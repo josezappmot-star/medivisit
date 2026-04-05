@@ -11,6 +11,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Serif+Display&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- FIREBASE SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <style>
     :root{
       --primary:#0F766E;--primary-light:#14B8A6;--primary-50:#F0FDFA;--primary-100:#CCFBF1;
@@ -26,8 +29,6 @@
     input,select,textarea,button{font-family:inherit;}
     .screen{display:none;min-height:100dvh;flex-direction:column;}
     .screen.active{display:flex;}
-
-    /* LOGIN */
     #loginScreen{background:linear-gradient(160deg,#0F766E 0%,#064E3B 50%,#022C22 100%);justify-content:center;align-items:center;padding:24px;text-align:center;}
     .login-logo{width:72px;height:72px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(255,255,255,0.2);}
     .login-logo i{font-size:32px;color:#fff;}
@@ -37,14 +38,18 @@
     .login-input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;outline:none;transition:all .2s;}
     .login-input::placeholder{color:rgba(255,255,255,0.4);}
     .login-input:focus{border-color:var(--primary-light);background:rgba(255,255,255,0.12);box-shadow:0 0 0 3px rgba(20,184,166,0.2);}
-    .login-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--primary-light);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;}
+    .login-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--primary-light);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
     .login-btn:hover{background:#0D9488;transform:translateY(-1px);}
     .login-btn:active{transform:scale(0.98);}
-    .login-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+    .login-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
     .login-error{color:#FCA5A5;font-size:13px;margin-top:12px;min-height:20px;}
     .login-attempts{color:rgba(255,255,255,0.4);font-size:11px;margin-top:8px;display:none;}
-
-    /* HEADER */
+    .conn-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:10px;font-weight:700;margin-bottom:16px;}
+    .conn-badge.online{background:rgba(22,163,74,0.2);color:#4ADE80;}
+    .conn-badge.offline{background:rgba(245,158,11,0.2);color:#FCD34D;}
+    .conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse-dot 2s infinite;}
+    .conn-badge.offline .conn-dot{animation:none;opacity:0.6;}
+    @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
     .app-header{background:var(--card);padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
     .app-header h2{font-size:20px;line-height:1.2;}
     .app-header .sub{font-size:12px;color:var(--muted);font-weight:400;font-family:'Inter',sans-serif;}
@@ -52,26 +57,25 @@
     .header-btn:active{transform:scale(0.92);}
     .back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--primary);font-size:14px;font-weight:600;cursor:pointer;padding:0;}
     .session-timer{font-size:10px;color:var(--danger);font-weight:700;display:flex;align-items:center;gap:4px;}
-
-    /* TABS */
+    .header-conn{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:4px 8px;border-radius:6px;}
+    .header-conn.online{background:var(--success-light);color:var(--success);}
+    .header-conn.offline{background:var(--accent-light);color:#92400E;}
+    .header-conn .hdot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+    .header-conn.online .hdot{animation:pulse-dot 2s infinite;}
     .tab-bar{display:flex;background:var(--card);border-top:1px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:30;padding:6px 4px;padding-bottom:max(6px,env(safe-area-inset-bottom));}
     .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border:none;background:none;color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;transition:color .15s;}
     .tab-btn i{font-size:18px;}
     .tab-btn.active{color:var(--primary);}
-
     .app-body{flex:1;padding:16px 16px 90px;overflow-y:auto;}
     .tab-content{display:none;animation:fadeUp .3s ease;}
     .tab-content.active{display:block;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
-
-    /* CANVAS DASHBOARD */
     .canvas-hero{border-radius:20px;padding:28px 24px;margin-bottom:20px;position:relative;overflow:hidden;color:#fff;}
     .canvas-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.3) 0%,transparent 60%);z-index:1;}
     .canvas-hero *{position:relative;z-index:2;}
     .canvas-hero .hero-big{font-size:48px;font-weight:900;line-height:1;}
     .canvas-hero .hero-label{font-size:14px;opacity:0.85;margin-top:4px;}
     .canvas-hero .hero-sub{font-size:12px;opacity:0.7;margin-top:12px;}
-
     .canvas-grid{display:grid;grid-template-columns:1fr;gap:14px;}
     .canvas-card{border-radius:16px;padding:20px;position:relative;overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;border:1px solid rgba(0,0,0,0.06);}
     .canvas-card:active{transform:scale(0.98);}
@@ -85,24 +89,18 @@
     .canvas-card .card-stats{display:flex;gap:16px;margin-top:10px;font-size:11px;color:var(--muted);font-weight:600;}
     .canvas-card .card-stats span{display:flex;align-items:center;gap:4px;}
     .canvas-card .card-badge{position:absolute;top:14px;right:14px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.3px;}
-
     .photo-strip{display:flex;gap:8px;overflow-x:auto;padding:4px 0;margin-top:10px;}
     .photo-strip img{width:52px;height:52px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.3);flex-shrink:0;cursor:pointer;transition:transform .15s;}
     .photo-strip img:active{transform:scale(0.9);}
-
-    /* PASSWORD DISPLAY */
     .pw-display{display:flex;align-items:center;gap:6px;background:var(--bg);border-radius:8px;padding:6px 10px;margin-top:6px;font-size:12px;font-family:'Courier New',monospace;font-weight:700;}
-    .pw-display .pw-text{flex:1;color:var(--fg);letter-spacing:0.5px;}
+    .pw-display .pw-text{flex:1;color:var(--fg);letter-spacing:0.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .pw-display .pw-btn{width:28px;height:28px;border-radius:6px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);background:var(--card);transition:all .15s;}
     .pw-display .pw-btn:active{transform:scale(0.9);}
-
     .card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:14px;}
     .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
     .stat-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;}
-    .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:10px;}
     .stat-num{font-size:26px;font-weight:900;line-height:1;}
     .stat-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500;}
-
     .btn{padding:12px 20px;border-radius:12px;border:none;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;width:100%;}
     .btn:active{transform:scale(0.97);}
     .btn-primary{background:var(--primary);color:#fff;}
@@ -111,7 +109,6 @@
     .btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary);}
     .btn-sm{padding:8px 14px;font-size:12px;border-radius:10px;width:auto;}
     .btn-ghost{background:var(--primary-50);color:var(--primary);border:none;}
-
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:12px;font-weight:700;color:var(--fg);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.3px;}
     .form-input{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:14px;background:var(--bg);color:var(--fg);outline:none;transition:all .2s;}
@@ -119,31 +116,26 @@
     .form-input::placeholder{color:#94A3B8;}
     select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
     textarea.form-input{resize:vertical;min-height:70px;}
-
     .badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
     .badge-pending{background:#FEF3C7;color:#92400E;}
     .badge-progress{background:#DBEAFE;color:#1E40AF;}
     .badge-done{background:#DCFCE7;color:#166534;}
     .badge-cancel{background:#FEE2E2;color:#991B1B;}
     .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;}
-
     .map-link{color:var(--info);text-decoration:none;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
     .map-link:active{opacity:0.7;}
-
     .geo-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:8px 12px;border-radius:8px;margin-top:6px;}
     .geo-status.searching{background:var(--info-light);color:var(--info);}
     .geo-status.found{background:var(--success-light);color:var(--success);}
     .geo-status.error{background:var(--danger-light);color:var(--danger);}
     .spinner-sm{width:14px;height:14px;border:2px solid rgba(37,99,235,0.2);border-top-color:var(--info);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
     @keyframes spin{to{transform:rotate(360deg);}}
-
     .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
     .modal-overlay.open{opacity:1;pointer-events:all;}
     .modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:90dvh;overflow-y:auto;padding:8px 20px 24px;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);}
     .modal-overlay.open .modal-sheet{transform:translateY(0);}
     .modal-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 16px;}
     .modal-title{font-size:18px;font-weight:800;margin-bottom:20px;font-family:'DM Serif Display',serif;}
-
     .confirm-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.7);backdrop-filter:blur(6px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;padding:24px;}
     .confirm-overlay.open{opacity:1;pointer-events:all;}
     .confirm-box{background:var(--card);border-radius:18px;padding:28px 24px;max-width:340px;width:100%;text-align:center;transform:scale(0.9);transition:transform .25s cubic-bezier(.4,0,.2,1);box-shadow:0 25px 60px rgba(0,0,0,0.2);}
@@ -155,7 +147,6 @@
     .confirm-msg{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.5;}
     .confirm-actions{display:flex;gap:10px;}
     .confirm-actions .btn{flex:1;}
-
     .toast-wrap{position:fixed;top:16px;left:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
     .toast{padding:14px 18px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 8px 30px rgba(0,0,0,0.15);animation:toastIn .35s ease;pointer-events:all;}
     .toast-ok{background:var(--primary);color:#fff;}
@@ -164,18 +155,14 @@
     .toast.out{animation:toastOut .25s forwards;}
     @keyframes toastIn{from{transform:translateY(-20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
     @keyframes toastOut{to{transform:translateY(-20px);opacity:0;}}
-
     .photo-preview{width:100%;max-height:220px;object-fit:cover;border-radius:12px;border:2px solid var(--border);margin:10px 0;}
     .photo-capture-btn{width:100%;padding:20px;border:2px dashed var(--border);border-radius:12px;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
     .photo-capture-btn:active{border-color:var(--primary);color:var(--primary);}
     .photo-capture-btn i{font-size:28px;}
-
     .user-item{display:flex;align-items:center;gap:12px;padding:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all .15s;}
     .user-item:active{background:var(--primary-50);}
-
     .visit-photo-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid var(--border);cursor:pointer;transition:transform .15s;}
     .visit-photo-thumb:active{transform:scale(0.9);}
-
     .section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;}
     .point-card-inner{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);}
     .point-card-inner:last-child{border-bottom:none;}
@@ -183,14 +170,11 @@
     .point-info{flex:1;min-width:0;}
     .point-name{font-size:14px;font-weight:700;}
     .point-addr{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word;}
-    .visit-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);}
-    .visit-row:last-child{border-bottom:none;}
     .progress-ring{position:relative;width:56px;height:56px;flex-shrink:0;}
     .progress-ring svg{transform:rotate(-90deg);}
     .progress-ring .ring-bg{stroke:var(--border);fill:none;stroke-width:4;}
     .progress-ring .ring-fg{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);}
     .progress-ring .ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;}
-    .coord-text{font-size:11px;color:var(--muted);font-family:monospace;}
     .empty-state{text-align:center;padding:48px 20px;}
     .empty-state i{font-size:48px;color:var(--border);margin-bottom:12px;}
     .empty-state p{color:var(--muted);font-size:14px;}
@@ -203,8 +187,6 @@
     .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
     .gallery-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:transform .15s;}
     .gallery-grid img:active{transform:scale(0.95);}
-
-    /* RUTA */
     .route-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:4px solid var(--primary);padding:18px;margin-bottom:16px;}
     .route-times{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
     .route-time-box{border-radius:10px;padding:12px;text-align:center;}
@@ -217,11 +199,10 @@
     .route-stop-name{font-size:13px;font-weight:700;}
     .route-stop-addr{font-size:11px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .route-stop-time{font-size:12px;font-weight:700;}
-
-    /* GPS permission modal */
     .gps-perm-card{background:var(--card);border-radius:18px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.2);}
     .gps-perm-icon{width:64px;height:64px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;}
-
+    .sync-indicator{position:fixed;bottom:80px;right:16px;z-index:25;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;background:var(--fg);color:#fff;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+    .sync-indicator.show{opacity:1;transform:translateY(0);}
     @media(min-width:640px){
       .app-body{padding:20px 24px 90px;}
       .stat-grid{grid-template-columns:repeat(4,1fr);}
@@ -235,6 +216,7 @@
 <body>
 
 <div class="toast-wrap" id="toastWrap"></div>
+<div class="sync-indicator" id="syncIndicator"><i class="fa-solid fa-arrows-rotate"></i> Sincronizando...</div>
 <div class="lockout-overlay" id="lockoutOverlay" style="display:none;">
   <i class="fa-solid fa-lock"></i>
   <div style="font-size:18px;font-weight:700;">Cuenta bloqueada temporalmente</div>
@@ -242,14 +224,11 @@
   <div style="font-size:13px;color:rgba(255,255,255,0.5);">Demasiados intentos fallidos</div>
 </div>
 
-<!-- GPS PERMISSION OVERLAY -->
 <div class="confirm-overlay" id="gpsPermOverlay">
   <div class="gps-perm-card">
     <div class="gps-perm-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
     <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Activar ubicación</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;">
-      Para mostrarte la sugerencia de ruta y registrar tu llegada a cada punto, necesitamos acceder a tu ubicación actual.
-    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;">Para mostrarte la sugerencia de ruta y registrar tu llegada a cada punto, necesitamos acceder a tu ubicación actual.</div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button class="btn btn-primary" onclick="requestGpsAndInit()"><i class="fa-solid fa-location-dot"></i> Permitir ubicación</button>
       <button class="btn btn-outline" onclick="skipGpsAndInit()">Continuar sin ubicación</button>
@@ -263,10 +242,11 @@
   <div class="login-card">
     <h1>MedVisit</h1>
     <p class="sub" id="loginGreeting">Creado por TesJua</p>
+    <div id="loginConnBadge" class="conn-badge offline"><span class="conn-dot"></span> Verificando conexión...</div>
     <div style="display:flex;flex-direction:column;gap:14px;">
       <input class="login-input" type="text" id="loginUser" placeholder="Usuario" autocomplete="username" autocapitalize="off">
       <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">Iniciar Sesión</button>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()" disabled><span class="spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff;"></span> Conectando...</button>
     </div>
     <div class="login-error" id="loginError"></div>
     <div class="login-attempts" id="loginAttempts"></div>
@@ -277,8 +257,9 @@
 <!-- ADMIN -->
 <div class="screen" id="adminScreen">
   <div class="app-header">
-    <div><h2>MedVisit</h2><div class="sub" id="adminGreeting">Panel de Administración</div></div>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:1;min-width:0;"><h2>MedVisit</h2><div class="sub" id="adminGreeting">Panel de Administración</div></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="header-conn online" id="adminConn"><span class="hdot"></span>Cloud</div>
       <div class="session-timer" id="adminSessionTimer" style="display:none;"><i class="fa-solid fa-clock" style="font-size:9px;"></i> <span></span></div>
       <button class="header-btn" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
@@ -322,8 +303,11 @@
 <!-- SUPER ADMIN -->
 <div class="screen" id="superScreen">
   <div class="app-header" style="background:linear-gradient(135deg,#7C3AED,#4F46E5);">
-    <div><h2 style="color:#fff;">Super Admin</h2><div class="sub" style="color:rgba(255,255,255,0.7);">Control total del sistema</div></div>
-    <button class="header-btn" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.2);color:#fff;" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    <div style="flex:1;min-width:0;"><h2 style="color:#fff;">Super Admin</h2><div class="sub" style="color:rgba(255,255,255,0.7);">Control total del sistema</div></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="header-conn online" id="superConn" style="background:rgba(255,255,255,0.15);color:#fff;"><span class="hdot"></span>Cloud</div>
+      <button class="header-btn" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.2);color:#fff;" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
   </div>
   <div class="app-body">
     <div class="tab-content active" id="sTab-users"><div class="section-title">Todos los Usuarios</div><div id="superUserList"></div></div>
@@ -339,8 +323,9 @@
 <!-- VISITADOR -->
 <div class="screen" id="visitorScreen">
   <div class="app-header">
-    <div><h2 id="visitorGreeting">Hola</h2><div class="sub" id="visitorDate"></div></div>
-    <div style="display:flex;align-items:center;gap:8px;">
+    <div style="flex:1;min-width:0;"><h2 id="visitorGreeting">Hola</h2><div class="sub" id="visitorDate"></div></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="header-conn online" id="visitorConn"><span class="hdot"></span>Cloud</div>
       <div class="session-timer" id="visitorSessionTimer" style="display:none;"><i class="fa-solid fa-clock" style="font-size:9px;"></i> <span></span></div>
       <button class="header-btn" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
@@ -371,18 +356,26 @@
 
 <!-- MODALES -->
 <div class="modal-overlay" id="modalVisitor"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalVisitorTitle">Nuevo Visitador</div><input type="hidden" id="editVisitorId"><div class="form-group"><label class="form-label">Nombre Completo</label><input class="form-input" id="mvName" placeholder="Ej: Juan Pérez García"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="mvUsername" placeholder="Ej: jperez" autocapitalize="off"></div><div class="form-group"><label class="form-label">Contraseña</label><input class="form-input" type="password" id="mvPassword" placeholder="Mínimo 4 caracteres"></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalVisitor')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="saveVisitor()">Guardar</button></div></div></div>
-
 <div class="modal-overlay" id="modalPoint"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalPointTitle">Nuevo Punto</div><input type="hidden" id="editPointId"><input type="hidden" id="editPointVisitorId" value=""><div class="form-group"><label class="form-label">Nombre del Punto</label><input class="form-input" id="mpName" placeholder="Ej: Farmacia San Rafael"></div><div class="form-group"><label class="form-label">Dirección Completa</label><input class="form-input" id="mpAddress" placeholder="Calle, número, colonia, ciudad..." onblur="geocodeAddress()"><div id="geoStatus" style="display:none;"></div></div><div id="gpsCoordsRow" style="display:none;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"><div><label class="form-label">Latitud</label><input class="form-input" id="mpLat" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div><div><label class="form-label">Longitud</label><input class="form-input" id="mpLng" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="form-group"><label class="form-label">Día</label><select class="form-input" id="mpDay"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miércoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sábado</option></select></div><div class="form-group"><label class="form-label">Orden</label><input class="form-input" type="number" id="mpOrder" placeholder="1, 2..." min="1"></div></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalPoint')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="savePoint()"><i class="fa-solid fa-map-pin"></i> Guardar</button></div></div></div>
-
 <div class="modal-overlay" id="modalCloseVisit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Cerrar Visita</div><input type="hidden" id="closeVisitId"><div style="background:var(--primary-50);border-radius:12px;padding:14px;margin-bottom:18px;"><div style="font-size:13px;font-weight:700;color:var(--primary);" id="closeVisitPointName"></div><div id="closeVisitPointAddr" style="font-size:12px;color:var(--muted);margin-top:2px;"></div></div><input type="file" id="visitPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoTaken(event)"><div class="form-group"><label class="form-label">Foto del Punto</label><div id="photoCaptureArea"><div class="photo-capture-btn" onclick="document.getElementById('visitPhotoInput').click()"><i class="fa-solid fa-camera"></i><span>Tomar Foto</span></div></div><img id="photoPreview" class="photo-preview" style="display:none;"></div><div class="form-group"><label class="form-label">Nombre del Jefe del Punto</label><input class="form-input" id="closeJefe" placeholder="Nombre del responsable"></div><div class="form-group"><label class="form-label">Notas (opcional)</label><textarea class="form-input" id="closeNotes" placeholder="Observaciones..."></textarea></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalCloseVisit')">Cancelar</button><button class="btn btn-success" style="flex:1;" onclick="completeVisit()"><i class="fa-solid fa-check"></i> Completar</button></div></div></div>
-
 <div class="modal-overlay" id="modalPhoto"><div class="modal-sheet" style="padding:8px 8px 24px;"><div class="modal-handle"></div><div class="modal-title" style="padding:0 12px;">Evidencia</div><img id="modalPhotoImg" style="width:100%;border-radius:12px;"><div style="padding:8px 12px 0;"><div id="modalPhotoInfo" style="font-size:13px;color:var(--muted);line-height:1.5;"></div></div><button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modalPhoto')">Cerrar</button></div></div>
-
 <div class="modal-overlay" id="modalSuperEdit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Editar Usuario</div><input type="hidden" id="superEditId"><div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="seName"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="seUsername" autocapitalize="off"></div><div class="form-group"><label class="form-label">Nueva Contraseña</label><input class="form-input" type="text" id="sePassword" placeholder="Dejar vacío para no cambiar"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-input" id="seRole"><option value="visitor">Visitador</option><option value="admin">Administrador</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalSuperEdit')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="superSaveUser()">Guardar</button></div></div></div>
-
 <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon" id="confirmIcon"><i id="confirmIconI"></i></div><div class="confirm-title" id="confirmTitle"></div><div class="confirm-msg" id="confirmMsg"></div><div class="confirm-actions"><button class="btn btn-outline" onclick="cancelConfirm()">Cancelar</button><button class="btn" id="confirmOkBtn" onclick="executeConfirm()">Confirmar</button></div></div></div>
 
 <script>
+// =============================================
+// FIREBASE — TUS CREDENCIALES YA ESTÁN AQUÍ
+// =============================================
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB-1_xhBuzfcL_XUFkT0yZfa6rCMl6DV0Q",
+  authDomain: "medvisit-app-e5991.firebaseapp.com",
+  databaseURL: "https://medvisit-app-e5991-default-rtdb.firebaseio.com",
+  projectId: "medvisit-app-e5991",
+  storageBucket: "medvisit-app-e5991.firebasestorage.app",
+  messagingSenderId: "372705290165",
+  appId: "1:372705290165:web:8694260ce573e172ee5bfc"
+};
+
 const SUPER_ADMIN_KEY='TesJua2024!';
 const MAX_LOGIN_ATTEMPTS=5,LOCKOUT_SECONDS=30,SESSION_MINUTES=30;
 const AV_COLORS=['#0F766E','#D97706','#DC2626','#7C3AED','#2563EB','#DB2777','#059669','#EA580C','#4F46E5','#0891B2'];
@@ -391,7 +384,7 @@ const MIN_PER_PUNTO=15;
 function avatarColor(id){let h=0;for(let i=0;i<(id||'').length;i++)h=id.charCodeAt(i)+((h<<5)-h);return AV_COLORS[Math.abs(h)%AV_COLORS.length];}
 function initials(n){if(!n)return'??';const p=n.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.substring(0,2).toUpperCase();}
 function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).substr(2,5);}
-function today(){return new Date().toISOString().split('T')[0];}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function todayDow(){const d=new Date().getDay();return d===0?7:d;}
 function fmtDate(d){if(!d)return '';const dt=new Date(d+'T12:00:00');const m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return dt.getDate()+' '+m[dt.getMonth()]+' '+dt.getFullYear();}
 function fmtDateShort(d){if(!d)return '';const dt=new Date(d+'T12:00:00');const m=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];return dt.getDate()+' '+m[dt.getMonth()];}
@@ -403,26 +396,179 @@ function haversine(a,b,c,d){const R=6371000,t=v=>v*Math.PI/180;const e=t(c-a),f=
 function esc(s){if(!s)return '';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function mapsLink(lat,lng,addr){if(lat!=null&&lng!=null&&!isNaN(lat)&&!isNaN(lng))return 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng;return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr||'');}
 function addrHTML(a,lat,lng){if(!a)return '<span style="color:var(--muted);font-size:12px;">Sin dirección</span>';const l=mapsLink(lat,lng,a);const s=a.length>50?a.substring(0,50)+'...':a;return `<a href="${l}" target="_blank" rel="noopener" class="map-link" style="font-size:12px;" title="${esc(a)}"><i class="fa-solid fa-location-arrow" style="font-size:10px;"></i> ${esc(s)}</a>`;}
-function pctColor(pct){const h=Math.round(pct*1.55);const s=70+pct*0.15;const l=45+pct*0.1;return `hsl(${h}, ${s}%, ${l}%)`;}
-function pctColorLight(pct){const h=Math.round(pct*1.55);return `hsl(${h}, 75%, 92%)`;}
+function pctColor(pct){const h=Math.round(pct*1.55);return `hsl(${h}, ${70+pct*0.15}%, ${45+pct*0.1}%)`;}
 function pctColorBg(pct){const h=Math.round(pct*1.55);return `linear-gradient(135deg, hsl(${h}, 60%, 96%) 0%, hsl(${h}, 50%, 99%) 100%)`;}
-
-// Saludo según hora
-function getGreeting(){
-  const h=new Date().getHours();
-  if(h>=5&&h<12) return 'Buenos días';
-  if(h>=12&&h<19) return 'Buenas tardes';
-  return 'Buenas noches';
-}
-
-// Saludo en login (sin nombre)
-function setLoginGreeting(){
-  const el=document.getElementById('loginGreeting');
-  if(el) el.textContent=getGreeting()+' — Ingresa tus datos para continuar';
-}
+function getGreeting(){const h=new Date().getHours();if(h>=5&&h<12)return 'Buenos días';if(h>=12&&h<19)return 'Buenas tardes';return 'Buenas noches';}
+function setLoginGreeting(){const el=document.getElementById('loginGreeting');if(el)el.textContent=getGreeting()+' — Ingresa tus datos para continuar';}
 setLoginGreeting();
 
+// =============================================
+// ESTADO GLOBAL
+// =============================================
+let D = defaultData();
+let currentUser = null;
+let currentPhotoData = null;
+let _superBackTo = null;
+let firebaseReady = false;
+let firebaseOnline = false;
+let myLastWriteId = null;
+let currentAdminTab = 'canvas';
+let currentVisitorTab = 'hoy';
+let currentSuperTab = 'users';
+let lastVisitorDetailId = null;
+let lastSuperDetailId = null;
+let dbRef = null;
+let gpsPermission = 'unknown';
+
+function defaultData(){
+  return {
+    _writeId: null,
+    users:[
+      {id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},
+      {id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Pérez García',active:true},
+      {id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'María López Hernández',active:true},
+      {id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martínez',active:true}
+    ],
+    points:[
+      {id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1},
+      {id:'p2',name:'Clínica del Valle',address:'Calle Amsterdam 56, Hipódromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2},
+      {id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Ávila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1},
+      {id:'p4',name:'Distribuidora Médica Sur',address:'Av. Revolución 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1},
+      {id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacán, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2},
+      {id:'p6',name:'Clínica Santa María',address:'Av. Tláhuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1},
+      {id:'p7',name:'Sanatorio del Ángel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1},
+      {id:'p8',name:'FarmaExpress Satélite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Méx.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1}
+    ],
+    visits:[
+      {id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed'},
+      {id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed'},
+      {id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'}
+    ]
+  };
+}
+
+// =============================================
+// FIREBASE: CONEXIÓN Y SINCRONIZACIÓN
+// =============================================
+function saveLocal(d){try{localStorage.setItem('medvisit_v5',JSON.stringify(d));}catch(e){}}
+
+function save(d){
+  myLastWriteId = Date.now()+'_'+Math.random().toString(36).substr(2,6);
+  d._writeId = myLastWriteId;
+  saveLocal(d);
+  if(firebaseReady && dbRef){
+    dbRef.ref('medvisit').set(d).catch(err=>{
+      console.error('Error Firebase:',err);
+      toast('Error de sincronización. Datos guardados localmente.','err');
+    });
+  }
+}
+
+function updateConnBadge(){
+  const badge = document.getElementById('loginConnBadge');
+  if(firebaseOnline){
+    badge.className='conn-badge online';
+    badge.innerHTML='<span class="conn-dot"></span> Conectado a la nube — sincronización activa';
+  }else if(firebaseReady){
+    badge.className='conn-badge offline';
+    badge.innerHTML='<span class="conn-dot"></span> Sin conexión temporal';
+  }
+}
+
+function updateHeaderConn(){
+  ['adminConn','visitorConn','superConn'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const isSuper=id==='superConn';
+    if(firebaseOnline){
+      el.className='header-conn online';
+      if(isSuper){el.style.background='rgba(255,255,255,0.15)';el.style.color='#fff';}
+      el.innerHTML='<span class="hdot"></span>Cloud';
+    }else{
+      el.className='header-conn offline';
+      if(isSuper){el.style.background='rgba(255,255,255,0.1)';el.style.color='rgba(255,255,255,0.5)';}
+      el.innerHTML='<span class="hdot"></span>Local';
+    }
+  });
+}
+
+function showSyncIndicator(){
+  const el=document.getElementById('syncIndicator');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2000);
+}
+
+function renderCurrentScreen(){
+  if(!currentUser)return;
+  if(document.querySelector('.modal-overlay.open')||document.querySelector('.confirm-overlay.open'))return;
+  try{
+    if(currentUser.role==='super'){
+      if(currentSuperTab==='users')renderSuperAdmin();
+      else if(currentSuperTab==='superDetail'&&lastSuperDetailId)openSuperDetail(lastSuperDetailId);
+    }else if(currentUser.role==='admin'){
+      if(currentAdminTab==='canvas')renderCanvasDashboard();
+      else if(currentAdminTab==='visitadores')renderVisitorList();
+      else if(currentAdminTab==='visitas'){populateVisitFilter();renderAdminVisitas();}
+      else if(currentAdminTab==='fotos')renderPhotoGallery();
+      else if(currentAdminTab==='visitorDetail'&&lastVisitorDetailId)openVisitorDetail(lastVisitorDetailId);
+    }else{
+      if(currentVisitorTab==='hoy')renderVisitorToday();
+      else if(currentVisitorTab==='semana')renderVisitorWeek();
+      else if(currentVisitorTab==='perfil')renderVisitorProfile();
+    }
+  }catch(e){console.error('renderCurrentScreen:',e);}
+}
+
+function initFirebase(){
+  const loginBtn=document.getElementById('loginBtn');
+  const connBadge=document.getElementById('loginConnBadge');
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    dbRef=firebase.database();
+    dbRef.ref('.info/connected').on('value',snap=>{
+      firebaseOnline=snap.val()===true;
+      updateConnBadge();updateHeaderConn();
+    });
+    dbRef.ref('medvisit').once('value').then(snap=>{
+      const remote=snap.val();
+      if(remote&&remote.users&&remote.users.length>0){
+        D=remote;myLastWriteId=remote._writeId||null;
+      }else{
+        D=defaultData();myLastWriteId=Date.now()+'_init';D._writeId=myLastWriteId;
+        dbRef.ref('medvisit').set(D);
+      }
+      saveLocal(D);firebaseReady=true;firebaseOnline=true;
+      loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesión';
+      updateConnBadge();updateHeaderConn();
+    }).catch(err=>{
+      console.error('Error Firebase:',err);
+      try{const l=JSON.parse(localStorage.getItem('medvisit_v5'));if(l&&l.users)D=l;}catch(e){}
+      saveLocal(D);firebaseReady=false;firebaseOnline=false;
+      loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesión';
+      connBadge.className='conn-badge offline';
+      connBadge.innerHTML='<span class="conn-dot"></span> Sin conexión — modo local';
+      updateHeaderConn();
+    });
+    dbRef.ref('medvisit').on('value',snap=>{
+      const newData=snap.val();
+      if(!newData||!newData.users)return;
+      if(newData._writeId&&newData._writeId===myLastWriteId)return;
+      showSyncIndicator();D=newData;myLastWriteId=newData._writeId||null;
+      saveLocal(D);renderCurrentScreen();
+    });
+  }catch(e){
+    console.error('Error init Firebase:',e);
+    try{const l=JSON.parse(localStorage.getItem('medvisit_v5'));if(l&&l.users)D=l;}catch(ex){}
+    saveLocal(D);firebaseReady=false;
+    loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesión';
+    connBadge.className='conn-badge offline';
+    connBadge.innerHTML='<span class="conn-dot"></span> Error de conexión';
+    updateHeaderConn();
+  }
+}
+
+// =============================================
 // SEGURIDAD
+// =============================================
 let loginAttempts=0,lockoutEnd=0,lockoutInterval=null;
 function showLockout(){document.getElementById('lockoutOverlay').style.display='flex';lockoutInterval=setInterval(()=>{const r=Math.max(0,Math.ceil((lockoutEnd-Date.now())/1000));document.getElementById('lockoutTimer').textContent=Math.floor(r/60).toString().padStart(2,'0')+':'+(r%60).toString().padStart(2,'0');if(r<=0){clearInterval(lockoutInterval);document.getElementById('lockoutOverlay').style.display='none';loginAttempts=0;}},250);}
 
@@ -440,49 +586,22 @@ function confirmLogout(){showConfirm('Cerrar Sesión','Se perderá el progreso n
 let geoTimer=null;
 function geocodeAddress(){clearTimeout(geoTimer);const a=document.getElementById('mpAddress').value.trim(),st=document.getElementById('geoStatus'),cr=document.getElementById('gpsCoordsRow');if(!a){st.style.display='none';cr.style.display='none';return;}st.style.display='flex';st.className='geo-status searching';st.innerHTML='<span class="spinner-sm"></span> Buscando ubicación...';geoTimer=setTimeout(async()=>{try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(a)+'&limit=1',{headers:{'Accept':'application/json'}});const d=await r.json();if(d&&d.length>0){document.getElementById('mpLat').value=parseFloat(d[0].lat).toFixed(6);document.getElementById('mpLng').value=parseFloat(d[0].lon).toFixed(6);cr.style.display='block';st.className='geo-status found';st.innerHTML='<i class="fa-solid fa-check-circle"></i> '+esc(d[0].display_name.substring(0,70));}else{cr.style.display='none';st.className='geo-status error';st.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> No encontrada';}}catch(e){cr.style.display='none';st.className='geo-status error';st.innerHTML='<i class="fa-solid fa-wifi"></i> Sin conexión';}},800);}
 
-function defaultData(){return{users:[{id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},{id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Pérez García',active:true},{id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'María López Hernández',active:true},{id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martínez',active:true}],points:[{id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1},{id:'p2',name:'Clínica del Valle',address:'Calle Amsterdam 56, Hipódromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2},{id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Ávila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1},{id:'p4',name:'Distribuidora Médica Sur',address:'Av. Revolución 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1},{id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacán, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2},{id:'p6',name:'Clínica Santa María',address:'Av. Tláhuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1},{id:'p7',name:'Sanatorio del Ángel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1},{id:'p8',name:'FarmaExpress Satélite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Méx.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1}],visits:[{id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed'},{id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed'},{id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'}]};}
-function load(){try{const d=JSON.parse(localStorage.getItem('medvisit_v4'));if(d&&d.users)return d;}catch(e){}const d=defaultData();save(d);return d;}
-function save(d){localStorage.setItem('medvisit_v4',JSON.stringify(d));}
-let D=load(),currentUser=null,currentPhotoData=null,_superBackTo=null;
-let gpsPermission='unknown'; // 'unknown' | 'granted' | 'denied'
-
 function toast(msg,type='ok'){const w=document.getElementById('toastWrap'),t=document.createElement('div');t.className='toast toast-'+type;t.innerHTML=`<i class="fa-solid ${type==='ok'?'fa-circle-check':type==='err'?'fa-circle-xmark':'fa-circle-info'}"></i><span>${esc(msg)}</span>`;w.appendChild(t);setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),250);},3000);}
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)closeModal(o.id);});});
 function getGPS(){return new Promise((ok,no)=>{if(!navigator.geolocation)return no('GPS no disponible');navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),e=>no('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000,maximumAge:0});});}
 function handlePhotoTaken(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){const img=new Image();img.onload=function(){const c=document.createElement('canvas'),M=800;let w=img.width,h=img.height;if(w>M||h>M){if(w>h){h=h*M/w;w=M;}else{w=w*M/h;h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);currentPhotoData=c.toDataURL('image/jpeg',0.7);const p=document.getElementById('photoPreview');p.src=currentPhotoData;p.style.display='block';document.getElementById('photoCaptureArea').style.display='none';};img.src=ev.target.result;};r.readAsDataURL(f);}
-
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
-// ===========================
-// GPS PERMISSION FLOW
-// ===========================
 function showGpsPermOverlay(){document.getElementById('gpsPermOverlay').classList.add('open');}
 function hideGpsPermOverlay(){document.getElementById('gpsPermOverlay').classList.remove('open');}
+async function requestGpsAndInit(){hideGpsPermOverlay();toast('Obteniendo ubicación...','info');try{await getGPS();gpsPermission='granted';toast('Ubicación activada','ok');}catch(e){gpsPermission='denied';toast('No se pudo obtener la ubicación','err');}showScreen('visitorScreen');renderVisitor();}
+function skipGpsAndInit(){hideGpsPermOverlay();gpsPermission='denied';showScreen('visitorScreen');renderVisitor();}
 
-async function requestGpsAndInit(){
-  hideGpsPermOverlay();
-  toast('Obteniendo ubicación...','info');
-  try{
-    await getGPS();
-    gpsPermission='granted';
-    toast('Ubicación activada','ok');
-  }catch(e){
-    gpsPermission='denied';
-    toast('No se pudo obtener la ubicación','err');
-  }
-  showScreen('visitorScreen');
-  renderVisitor();
-}
-
-function skipGpsAndInit(){
-  hideGpsPermOverlay();
-  gpsPermission='denied';
-  showScreen('visitorScreen');
-  renderVisitor();
-}
-
+// =============================================
+// LOGIN / LOGOUT
+// =============================================
 function doLogin(){
   if(Date.now()<lockoutEnd)return;
   const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value,err=document.getElementById('loginError'),att=document.getElementById('loginAttempts');
@@ -492,26 +611,21 @@ function doLogin(){
   if(!user){loginAttempts++;const rem=MAX_LOGIN_ATTEMPTS-loginAttempts;if(rem<=0){err.textContent='';att.style.display='none';lockoutEnd=Date.now()+LOCKOUT_SECONDS*1000;showLockout();return;}err.textContent='Usuario o contraseña incorrectos';att.style.display='block';att.textContent=rem+' intento'+(rem>1?'s':'')+' restante'+(rem>1?'s':'');att.style.color=rem<=2?'#FCA5A5':'rgba(255,255,255,0.4)';return;}
   currentUser={id:user.id,username:user.username,role:user.role,name:user.name};
   err.textContent='';loginAttempts=0;att.style.display='none';resetSession();
-  if(user.role==='admin'){
-    showScreen('adminScreen');renderAdmin();
-    toast(getGreeting()+', '+user.name.split(' ')[0]+'!');
-  }else{
-    // visitador: pedir GPS primero
-    gpsPermission='unknown';
-    showGpsPermOverlay();
-    toast(getGreeting()+', '+user.name.split(' ')[0]+'!');
-  }
+  if(user.role==='admin'){showScreen('adminScreen');renderAdmin();toast(getGreeting()+', '+user.name.split(' ')[0]+'!');}
+  else{gpsPermission='unknown';showGpsPermOverlay();toast(getGreeting()+', '+user.name.split(' ')[0]+'!');}
 }
-function doLogout(){currentUser=null;gpsPermission='unknown';stopSession();document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';document.getElementById('loginError').textContent='';document.getElementById('loginAttempts').style.display='none';showScreen('loginScreen');}
+function doLogout(){currentUser=null;gpsPermission='unknown';stopSession();document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';document.getElementById('loginError').textContent='';document.getElementById('loginAttempts').style.display='none';lastVisitorDetailId=null;lastSuperDetailId=null;currentAdminTab='canvas';currentVisitorTab='hoy';currentSuperTab='users';showScreen('loginScreen');}
 document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginPass').focus();});
 
+// =============================================
 // ADMIN TABS
-function switchAdminTab(tab,btn){document.querySelectorAll('#adminScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#adminScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('aTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='canvas')renderCanvasDashboard();if(tab==='visitadores')renderVisitorList();if(tab==='visitas')renderAdminVisitas();if(tab==='fotos')renderPhotoGallery();}
+// =============================================
+function switchAdminTab(tab,btn){currentAdminTab=tab;if(tab!=='visitorDetail')lastVisitorDetailId=null;document.querySelectorAll('#adminScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#adminScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('aTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='canvas')renderCanvasDashboard();if(tab==='visitadores')renderVisitorList();if(tab==='visitas'){populateVisitFilter();renderAdminVisitas();}if(tab==='fotos')renderPhotoGallery();}
 
-// ===========================
+// =============================================
 // CANVAS DASHBOARD
-// ===========================
+// =============================================
 function renderCanvasDashboard(){
   const visitors=D.users.filter(u=>u.role==='visitor'&&u.active);
   const allVisits=D.visits.filter(v=>v.date===today());
@@ -519,34 +633,17 @@ function renderCanvasDashboard(){
   const allTotal=D.points.filter(p=>visitors.some(v=>v.id===p.assignedTo)&&p.dayOfWeek===todayDow()).length;
   const overallPct=allTotal>0?Math.round(allDone/allTotal*100):0;
   const el=document.getElementById('aTab-canvas');
-  let html=`<div class="canvas-hero" style="background:linear-gradient(135deg,${pctColor(overallPct)},${pctColor(Math.min(100,overallPct+30))});">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div class="hero-label">Cumplimiento del Equipo Hoy</div>
-        <div class="hero-big">${overallPct}%</div>
-        <div class="hero-sub">${allDone} de ${allTotal} visitas completadas &middot; ${visitors.length} visitadores</div>
-      </div>
-      <div class="progress-ring" style="width:80px;height:80px;">
-        <svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34-(overallPct/100)*2*Math.PI*34}"/></svg>
-        <div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">${overallPct}%</div>
-      </div>
-    </div>
-  </div>`;
+  let html=`<div class="canvas-hero" style="background:linear-gradient(135deg,${pctColor(overallPct)},${pctColor(Math.min(100,overallPct+30))});"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div class="hero-label">Cumplimiento del Equipo Hoy</div><div class="hero-big">${overallPct}%</div><div class="hero-sub">${allDone} de ${allTotal} visitas completadas &middot; ${visitors.length} visitadores</div></div><div class="progress-ring" style="width:80px;height:80px;"><svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="${2*Math.PI*34}" stroke-dashoffset="${2*Math.PI*34-(overallPct/100)*2*Math.PI*34}"/></svg><div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">${overallPct}%</div></div></div></div>`;
   const inProgress=allVisits.filter(v=>v.status==='in-progress').length;
   const pending=allVisits.filter(v=>v.status==='pending').length;
-  html+=`<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
-    <div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">${allDone}</div><div class="stat-label">Completadas</div></div>
-    <div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">${inProgress}</div><div class="stat-label">En Curso</div></div>
-    <div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">${pending}</div><div class="stat-label">Pendientes</div></div>
-  </div>`;
+  html+=`<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">${allDone}</div><div class="stat-label">Completadas</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">${inProgress}</div><div class="stat-label">En Curso</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">${pending}</div><div class="stat-label">Pendientes</div></div></div>`;
   html+=`<div class="section-title">Rendimiento por Visitador</div><div class="canvas-grid">`;
-  visitors.forEach((u,i)=>{
+  visitors.forEach(u=>{
     const pts=D.points.filter(p=>p.assignedTo===u.id&&p.dayOfWeek===todayDow());
     const visits=D.visits.filter(v=>v.visitorId===u.id&&v.date===today());
     const done=visits.filter(v=>v.status==='completed').length;
     const total=pts.length;
     const pct=total>0?Math.round(done/total*100):0;
-    const col=avatarColor(u.id);
     const photos=D.visits.filter(v=>v.visitorId===u.id&&v.photo).slice(-3);
     let badgeHTML='';
     if(pct===100)badgeHTML=`<div class="card-badge" style="background:rgba(22,163,74,0.15);color:#16A34A;"><i class="fa-solid fa-check"></i> Completo</div>`;
@@ -554,26 +651,8 @@ function renderCanvasDashboard(){
     else if(pct>0)badgeHTML=`<div class="card-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Iniciando</div>`;
     else badgeHTML=`<div class="card-badge" style="background:rgba(100,116,139,0.1);color:#64748B;">Sin iniciar</div>`;
     let photoStrip='';
-    if(photos.length){photoStrip=`<div class="photo-strip">${photos.map(p=>`<img src="${p.photo}" onclick="event.stopPropagation();viewPhoto('${p.id}')" title="Ver evidencia">`).join('')}</div>`;}
-    html+=`<div class="canvas-card" style="background:${pctColorBg(pct)};${i%2===1?'margin-top:12px;':''}" onclick="openVisitorDetail('${u.id}')">
-      <div class="card-stripe" style="background:${pctColor(pct)};"></div>
-      ${badgeHTML}
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-        <div class="card-avatar" style="background:${col};">${initials(u.name)}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="card-name">${esc(u.name)}</div>
-          <div class="card-username">@${esc(u.username)} &middot; ${DOW_NAME[todayDow()]}</div>
-        </div>
-        <div class="card-pct" style="color:${pctColor(pct)};">${pct}%</div>
-      </div>
-      <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%;background:${pctColor(pct)};"></div></div>
-      <div class="card-stats">
-        <span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> ${done} completadas</span>
-        <span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> ${total} puntos</span>
-        <span><i class="fa-solid fa-camera" style="font-size:9px;"></i> ${photos.length} fotos</span>
-      </div>
-      ${photoStrip}
-    </div>`;
+    if(photos.length)photoStrip=`<div class="photo-strip">${photos.map(p=>`<img src="${p.photo}" onclick="event.stopPropagation();viewPhoto('${p.id}')" title="Ver evidencia">`).join('')}</div>`;
+    html+=`<div class="canvas-card" style="background:${pctColorBg(pct)};" onclick="openVisitorDetail('${u.id}')"><div class="card-stripe" style="background:${pctColor(pct)};"></div>${badgeHTML}<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="card-avatar" style="background:${avatarColor(u.id)};">${initials(u.name)}</div><div style="flex:1;min-width:0;"><div class="card-name">${esc(u.name)}</div><div class="card-username">@${esc(u.username)} &middot; ${DOW_NAME[todayDow()]}</div></div><div class="card-pct" style="color:${pctColor(pct)};">${pct}%</div></div><div class="card-bar"><div class="card-bar-fill" style="width:${pct}%;background:${pctColor(pct)};"></div></div><div class="card-stats"><span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> ${done}</span><span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> ${total}</span><span><i class="fa-solid fa-camera" style="font-size:9px;"></i> ${photos.length}</span></div>${photoStrip}</div>`;
   });
   html+=`</div>`;
   if(!visitors.length)html+=`<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores registrados</p></div>`;
@@ -581,25 +660,14 @@ function renderCanvasDashboard(){
   requestAnimationFrame(()=>{el.querySelectorAll('.card-bar-fill').forEach(bar=>{const w=bar.style.width;bar.style.width='0%';requestAnimationFrame(()=>{bar.style.width=w;});});});
 }
 
-function renderPhotoGallery(){
-  const photos=D.visits.filter(v=>v.photo).sort((a,b)=>(b.date+b.closeTime||'').localeCompare(a.date+(a.closeTime||'')));
-  const el=document.getElementById('adminPhotoGallery');
-  if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image"></i><p>Sin fotos de evidencia aún</p></div>';return;}
-  el.innerHTML=`<div class="gallery-grid">${photos.map(v=>{const pt=pointById(v.pointId);const vis=userById(v.visitorId);return `<img src="${v.photo}" onclick="viewPhoto('${v.id}')" title="${vis?esc(vis.name):'?'} — ${pt?esc(pt.name):'?'} — ${fmtDateShort(v.date)}">`;}).join('')}</div>`;
-}
-
+function renderPhotoGallery(){const photos=D.visits.filter(v=>v.photo).sort((a,b)=>(b.date+b.closeTime||'').localeCompare(a.date+(a.closeTime||'')));const el=document.getElementById('adminPhotoGallery');if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image"></i><p>Sin fotos de evidencia aún</p></div>';return;}el.innerHTML=`<div class="gallery-grid">${photos.map(v=>{const pt=pointById(v.pointId);const vis=userById(v.visitorId);return `<img src="${v.photo}" onclick="viewPhoto('${v.id}')" title="${vis?esc(vis.name):'?'} — ${pt?esc(pt.name):'?'} — ${fmtDateShort(v.date)}">`;}).join('')}</div>`;}
 function renderAdmin(){document.getElementById('adminGreeting').textContent='Hola, '+currentUser.name;renderCanvasDashboard();populateVisitFilter();}
 function populateVisitFilter(){const s=document.getElementById('filterVisitVisitor');const c=s.value;s.innerHTML='<option value="">Todos</option>';D.users.filter(u=>u.role==='visitor'&&u.active).forEach(u=>{s.innerHTML+=`<option value="${u.id}">${esc(u.name)}</option>`;});s.value=c;}
 
-function renderVisitorList(){
-  const list=D.users.filter(u=>u.role==='visitor');
-  document.getElementById('visitorCount').textContent=list.length;
-  const el=document.getElementById('visitorList');
-  if(!list.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores</p></div>';return;}
-  el.innerHTML=list.map(u=>{const pts=D.points.filter(p=>p.assignedTo===u.id);const dn=D.visits.filter(v=>v.visitorId===u.id&&v.status==='completed').length;return `<div class="user-item" onclick="openVisitorDetail('${u.id}')"><div class="avatar" style="background:${avatarColor(u.id)};">${initials(u.name)}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">${esc(u.name)}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)} &middot; ${pts.length} puntos &middot; ${dn} visitas</div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;"></i></div>`;}).join('');
-}
+function renderVisitorList(){const list=D.users.filter(u=>u.role==='visitor');document.getElementById('visitorCount').textContent=list.length;const el=document.getElementById('visitorList');if(!list.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores</p></div>';return;}el.innerHTML=list.map(u=>{const pts=D.points.filter(p=>p.assignedTo===u.id);const dn=D.visits.filter(v=>v.visitorId===u.id&&v.status==='completed').length;return `<div class="user-item" onclick="openVisitorDetail('${u.id}')"><div class="avatar" style="background:${avatarColor(u.id)};">${initials(u.name)}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">${esc(u.name)}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)} &middot; ${pts.length} puntos &middot; ${dn} visitas</div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;"></i></div>`;}).join('');}
 
 function openVisitorDetail(vid){
+  lastVisitorDetailId=vid;currentAdminTab='visitorDetail';
   const u=userById(vid);if(!u)return;
   const pts=D.points.filter(p=>p.assignedTo===vid).sort((a,b)=>a.dayOfWeek-b.dayOfWeek||a.order-b.order);
   const dn=D.visits.filter(v=>v.visitorId===vid&&v.status==='completed').length;
@@ -608,7 +676,7 @@ function openVisitorDetail(vid){
   document.getElementById('aTab-visitorDetail').classList.add('active');
   let ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';
   else{const byDay={};pts.forEach(p=>{if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});
-    ph=Object.keys(byDay).sort().map(day=>`<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">${DOW_NAME[day]} <span style="color:var(--muted);font-weight:500;">(${byDay[day].length})</span></div>${byDay[day].map(p=>{const v=D.visits.find(x=>x.pointId===p.id&&x.visitorId===vid&&x.date===today());const st=v?v.status:'none';const photoThumb=v&&v.photo?`<img src="${v.photo}" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto('${v.id}')" style="margin-left:auto;">`:'';return `<div class="card" style="padding:14px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">${p.order}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">${esc(p.name)}</div><div style="margin-top:4px;">${addrHTML(p.address,p.lat,p.lng)}</div></div>${photoThumb}<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editPointForVisitor('${p.id}','${vid}')" style="width:32px;height:32px;padding:0;"><i class="fa-solid fa-pen" style="font-size:11px;"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm('${p.id}','${vid}')" style="width:32px;height:32px;padding:0;background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button></div></div></div>`;}).join('')}</div>`).join('');}
+    ph=Object.keys(byDay).sort().map(day=>`<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">${DOW_NAME[day]} <span style="color:var(--muted);font-weight:500;">(${byDay[day].length})</span></div>${byDay[day].map(p=>{const v=D.visits.find(x=>x.pointId===p.id&&x.visitorId===vid&&x.date===today());const photoThumb=v&&v.photo?`<img src="${v.photo}" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto('${v.id}')" style="margin-left:auto;">`:'';return `<div class="card" style="padding:14px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">${p.order}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">${esc(p.name)}</div><div style="margin-top:4px;">${addrHTML(p.address,p.lat,p.lng)}</div></div>${photoThumb}<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editPointForVisitor('${p.id}','${vid}')" style="width:32px;height:32px;padding:0;"><i class="fa-solid fa-pen" style="font-size:11px;"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm('${p.id}','${vid}')" style="width:32px;height:32px;padding:0;background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button></div></div></div>`;}).join('')}</div>`).join('');}
   document.getElementById('visitorDetailContent').innerHTML=`<div class="visitor-detail-header"><div class="avatar" style="background:${avatarColor(u.id)};width:52px;height:52px;font-size:18px;">${initials(u.name)}</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">${esc(u.name)}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)} &middot; ${pts.length} puntos &middot; ${dn} completadas</div></div><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="editVisitor('${u.id}')"><i class="fa-solid fa-user-pen"></i></button><button class="btn btn-sm" onclick="deleteVisitorConfirm('${u.id}')" style="background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash"></i></button></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="section-title" style="margin:0;">Puntos</div><button class="btn btn-primary btn-sm" onclick="openNewPointForVisitor('${vid}')"><i class="fa-solid fa-plus"></i> Agregar</button></div>${ph}`;
 }
 
@@ -617,44 +685,32 @@ function deleteVisitorConfirm(vid){const u=userById(vid);showConfirm('Eliminar V
 
 function openNewPointForVisitor(vid){document.getElementById('editPointId').value='';document.getElementById('editPointVisitorId').value=vid;['mpName','mpAddress','mpLat','mpLng','mpOrder'].forEach(x=>document.getElementById(x).value='');document.getElementById('mpDay').value=todayDow();document.getElementById('gpsCoordsRow').style.display='none';document.getElementById('geoStatus').style.display='none';document.getElementById('modalPointTitle').textContent='Nuevo Punto';openModal('modalPoint');}
 function editPointForVisitor(pid,vid){const p=pointById(pid);if(!p)return;document.getElementById('editPointId').value=pid;document.getElementById('editPointVisitorId').value=vid;document.getElementById('mpName').value=p.name;document.getElementById('mpAddress').value=p.address;document.getElementById('mpLat').value=p.lat||'';document.getElementById('mpLng').value=p.lng||'';document.getElementById('mpDay').value=p.dayOfWeek;document.getElementById('mpOrder').value=p.order||'';document.getElementById('gpsCoordsRow').style.display=p.lat!=null?'block':'none';document.getElementById('geoStatus').style.display='none';document.getElementById('modalPointTitle').textContent='Editar Punto';openModal('modalPoint');}
-function savePoint(){const id=document.getElementById('editPointId').value,vid=document.getElementById('editPointVisitorId').value,name=document.getElementById('mpName').value.trim(),address=document.getElementById('mpAddress').value.trim(),lat=parseFloat(document.getElementById('mpLat').value),lng=parseFloat(document.getElementById('mpLng').value),dayOfWeek=parseInt(document.getElementById('mpDay').value),order=parseInt(document.getElementById('mpOrder').value)||1;if(!name){toast('Nombre obligatorio','err');return;}if(!address){toast('Dirección obligatoria','err');return;}if(isNaN(lat)||isNaN(lng)){toast('Espera la georreferenciación','err');return;}if(id){const p=pointById(id);if(p)Object.assign(p,{name,address,lat,lng,dayOfWeek,order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else if(p.assignedTo)openVisitorDetail(p.assignedTo);}else{if(!vid){toast('Sin visitador','err');return;}D.points.push({id:uid(),name,address,lat,lng,assignedTo:vid,dayOfWeek,order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else openVisitorDetail(vid);}toast(id?'Punto actualizado':'Punto creado');}
+function savePoint(){const id=document.getElementById('editPointId').value,vid=document.getElementById('editPointVisitorId').value,name=document.getElementById('mpName').value.trim(),address=document.getElementById('mpAddress').value.trim(),lat=parseFloat(document.getElementById('mpLat').value),lng=parseFloat(document.getElementById('mpLng').value),dayOfWeek=parseInt(document.getElementById('mpDay').value),order=parseInt(document.getElementById('mpOrder').value)||1;if(!name){toast('Nombre obligatorio','err');return;}if(!address){toast('Dirección obligatoria','err');return;}if(isNaN(lat)||isNaN(lng)){toast('Espera la georreferenciación','err');return;}if(id){const p=pointById(id);if(p)Object.assign(p,{name,address,lat,lng,dayOfWeek,order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else if(p&&p.assignedTo)openVisitorDetail(p.assignedTo);}else{if(!vid){toast('Sin visitador','err');return;}D.points.push({id:uid(),name,address,lat,lng,assignedTo:vid,dayOfWeek,order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else openVisitorDetail(vid);}toast(id?'Punto actualizado':'Punto creado');}
 
 function openNewVisitor(){document.getElementById('editVisitorId').value='';['mvName','mvUsername','mvPassword'].forEach(x=>document.getElementById(x).value='');document.getElementById('modalVisitorTitle').textContent='Nuevo Visitador';openModal('modalVisitor');}
 function editVisitor(id){const u=userById(id);if(!u)return;document.getElementById('editVisitorId').value=id;document.getElementById('mvName').value=u.name;document.getElementById('mvUsername').value=u.username;document.getElementById('mvPassword').value='';document.getElementById('modalVisitorTitle').textContent='Editar Visitador';openModal('modalVisitor');}
-function saveVisitor(){const id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contraseña mínimo 4 caracteres','err');return;}if(D.users.length>=40&&!id){toast('Máximo 40 perfiles','err');return;}if(D.users.find(u=>u.username===username&&u.id!==id)){toast('Usuario ya existe','err');return;}if(id){const u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;}}else{D.users.push({id:uid(),username,password,role:'visitor',name,active:true});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Creado');}
+function saveVisitor(){const id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contraseña mínimo 4 caracteres','err');return;}if(D.users.length>=40&&!id){toast('Máximo 40 perfiles','err');return;}if(D.users.find(u=>u.username===username&&u.id!==id)){toast('Usuario ya existe','err');return;}if(id){const u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;}}else{D.users.push({id:uid(),username,password,role:'visitor',name,active:true});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Visitador creado — ya puede iniciar sesión en cualquier dispositivo');}
 
-function renderAdminVisitas(){const fv=document.getElementById('filterVisitVisitor').value,fs=document.getElementById('filterVisitStatus').value;let l=[...D.visits];if(fv)l=l.filter(v=>v.visitorId===fv);if(fs)l=l.filter(v=>v.status===fs);l.sort((a,b)=>(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||'')));const el=document.getElementById('adminVisitsList');if(!l.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}
-  el.innerHTML=l.map(v=>{const pt=pointById(v.pointId),vis=userById(v.visitorId);const b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':v.status==='cancelled'?'badge-cancel':'badge-pending';const lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':v.status==='cancelled'?'Cancelada':'Pendiente';const ph=v.photo?`<img src="${v.photo}" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto('${v.id}')">`:'';return `<div class="user-item" style="cursor:pointer;" onclick="viewPhoto('${v.id}')"><div class="avatar" style="background:${avatarColor(v.visitorId)};width:34px;height:34px;font-size:11px;">${vis?initials(vis.name):'?'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">${pt?esc(pt.name):'Eliminado'}</div><div style="font-size:11px;color:var(--muted);">${vis?esc(vis.name):'?'} &middot; ${fmtDateShort(v.date)} ${v.arrivalTime||''}${v.closeTime?' → '+v.closeTime:''}</div>${v.jefeNombre?'<div style="font-size:11px;color:var(--muted);">Jefe: '+esc(v.jefeNombre)+'</div>':''}</div><div style="display:flex;align-items:center;gap:8px;">${ph}<span class="badge ${b}">${lb}</span></div></div>`;}).join('');}
+function renderAdminVisitas(){const fv=document.getElementById('filterVisitVisitor').value,fs=document.getElementById('filterVisitStatus').value;let l=[...D.visits];if(fv)l=l.filter(v=>v.visitorId===fv);if(fs)l=l.filter(v=>v.status===fs);l.sort((a,b)=>(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||'')));const el=document.getElementById('adminVisitsList');if(!l.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}el.innerHTML=l.map(v=>{const pt=pointById(v.pointId),vis=userById(v.visitorId);const b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':v.status==='cancelled'?'badge-cancel':'badge-pending';const lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':v.status==='cancelled'?'Cancelada':'Pendiente';const ph=v.photo?`<img src="${v.photo}" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto('${v.id}')">`:'';return `<div class="user-item" onclick="viewPhoto('${v.id}')"><div class="avatar" style="background:${avatarColor(v.visitorId)};width:34px;height:34px;font-size:11px;">${vis?initials(vis.name):'?'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">${pt?esc(pt.name):'Eliminado'}</div><div style="font-size:11px;color:var(--muted);">${vis?esc(vis.name):'?'} &middot; ${fmtDateShort(v.date)} ${v.arrivalTime||''}${v.closeTime?' → '+v.closeTime:''}</div>${v.jefeNombre?'<div style="font-size:11px;color:var(--muted);">Jefe: '+esc(v.jefeNombre)+'</div>':''}</div><div style="display:flex;align-items:center;gap:8px;">${ph}<span class="badge ${b}">${lb}</span></div></div>`;}).join('');}
 
 function viewPhoto(vid){const v=D.visits.find(x=>x.id===vid);if(!v||!v.photo){toast('Sin foto','info');return;}const pt=pointById(v.pointId),vis=userById(v.visitorId);document.getElementById('modalPhotoImg').src=v.photo;document.getElementById('modalPhotoInfo').innerHTML=`<strong>${pt?esc(pt.name):'?'}</strong><br>${vis?esc(vis.name):'?'} &middot; ${fmtDate(v.date)} ${v.arrivalTime||''}<br>Jefe: ${esc(v.jefeNombre||'N/D')}${v.notes?'<br><em>'+esc(v.notes)+'</em>':''}`;openModal('modalPhoto');}
 
-// ===========================
+// =============================================
 // SUPER ADMIN
-// ===========================
-function switchSuperTab(tab,btn){document.querySelectorAll('#superScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#superScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('sTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='users')renderSuperAdmin();}
+// =============================================
+function switchSuperTab(tab,btn){currentSuperTab=tab;if(tab!=='superDetail')lastSuperDetailId=null;document.querySelectorAll('#superScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#superScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('sTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='users')renderSuperAdmin();}
 
 function renderSuperAdmin(){
   const el=document.getElementById('superUserList');
   el.innerHTML=D.users.map(u=>{
     const roleBadge=u.role==='admin'?'<span class="badge badge-progress" style="font-size:10px;">Admin</span>':'<span class="badge badge-done" style="font-size:10px;">Visitador</span>';
-    return `<div class="user-item" onclick="openSuperDetail('${u.id}')" style="flex-wrap:wrap;">
-      <div class="avatar" style="background:${u.role==='admin'?'#7C3AED':avatarColor(u.id)};">${initials(u.name)}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:700;">${esc(u.name)} ${roleBadge}</div>
-        <div style="font-size:12px;color:var(--muted);">@${esc(u.username)}</div>
-        <div class="pw-display">
-          <i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i>
-          <span class="pw-text">${esc(u.password)}</span>
-          <button class="pw-btn" onclick="event.stopPropagation();copyText('${esc(u.password)}')" title="Copiar"><i class="fa-solid fa-copy"></i></button>
-        </div>
-      </div>
-      <i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;align-self:center;"></i>
-    </div>`;}).join('');
+    const pwEsc=esc(u.password).replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+    return `<div class="user-item" onclick="openSuperDetail('${u.id}')"><div class="avatar" style="background:${u.role==='admin'?'#7C3AED':avatarColor(u.id)};">${initials(u.name)}</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">${esc(u.name)} ${roleBadge}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)}</div><div class="pw-display"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">${pwEsc}</span><button class="pw-btn" onclick="event.stopPropagation();copyPw(this)" data-pw="${pwEsc}" title="Copiar"><i class="fa-solid fa-copy"></i></button></div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;align-self:center;"></i></div>`;}).join('');
 }
-
-function copyText(text){navigator.clipboard.writeText(text).then(()=>toast('Contraseña copiada al portapapeles','info')).catch(()=>toast('No se pudo copiar','err'));}
+function copyPw(btn){const pw=btn.getAttribute('data-pw');navigator.clipboard.writeText(pw).then(()=>toast('Contraseña copiada','info')).catch(()=>toast('No se pudo copiar','err'));}
 
 function openSuperDetail(uid){
+  lastSuperDetailId=uid;currentSuperTab='superDetail';
   const u=userById(uid);if(!u)return;
   const pts=D.points.filter(p=>p.assignedTo===uid).sort((a,b)=>a.dayOfWeek-b.dayOfWeek||a.order-b.order);
   const visits=D.visits.filter(v=>v.visitorId===uid);
@@ -662,9 +718,10 @@ function openSuperDetail(uid){
   document.querySelectorAll('#superScreen .tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('#superScreen .tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('sTab-superDetail').classList.add('active');
-  let userInfo=`<div class="visitor-detail-header"><div class="avatar" style="background:${u.role==='admin'?'#7C3AED':avatarColor(u.id)};width:52px;height:52px;font-size:18px;">${initials(u.name)}</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">${esc(u.name)}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)} &middot; ${pts.length} puntos &middot; ${visits.filter(v=>v.status==='completed').length} completadas</div><div class="pw-display" style="margin-top:6px;"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">${esc(u.password)}</span><button class="pw-btn" onclick="copyText('${esc(u.password)}')"><i class="fa-solid fa-copy"></i></button></div></div><button class="btn btn-ghost btn-sm" onclick="superEditUser('${u.id}')"><i class="fa-solid fa-pen"></i> Editar</button></div>`;
+  const pwEsc=esc(u.password).replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+  let userInfo=`<div class="visitor-detail-header"><div class="avatar" style="background:${u.role==='admin'?'#7C3AED':avatarColor(u.id)};width:52px;height:52px;font-size:18px;">${initials(u.name)}</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">${esc(u.name)}</div><div style="font-size:12px;color:var(--muted);">@${esc(u.username)} &middot; ${pts.length} puntos &middot; ${visits.filter(v=>v.status==='completed').length} completadas</div><div class="pw-display" style="margin-top:6px;"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">${pwEsc}</span><button class="pw-btn" onclick="copyPw(this)" data-pw="${pwEsc}"><i class="fa-solid fa-copy"></i></button></div></div><button class="btn btn-ghost btn-sm" onclick="superEditUser('${u.id}')"><i class="fa-solid fa-pen"></i> Editar</button></div>`;
   let photoSection='';
-  if(photos.length){photoSection=`<div class="section-title" style="margin-top:20px;">Fotos de Evidencia (${photos.length})</div><div class="gallery-grid">${photos.map(p=>`<img src="${p.photo}" onclick="viewPhoto('${p.id}')" title="${fmtDateShort(p.date)}">`).join('')}</div>`;}
+  if(photos.length)photoSection=`<div class="section-title" style="margin-top:20px;">Fotos de Evidencia (${photos.length})</div><div class="gallery-grid">${photos.map(p=>`<img src="${p.photo}" onclick="viewPhoto('${p.id}')" title="${fmtDateShort(p.date)}">`).join('')}</div>`;
   let ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';
   else{const byDay={};pts.forEach(p=>{if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});
     ph=Object.keys(byDay).sort().map(day=>`<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">${DOW_NAME[day]}</div>${byDay[day].map(p=>`<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:28px;height:28px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;">${p.order}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">${esc(p.name)}</div><div style="margin-top:3px;">${addrHTML(p.address,p.lat,p.lng)}</div></div><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm('${p.id}','${uid}')" style="width:28px;height:28px;padding:0;background:var(--danger-light);color:var(--danger);flex-shrink:0;"><i class="fa-solid fa-trash" style="font-size:10px;"></i></button></div></div>`).join('')}</div>`).join('');}
@@ -674,151 +731,57 @@ function openSuperDetail(uid){
 function superEditUser(id){const u=userById(id);if(!u)return;document.getElementById('superEditId').value=id;document.getElementById('seName').value=u.name;document.getElementById('seUsername').value=u.username;document.getElementById('sePassword').value='';document.getElementById('seRole').value=u.role;openModal('modalSuperEdit');}
 function superSaveUser(){const id=document.getElementById('superEditId').value,name=document.getElementById('seName').value.trim(),username=document.getElementById('seUsername').value.trim(),password=document.getElementById('sePassword').value,role=document.getElementById('seRole').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(D.users.find(u=>u.username===username&&u.id!==id)){toast('Usuario duplicado','err');return;}const u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;u.role=role;}save(D);closeModal('modalSuperEdit');renderSuperAdmin();toast('Actualizado');}
 
-// ===========================
+// =============================================
 // VISITADOR
-// ===========================
-function switchVisitorTab(tab,btn){document.querySelectorAll('#visitorScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#visitorScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('vTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='hoy')renderVisitorToday();if(tab==='semana')renderVisitorWeek();if(tab==='perfil')renderVisitorProfile();}
+// =============================================
+function switchVisitorTab(tab,btn){currentVisitorTab=tab;document.querySelectorAll('#visitorScreen .tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('#visitorScreen .tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('vTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='hoy')renderVisitorToday();if(tab==='semana')renderVisitorWeek();if(tab==='perfil')renderVisitorProfile();}
 
 function renderVisitor(){
-  const h=new Date().getHours();
-  const sal=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
-  const nombre=currentUser.name.split(' ')[0];
-  document.getElementById('visitorGreeting').textContent=sal+', '+nombre+'!';
-  const d=new Date();
-  const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const h=new Date().getHours();const sal=h<12?'Buenos días':h<18?'Buenas tardes':'Buenas noches';
+  document.getElementById('visitorGreeting').textContent=sal+', '+currentUser.name.split(' ')[0]+'!';
+  const d=new Date();const days=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   document.getElementById('visitorDate').textContent=days[d.getDay()]+', '+d.getDate()+' de '+months[d.getMonth()]+' '+d.getFullYear();
   renderVisitorToday();
 }
 
-// ===========================
-// VISTA HOY CON RUTA
-// ===========================
-function buildMapsRouteUrl(pts){
-  if(!pts||!pts.length) return null;
-  if(pts.length===1) return mapsLink(pts[0].lat,pts[0].lng,pts[0].address);
-  const origin=encodeURIComponent(pts[0].lat+','+pts[0].lng);
-  const dest=encodeURIComponent(pts[pts.length-1].lat+','+pts[pts.length-1].lng);
-  const waypoints=pts.slice(1,-1).map(p=>encodeURIComponent(p.lat+','+p.lng)).join('|');
-  return 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+dest+(waypoints?'&waypoints='+waypoints:'')+'&travelmode=driving';
-}
+function buildMapsRouteUrl(pts){if(!pts||!pts.length)return null;if(pts.length===1)return mapsLink(pts[0].lat,pts[0].lng,pts[0].address);const origin=encodeURIComponent(pts[0].lat+','+pts[0].lng);const dest=encodeURIComponent(pts[pts.length-1].lat+','+pts[pts.length-1].lng);const waypoints=pts.slice(1,-1).map(p=>encodeURIComponent(p.lat+','+p.lng)).join('|');return 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+dest+(waypoints?'&waypoints='+waypoints:'')+'&travelmode=driving';}
 
 function renderVisitorToday(){
   const dow=todayDow();
   const myPts=D.points.filter(p=>p.assignedTo===currentUser.id&&p.dayOfWeek===dow).sort((a,b)=>a.order-b.order);
   const el=document.getElementById('visitorTodayPoints');
   if(!myPts.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-couch"></i><p>Sin puntos para hoy</p></div>';return;}
-
-  const now=new Date();
-  const startH=now.getHours(),startM=now.getMinutes();
-  const totalMin=myPts.length*MIN_PER_PUNTO;
-  const endTotalMin=startH*60+startM+totalMin;
-  const endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
+  const now=new Date();const startH=8,startM=0;
+  const totalMin=myPts.length*MIN_PER_PUNTO;const endTotalMin=startH*60+startM+totalMin;const endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
   const doneCt=D.visits.filter(v=>v.visitorId===currentUser.id&&v.date===today()&&v.status==='completed').length;
   const allDone=doneCt===myPts.length;
   const mapsUrl=buildMapsRouteUrl(myPts);
   const gpsOk=gpsPermission==='granted';
-
-  // Tarjeta de ruta
   let stopsHtml='';
-  myPts.forEach((p,i)=>{
-    const estMin=startH*60+startM+(i*MIN_PER_PUNTO);
-    const estH=Math.floor(estMin/60)%24,estMM=estMin%60;
-    const visit=D.visits.find(v=>v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today());
-    const done=visit&&visit.status==='completed';
-    const inProg=visit&&visit.status==='in-progress';
-    const bgNum=done?'var(--success)':inProg?'var(--info)':'var(--primary)';
-    stopsHtml+=`<div class="route-stop">
-      <div class="route-stop-num" style="background:${bgNum};">${done?'✓':(inProg?'▶':(i+1))}</div>
-      <div class="route-stop-info">
-        <div class="route-stop-name" style="${done?'text-decoration:line-through;color:var(--muted);':''}">${esc(p.name)}</div>
-        <div class="route-stop-addr">${esc(p.address)}</div>
-      </div>
-      <div class="route-stop-time" style="color:${done?'var(--success)':inProg?'var(--info)':'var(--muted)'};">~${fmt(estH,estMM)}</div>
-    </div>`;
-  });
-
-  const routeCard=`<div class="route-card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <i class="fa-solid fa-route" style="color:var(--primary);font-size:15px;"></i>
-        <span style="font-size:14px;font-weight:700;">Sugerencia de Ruta</span>
-      </div>
-      ${!gpsOk?`<span style="font-size:10px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:9px;"></i> Sin GPS</span>`:'<span style="font-size:10px;font-weight:700;background:var(--success-light);color:#166534;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:9px;"></i> GPS activo</span>'}
-    </div>
-    <div class="route-times">
-      <div class="route-time-box" style="background:var(--primary-50);">
-        <div class="route-time-label">Inicio estimado</div>
-        <div class="route-time-val" style="color:var(--primary);">${fmt(startH,startM)}</div>
-      </div>
-      <div class="route-time-box" style="background:${allDone?'var(--success-light)':'var(--accent-light)'};">
-        <div class="route-time-label">Fin estimado</div>
-        <div class="route-time-val" style="color:${allDone?'var(--success)':'var(--accent)'};">${fmt(endH,endMM)}</div>
-      </div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-      <i class="fa-solid fa-clock" style="font-size:10px;"></i>
-      ${myPts.length} puntos &middot; ~${MIN_PER_PUNTO} min c/u (10 min visita + 5 min traslado) &middot; ${Math.floor(totalMin/60)}h${totalMin%60>0?' '+totalMin%60+'min':''}
-    </div>
-    <div class="section-title" style="margin-bottom:6px;">Orden sugerido</div>
-    ${stopsHtml}
-    ${mapsUrl?`<a href="${mapsUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:11px;border-radius:10px;background:var(--info-light);color:var(--info);font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Abrir ruta completa en Google Maps</a>`:''}
-  </div>`;
-
-  // Puntos individuales (cards de acción)
-  const pointsCards=myPts.map(p=>{
-    const visit=D.visits.find(v=>v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today());
-    const st=visit?visit.status:'pending';
-    const b=st==='completed'?'badge-done':st==='in-progress'?'badge-progress':st==='cancelled'?'badge-cancel':'badge-pending';
-    const lb=st==='completed'?'Completada':st==='in-progress'?'En Curso':st==='cancelled'?'Cancelada':'Pendiente';
-    let act='';
-    if(st==='pending') act=`<button class="btn btn-primary btn-sm" onclick="arriveToPoint('${p.id}')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-location-crosshairs"></i> Marcar Llegada</button>`;
-    else if(st==='in-progress') act=`<button class="btn btn-success btn-sm" onclick="openCloseVisit('${visit.id}','${p.id}')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>`;
-    else if(st==='completed'&&visit.photo) act=`<img src="${visit.photo}" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewPhoto('${visit.id}')">`;
-    return `<div class="card"><div class="point-card-inner" style="border:none;padding:0;"><div class="point-num">${p.order}</div><div class="point-info"><div class="point-name">${esc(p.name)}</div><div class="point-addr">${addrHTML(p.address,p.lat,p.lng)}</div></div><span class="badge ${b}">${lb}</span></div>${act}</div>`;
-  }).join('');
-
+  myPts.forEach((p,i)=>{const estMin=startH*60+startM+(i*MIN_PER_PUNTO);const estH=Math.floor(estMin/60)%24,estMM=estMin%60;const visit=D.visits.find(v=>v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today());const done=visit&&visit.status==='completed';const inProg=visit&&visit.status==='in-progress';const bgNum=done?'var(--success)':inProg?'var(--info)':'var(--primary)';stopsHtml+=`<div class="route-stop"><div class="route-stop-num" style="background:${bgNum};">${done?'✓':(inProg?'▶':(i+1))}</div><div class="route-stop-info"><div class="route-stop-name" style="${done?'text-decoration:line-through;color:var(--muted);':''}">${esc(p.name)}</div><div class="route-stop-addr">${esc(p.address)}</div></div><div class="route-stop-time" style="color:${done?'var(--success)':inProg?'var(--info)':'var(--muted)'};">~${fmt(estH,estMM)}</div></div>`;});
+  const routeCard=`<div class="route-card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-route" style="color:var(--primary);font-size:15px;"></i><span style="font-size:14px;font-weight:700;">Sugerencia de Ruta</span></div>${!gpsOk?'<span style="font-size:10px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:9px;"></i> Sin GPS</span>':'<span style="font-size:10px;font-weight:700;background:var(--success-light);color:#166534;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:9px;"></i> GPS activo</span>'}</div><div class="route-times"><div class="route-time-box" style="background:var(--primary-50);"><div class="route-time-label">Inicio estimado</div><div class="route-time-val" style="color:var(--primary);">${fmt(startH,startM)}</div></div><div class="route-time-box" style="background:${allDone?'var(--success-light)':'var(--accent-light)'};"><div class="route-time-label">Fin estimado</div><div class="route-time-val" style="color:${allDone?'var(--success)':'var(--accent)'};">${fmt(endH,endMM)}</div></div></div><div style="font-size:11px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock" style="font-size:10px;"></i> ${myPts.length} puntos &middot; ~${MIN_PER_PUNTO} min c/u &middot; ${Math.floor(totalMin/60)}h${totalMin%60>0?' '+totalMin%60+'min':''}</div><div class="section-title" style="margin-bottom:6px;">Orden sugerido</div>${stopsHtml}${mapsUrl?`<a href="${mapsUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:11px;border-radius:10px;background:var(--info-light);color:var(--info);font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-map-location-dot"></i> Abrir ruta completa en Google Maps</a>`:''}</div>`;
+  const pointsCards=myPts.map(p=>{const visit=D.visits.find(v=>v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today());const st=visit?visit.status:'pending';const b=st==='completed'?'badge-done':st==='in-progress'?'badge-progress':st==='cancelled'?'badge-cancel':'badge-pending';const lb=st==='completed'?'Completada':st==='in-progress'?'En Curso':st==='cancelled'?'Cancelada':'Pendiente';let act='';if(st==='pending')act=`<button class="btn btn-primary btn-sm" onclick="arriveToPoint('${p.id}')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-location-crosshairs"></i> Marcar Llegada</button>`;else if(st==='in-progress')act=`<button class="btn btn-success btn-sm" onclick="openCloseVisit('${visit.id}','${p.id}')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>`;else if(st==='completed'&&visit.photo)act=`<img src="${visit.photo}" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewPhoto('${visit.id}')">`;return `<div class="card"><div class="point-card-inner" style="border:none;padding:0;"><div class="point-num">${p.order}</div><div class="point-info"><div class="point-name">${esc(p.name)}</div><div class="point-addr">${addrHTML(p.address,p.lat,p.lng)}</div></div><span class="badge ${b}">${lb}</span></div>${act}</div>`;}).join('');
   el.innerHTML=`<div class="section-title">${DOW_NAME[dow]} — ${myPts.length} punto${myPts.length>1?'s':''}</div>${routeCard}${pointsCards}`;
 }
 
 async function arriveToPoint(pid){
-  if(gpsPermission==='denied'){
-    // Sin GPS guardamos igual pero avisamos
-    const now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-    D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});
-    save(D);renderVisitorToday();toast('Llegada registrada (sin coordenadas GPS)','info');
-    return;
-  }
+  if(gpsPermission==='denied'){const now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast('Llegada registrada (sin coordenadas GPS)','info');return;}
   toast('Obteniendo GPS...','info');
-  try{
-    const gps=await getGPS();
-    gpsPermission='granted';
-    const pt=pointById(pid);if(!pt)return;
-    const dist=haversine(gps.lat,gps.lng,pt.lat,pt.lng),ok=dist<=300;
-    if(!ok)toast('A '+Math.round(dist)+'m del punto (300m máx.)','info');
-    const now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-    D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:gps.lat,arrivalLng:gps.lng,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});
-    save(D);renderVisitorToday();toast(ok?'Llegada registrada':'Llegada registrada (fuera de rango)');
-  }catch(e){
-    toast('No se pudo obtener GPS: '+e,'err');
-  }
+  try{const gps=await getGPS();gpsPermission='granted';const pt=pointById(pid);if(!pt)return;const dist=haversine(gps.lat,gps.lng,pt.lat,pt.lng),ok=dist<=300;if(!ok)toast('A '+Math.round(dist)+'m del punto (300m máx.)','info');const now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:gps.lat,arrivalLng:gps.lng,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast(ok?'Llegada registrada':'Llegada registrada (fuera de rango)');}catch(e){toast('No se pudo obtener GPS: '+e,'err');}
 }
 
 function openCloseVisit(vid,pid){const pt=pointById(pid);document.getElementById('closeVisitId').value=vid;document.getElementById('closeVisitPointName').textContent=pt?pt.name:'';document.getElementById('closeVisitPointAddr').innerHTML=pt?addrHTML(pt.address,pt.lat,pt.lng):'';document.getElementById('closeJefe').value='';document.getElementById('closeNotes').value='';currentPhotoData=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoCaptureArea').style.display='block';document.getElementById('visitPhotoInput').value='';openModal('modalCloseVisit');}
 
 async function completeVisit(){
   const vid=document.getElementById('closeVisitId').value,jefe=document.getElementById('closeJefe').value.trim(),notes=document.getElementById('closeNotes').value.trim();
-  if(!currentPhotoData){toast('Toma una foto','err');return;}
-  if(!jefe){toast('Nombre del jefe obligatorio','err');return;}
-  let cL=null,cN=null;
-  try{const g=await getGPS();cL=g.lat;cN=g.lng;}catch(e){}
+  if(!currentPhotoData){toast('Toma una foto','err');return;}if(!jefe){toast('Nombre del jefe obligatorio','err');return;}
+  let cL=null,cN=null;try{const g=await getGPS();cL=g.lat;cN=g.lng;}catch(e){}
   const now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  const v=D.visits.find(x=>x.id===vid);
-  if(v){v.closeTime=time;v.closeLat=cL;v.closeLng=cN;v.photo=currentPhotoData;v.jefeNombre=jefe;v.notes=notes;v.status='completed';}
+  const v=D.visits.find(x=>x.id===vid);if(v){v.closeTime=time;v.closeLat=cL;v.closeLng=cN;v.photo=currentPhotoData;v.jefeNombre=jefe;v.notes=notes;v.status='completed';}
   save(D);closeModal('modalCloseVisit');currentPhotoData=null;renderVisitorToday();toast('Visita completada');
 }
 
-function todayForDow(t){const d=new Date(),c=d.getDay()===0?7:d.getDay(),diff=c-t,r=new Date(d);r.setDate(d.getDate()-diff);return r.toISOString().split('T')[0];}
+function todayForDow(t){const d=new Date(),c=d.getDay()===0?7:d.getDay(),diff=c-t,r=new Date(d);r.setDate(d.getDate()-diff);return r.getFullYear()+'-'+String(r.getMonth()+1).padStart(2,'0')+'-'+String(r.getDate()).padStart(2,'0');}
 
 function renderVisitorWeek(){
   const el=document.getElementById('visitorWeekSummary'),dow=todayDow(),days=[1,2,3,4,5,6,7].filter(d=>d<=dow);
@@ -827,9 +790,8 @@ function renderVisitorWeek(){
     const pts=D.points.filter(p=>p.assignedTo===currentUser.id&&p.dayOfWeek===day).sort((a,b)=>a.order-b.order);
     const visits=D.visits.filter(v=>v.visitorId===currentUser.id&&v.date===todayForDow(day));
     const dn=visits.filter(v=>v.status==='completed').length,total=pts.length,pct=total>0?Math.round(dn/total*100):0,isToday=day===dow;
-    let ds='';try{ds=fmtDateShort(todayForDow(day));}catch(e){}
     const circ=2*Math.PI*22,off=circ-(pct/100)*circ,rc=pct===100?'var(--success)':pct>0?'var(--primary)':'var(--border)';
-    h+=`<div class="card" style="${isToday?'border-color:var(--primary);background:var(--primary-50);':''}"><div style="display:flex;align-items:center;gap:14px;"><div class="progress-ring"><svg width="56" height="56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fg" cx="28" cy="28" r="22" stroke="${rc}" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/></svg><div class="ring-text" style="color:${rc};">${pct}%</div></div><div style="flex:1;"><div style="font-size:15px;font-weight:800;">${DOW_NAME[day]}${isToday?' <span style="font-size:11px;color:var(--primary);font-weight:600;">— Hoy</span>':''}</div><div style="font-size:12px;color:var(--muted);">${ds} &middot; ${dn}/${total}</div>${pts.map(p=>{const vs=visits.find(v=>v.pointId===p.id);const s=vs?vs.status:'none';const ic=s==='completed'?'fa-check-circle" style="color:var(--success)':s==='in-progress'?'fa-spinner" style="color:#2563EB':'fa-circle" style="color:var(--border)';return `<div style="font-size:12px;margin-top:3px;"><i class="fa-solid ${ic};font-size:10px;"></i> ${esc(p.name)}</div>`;}).join('')}</div></div></div>`;
+    h+=`<div class="card" style="${isToday?'border-color:var(--primary);background:var(--primary-50);':''}"><div style="display:flex;align-items:center;gap:14px;"><div class="progress-ring"><svg width="56" height="56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fg" cx="28" cy="28" r="22" stroke="${rc}" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/></svg><div class="ring-text" style="color:${rc};">${pct}%</div></div><div style="flex:1;"><div style="font-size:15px;font-weight:800;">${DOW_NAME[day]}${isToday?' <span style="font-size:11px;color:var(--primary);font-weight:600;">— Hoy</span>':''}</div><div style="font-size:12px;color:var(--muted);">${fmtDateShort(todayForDow(day))} &middot; ${dn}/${total}</div>${pts.map(p=>{const vs=visits.find(v=>v.pointId===p.id);const s=vs?vs.status:'none';const ic=s==='completed'?'fa-check-circle" style="color:var(--success)':s==='in-progress'?'fa-spinner" style="color:#2563EB':'fa-circle" style="color:var(--border)';return `<div style="font-size:12px;margin-top:3px;"><i class="fa-solid ${ic};font-size:10px;"></i> ${esc(p.name)}</div>`;}).join('')}</div></div></div>`;
   });
   if(!h)h='<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Sin información</p></div>';
   el.innerHTML=h;
@@ -848,6 +810,11 @@ function renderVisitorProfile(){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>closeModal(m.id));cancelConfirm();}});
+
+// =============================================
+// INICIALIZAR
+// =============================================
+initFirebase();
 </script>
 </body>
 </html>
