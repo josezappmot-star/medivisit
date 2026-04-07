@@ -14,14 +14,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <style>
-    :root{
-      --primary:#0F766E;--primary-light:#14B8A6;--primary-50:#F0FDFA;--primary-100:#CCFBF1;
-      --accent:#F59E0B;--accent-light:#FEF3C7;
-      --danger:#DC2626;--danger-light:#FEE2E2;
-      --success:#16A34A;--success-light:#DCFCE7;
-      --info:#2563EB;--info-light:#DBEAFE;
-      --bg:#F1F5F9;--card:#FFFFFF;--fg:#0F172A;--muted:#64748B;--border:#E2E8F0;--radius:14px;
-    }
+    :root{--primary:#0F766E;--primary-light:#14B8A6;--primary-50:#F0FDFA;--primary-100:#CCFBF1;--accent:#F59E0B;--accent-light:#FEF3C7;--danger:#DC2626;--danger-light:#FEE2E2;--success:#16A34A;--success-light:#DCFCE7;--info:#2563EB;--info-light:#DBEAFE;--bg:#F1F5F9;--card:#FFFFFF;--fg:#0F172A;--muted:#64748B;--border:#E2E8F0;--radius:14px;}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;min-height:100dvh;}
     h1,h2,h3,.serif{font-family:'DM Serif Display',serif;}
@@ -187,10 +180,6 @@
     .gallery-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:transform .15s;}
     .gallery-grid img:active{transform:scale(0.95);}
     .route-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);border-left:4px solid var(--primary);padding:18px;margin-bottom:16px;}
-    .route-times{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-    .route-time-box{border-radius:10px;padding:12px;text-align:center;}
-    .route-time-label{font-size:11px;color:var(--muted);margin-bottom:3px;}
-    .route-time-val{font-size:20px;font-weight:900;}
     .route-stop{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
     .route-stop:last-child{border-bottom:none;}
     .route-stop-num{width:28px;height:28px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;}
@@ -198,8 +187,6 @@
     .route-stop-name{font-size:13px;font-weight:700;}
     .route-stop-addr{font-size:11px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .route-stop-time{font-size:12px;font-weight:700;}
-    .route-stop-map{width:30px;height:30px;border-radius:8px;background:var(--info-light);color:var(--info);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;text-decoration:none;font-size:13px;transition:all .15s;}
-    .route-stop-map:active{transform:scale(0.9);background:#BFDBFE;}
     .gps-perm-card{background:var(--card);border-radius:18px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.2);}
     .gps-perm-icon{width:64px;height:64px;border-radius:50%;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;}
     .sync-indicator{position:fixed;bottom:80px;right:16px;z-index:25;display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:10px;font-weight:700;background:var(--fg);color:#fff;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
@@ -223,14 +210,7 @@
     .preview-stop-map-btn:active{transform:scale(0.95);background:#BFDBFE;}
     .preview-nav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:14px;font-weight:700;text-decoration:none;margin-top:18px;transition:all .15s;}
     .preview-nav-btn:active{transform:scale(0.97);}
-    @media(min-width:640px){
-      .app-body{padding:20px 24px 90px;}
-      .stat-grid{grid-template-columns:repeat(4,1fr);}
-      .canvas-grid{grid-template-columns:1fr 1fr;}
-      .modal-sheet{border-radius:20px;margin-bottom:20px;}
-      .modal-overlay{align-items:center;}
-      .gallery-grid{grid-template-columns:repeat(4,1fr);}
-    }
+    @media(min-width:640px){.app-body{padding:20px 24px 90px;}.stat-grid{grid-template-columns:repeat(4,1fr);}.canvas-grid{grid-template-columns:1fr 1fr;}.modal-sheet{border-radius:20px;margin-bottom:20px;}.modal-overlay{align-items:center;}.gallery-grid{grid-template-columns:repeat(4,1fr);}}
   </style>
 </head>
 <body>
@@ -381,24 +361,14 @@
 <div class="modal-overlay" id="modalPhoto"><div class="modal-sheet" style="padding:8px 8px 24px;"><div class="modal-handle"></div><div class="modal-title" style="padding:0 12px;">Evidencia</div><img id="modalPhotoImg" style="width:100%;border-radius:12px;"><div style="padding:8px 12px 0;"><div id="modalPhotoInfo" style="font-size:13px;color:var(--muted);line-height:1.5;"></div></div><button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modalPhoto')">Cerrar</button></div></div>
 <div class="modal-overlay" id="modalSuperEdit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Editar Usuario</div><input type="hidden" id="superEditId"><div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="seName"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="seUsername" autocapitalize="off"></div><div class="form-group"><label class="form-label">Nueva Contrasena</label><input class="form-input" type="text" id="sePassword" placeholder="Dejar vacio para no cambiar"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-input" id="seRole"><option value="visitor">Visitador</option><option value="admin">Administrador</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalSuperEdit')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="superSaveUser()">Guardar</button></div></div></div>
 <div class="modal-overlay" id="modalRoutePreview"><div class="modal-sheet" style="max-height:92dvh;"><div class="modal-handle"></div><div id="routePreviewContent"></div></div></div>
-
 <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon" id="confirmIcon"><i id="confirmIconI"></i></div><div class="confirm-title" id="confirmTitle"></div><div class="confirm-msg" id="confirmMsg"></div><div class="confirm-actions"><button class="btn btn-outline" onclick="cancelConfirm()">Cancelar</button><button class="btn" id="confirmOkBtn" onclick="executeConfirm()">Confirmar</button></div></div></div>
 
 <script>
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyB-1_xhBuzfcL_XUFkT0yZfa6rCMl6DV0Q",
-  authDomain: "medvisit-app-e5991.firebaseapp.com",
-  databaseURL: "https://medvisit-app-e5991-default-rtdb.firebaseio.com",
-  projectId: "medvisit-app-e5991",
-  storageBucket: "medvisit-app-e5991.firebasestorage.app",
-  messagingSenderId: "372705290165",
-  appId: "1:372705290165:web:8694260ce573e172ee5bfc"
-};
-
-const SUPER_ADMIN_KEY='TesJua2024!';
-const MAX_LOGIN_ATTEMPTS=5,LOCKOUT_SECONDS=30,SESSION_MINUTES=30;
-const AV_COLORS=['#0F766E','#D97706','#DC2626','#7C3AED','#2563EB','#DB2777','#059669','#EA580C','#4F46E5','#0891B2'];
-const MIN_PER_PUNTO=15;
+var FIREBASE_CONFIG={apiKey:"AIzaSyB-1_xhBuzfcL_XUFkT0yZfa6rCMl6DV0Q",authDomain:"medvisit-app-e5991.firebaseapp.com",databaseURL:"https://medvisit-app-e5991-default-rtdb.firebaseio.com",projectId:"medvisit-app-e5991",storageBucket:"medvisit-app-e5991.firebasestorage.app",messagingSenderId:"372705290165",appId:"1:372705290165:web:8694260ce573e172ee5bfc"};
+var SUPER_ADMIN_KEY='TesJua2024!';
+var MAX_LOGIN_ATTEMPTS=5,LOCKOUT_SECONDS=30,SESSION_MINUTES=30;
+var AV_COLORS=['#0F766E','#D97706','#DC2626','#7C3AED','#2563EB','#DB2777','#059669','#EA580C','#4F46E5','#0891B2'];
+var MIN_PER_PUNTO=15;
 
 function avatarColor(id){var h=0;for(var i=0;i<(id||'').length;i++)h=id.charCodeAt(i)+((h<<5)-h);return AV_COLORS[Math.abs(h)%AV_COLORS.length];}
 function initials(n){if(!n)return'??';var p=n.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.substring(0,2).toUpperCase();}
@@ -430,7 +400,7 @@ function defaultData(){return{_writeId:null,users:[{id:'u1',username:'admin',pas
 
 function saveLocal(d){try{localStorage.setItem('medvisit_v5',JSON.stringify(d));}catch(e){}}
 function save(d){myLastWriteId=Date.now()+'_'+Math.random().toString(36).substr(2,6);d._writeId=myLastWriteId;saveLocal(d);if(firebaseReady&&dbRef){dbRef.ref('medvisit').set(d).catch(function(err){console.error('Error Firebase:',err);toast('Error de sincronizacion. Datos guardados localmente.','err');});}}
-function updateConnBadge(){var b=document.getElementById('loginConnBadge');if(firebaseOnline){b.className='conn-badge online';b.innerHTML='<span class="conn-dot"></span> Conectado a la nube — sincronizacion activa';}else if(firebaseReady){b.className='conn-badge offline';b.innerHTML='<span class="conn-dot"></span> Sin conexion temporal';}}
+function updateConnBadge(){var b=document.getElementById('loginConnBadge');if(firebaseOnline){b.className='conn-badge online';b.innerHTML='<span class="conn-dot"></span> Conectado a la nube';}else if(firebaseReady){b.className='conn-badge offline';b.innerHTML='<span class="conn-dot"></span> Sin conexion temporal';}}
 function updateHeaderConn(){['adminConn','visitorConn','superConn'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var s=id==='superConn';if(firebaseOnline){el.className='header-conn online';if(s){el.style.background='rgba(255,255,255,0.15)';el.style.color='#fff';}el.innerHTML='<span class="hdot"></span>Cloud';}else{el.className='header-conn offline';if(s){el.style.background='rgba(255,255,255,0.1)';el.style.color='rgba(255,255,255,0.5)';}el.innerHTML='<span class="hdot"></span>Local';}});}
 function showSyncIndicator(){var el=document.getElementById('syncIndicator');el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2000);}
 function renderCurrentScreen(){if(!currentUser)return;if(document.querySelector('.modal-overlay.open')||document.querySelector('.confirm-overlay.open'))return;try{if(currentUser.role==='super'){if(currentSuperTab==='users')renderSuperAdmin();else if(currentSuperTab==='superDetail'&&lastSuperDetailId)openSuperDetail(lastSuperDetailId);}else if(currentUser.role==='admin'){if(currentAdminTab==='canvas')renderCanvasDashboard();else if(currentAdminTab==='visitadores')renderVisitorList();else if(currentAdminTab==='visitas'){populateVisitFilter();renderAdminVisitas();}else if(currentAdminTab==='fotos')renderPhotoGallery();else if(currentAdminTab==='visitorDetail'&&lastVisitorDetailId)openVisitorDetail(lastVisitorDetailId);}else{if(currentVisitorTab==='hoy')renderVisitorToday();else if(currentVisitorTab==='semana')renderVisitorWeek();else if(currentVisitorTab==='perfil')renderVisitorProfile();}}catch(e){console.error('renderCurrentScreen:',e);}}
@@ -490,16 +460,7 @@ document.getElementById('loginUser').addEventListener('keydown',function(e){if(e
 
 function switchAdminTab(tab,btn){currentAdminTab=tab;if(tab!=='visitorDetail')lastVisitorDetailId=null;document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('aTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='canvas')renderCanvasDashboard();if(tab==='visitadores')renderVisitorList();if(tab==='visitas'){populateVisitFilter();renderAdminVisitas();}if(tab==='fotos')renderPhotoGallery();}
 
-function renderCanvasDashboard(){
-  var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.active;});var allVisits=D.visits.filter(function(v){return v.date===today();});var allDone=allVisits.filter(function(v){return v.status==='completed';}).length;var allTotal=D.points.filter(function(p){return visitors.some(function(v){return v.id===p.assignedTo;})&&p.dayOfWeek===todayDow();}).length;var overallPct=allTotal>0?Math.round(allDone/allTotal*100):0;var el=document.getElementById('aTab-canvas');
-  var html='<div class="canvas-hero" style="background:linear-gradient(135deg,'+pctColor(overallPct)+','+pctColor(Math.min(100,overallPct+30))+');"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div class="hero-label">Cumplimiento del Equipo Hoy</div><div class="hero-big">'+overallPct+'%</div><div class="hero-sub">'+allDone+' de '+allTotal+' visitas completadas &middot; '+visitors.length+' visitadores</div></div><div class="progress-ring" style="width:80px;height:80px;"><svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="'+(2*Math.PI*34)+'" stroke-dashoffset="'+(2*Math.PI*34-(overallPct/100)*2*Math.PI*34)+'"/></svg><div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">'+overallPct+'%</div></div></div></div>';
-  var inProgress=allVisits.filter(function(v){return v.status==='in-progress';}).length;var pending=allVisits.filter(function(v){return v.status==='pending';}).length;
-  html+='<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">'+allDone+'</div><div class="stat-label">Completadas</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">'+inProgress+'</div><div class="stat-label">En Curso</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">'+pending+'</div><div class="stat-label">Pendientes</div></div></div>';
-  html+='<div class="section-title">Rendimiento por Visitador</div><div class="canvas-grid">';
-  visitors.forEach(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id&&p.dayOfWeek===todayDow();});var visits=D.visits.filter(function(v){return v.visitorId===u.id&&v.date===today();});var done=visits.filter(function(v){return v.status==='completed';}).length;var total=pts.length;var pct=total>0?Math.round(done/total*100):0;var photos=D.visits.filter(function(v){return v.visitorId===u.id&&v.photo;}).slice(-3);var badgeHTML='';if(pct===100)badgeHTML='<div class="card-badge" style="background:rgba(22,163,74,0.15);color:#16A34A;"><i class="fa-solid fa-check"></i> Completo</div>';else if(pct>=50)badgeHTML='<div class="card-badge" style="background:rgba(37,99,235,0.1);color:#2563EB;">En progreso</div>';else if(pct>0)badgeHTML='<div class="card-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Iniciando</div>';else badgeHTML='<div class="card-badge" style="background:rgba(100,116,139,0.1);color:#64748B;">Sin iniciar</div>';var photoStrip='';if(photos.length)photoStrip='<div class="photo-strip">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="event.stopPropagation();viewPhoto(\''+p.id+'\')" title="Ver evidencia">';}).join('')+'</div>';html+='<div class="canvas-card" style="background:'+pctColorBg(pct)+';" onclick="openVisitorDetail(\''+u.id+'\')"><div class="card-stripe" style="background:'+pctColor(pct)+';"></div>'+badgeHTML+'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="card-avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div class="card-name">'+esc(u.name)+'</div><div class="card-username">@'+esc(u.username)+' &middot; '+DOW_NAME[todayDow()]+'</div></div><div class="card-pct" style="color:'+pctColor(pct)+';">'+pct+'%</div></div><div class="card-bar"><div class="card-bar-fill" style="width:'+pct+'%;background:'+pctColor(pct)+';"></div></div><div class="card-stats"><span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> '+done+'</span><span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> '+total+'</span><span><i class="fa-solid fa-camera" style="font-size:9px;"></i> '+photos.length+'</span></div>'+photoStrip+'</div>';});
-  html+='</div>';if(!visitors.length)html+='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores registrados</p></div>';
-  el.innerHTML=html;requestAnimationFrame(function(){el.querySelectorAll('.card-bar-fill').forEach(function(bar){var w=bar.style.width;bar.style.width='0%';requestAnimationFrame(function(){bar.style.width=w;});});});
-}
+function renderCanvasDashboard(){var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.active;});var allVisits=D.visits.filter(function(v){return v.date===today();});var allDone=allVisits.filter(function(v){return v.status==='completed';}).length;var allTotal=D.points.filter(function(p){return visitors.some(function(v){return v.id===p.assignedTo;})&&p.dayOfWeek===todayDow();}).length;var overallPct=allTotal>0?Math.round(allDone/allTotal*100):0;var el=document.getElementById('aTab-canvas');var html='<div class="canvas-hero" style="background:linear-gradient(135deg,'+pctColor(overallPct)+','+pctColor(Math.min(100,overallPct+30))+');"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div class="hero-label">Cumplimiento del Equipo Hoy</div><div class="hero-big">'+overallPct+'%</div><div class="hero-sub">'+allDone+' de '+allTotal+' visitas completadas &middot; '+visitors.length+' visitadores</div></div><div class="progress-ring" style="width:80px;height:80px;"><svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="'+(2*Math.PI*34)+'" stroke-dashoffset="'+(2*Math.PI*34-(overallPct/100)*2*Math.PI*34)+'"/></svg><div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">'+overallPct+'%</div></div></div></div>';var inProgress=allVisits.filter(function(v){return v.status==='in-progress';}).length;var pending=allVisits.filter(function(v){return v.status==='pending';}).length;html+='<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">'+allDone+'</div><div class="stat-label">Completadas</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">'+inProgress+'</div><div class="stat-label">En Curso</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">'+pending+'</div><div class="stat-label">Pendientes</div></div></div>';html+='<div class="section-title">Rendimiento por Visitador</div><div class="canvas-grid">';visitors.forEach(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id&&p.dayOfWeek===todayDow();});var visits=D.visits.filter(function(v){return v.visitorId===u.id&&v.date===today();});var done=visits.filter(function(v){return v.status==='completed';}).length;var total=pts.length;var pct=total>0?Math.round(done/total*100):0;var photos=D.visits.filter(function(v){return v.visitorId===u.id&&v.photo;}).slice(-3);var badgeHTML='';if(pct===100)badgeHTML='<div class="card-badge" style="background:rgba(22,163,74,0.15);color:#16A34A;"><i class="fa-solid fa-check"></i> Completo</div>';else if(pct>=50)badgeHTML='<div class="card-badge" style="background:rgba(37,99,235,0.1);color:#2563EB;">En progreso</div>';else if(pct>0)badgeHTML='<div class="card-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Iniciando</div>';else badgeHTML='<div class="card-badge" style="background:rgba(100,116,139,0.1);color:#64748B;">Sin iniciar</div>';var photoStrip='';if(photos.length)photoStrip='<div class="photo-strip">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="event.stopPropagation();viewPhoto(\''+p.id+'\')" title="Ver evidencia">';}).join('')+'</div>';html+='<div class="canvas-card" style="background:'+pctColorBg(pct)+';" onclick="openVisitorDetail(\''+u.id+'\')"><div class="card-stripe" style="background:'+pctColor(pct)+';"></div>'+badgeHTML+'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="card-avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div class="card-name">'+esc(u.name)+'</div><div class="card-username">@'+esc(u.username)+' &middot; '+DOW_NAME[todayDow()]+'</div></div><div class="card-pct" style="color:'+pctColor(pct)+';">'+pct+'%</div></div><div class="card-bar"><div class="card-bar-fill" style="width:'+pct+'%;background:'+pctColor(pct)+';"></div></div><div class="card-stats"><span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> '+done+'</span><span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> '+total+'</span><span><i class="fa-solid fa-camera" style="font-size:9px;"></i> '+photos.length+'</span></div>'+photoStrip+'</div>';});html+='</div>';if(!visitors.length)html+='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores registrados</p></div>';el.innerHTML=html;requestAnimationFrame(function(){el.querySelectorAll('.card-bar-fill').forEach(function(bar){var w=bar.style.width;bar.style.width='0%';requestAnimationFrame(function(){bar.style.width=w;});});});}
 
 function renderPhotoGallery(){var photos=D.visits.filter(function(v){return v.photo;}).sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminPhotoGallery');if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image"></i><p>Sin fotos de evidencia aun</p></div>';return;}el.innerHTML='<div class="gallery-grid">'+photos.map(function(v){var pt=pointById(v.pointId);var vis=userById(v.visitorId);return '<img src="'+v.photo+'" onclick="viewPhoto(\''+v.id+'\')" title="'+(vis?esc(vis.name):'?')+' — '+(pt?esc(pt.name):'?')+' — '+fmtDateShort(v.date)+'">';}).join('')+'</div>';}
 function renderAdmin(){document.getElementById('adminGreeting').textContent='Hola, '+currentUser.name;renderCanvasDashboard();populateVisitFilter();}
@@ -515,7 +476,7 @@ function editPointForVisitor(pid,vid){var p=pointById(pid);if(!p)return;document
 function savePoint(){var id=document.getElementById('editPointId').value,vid=document.getElementById('editPointVisitorId').value,name=document.getElementById('mpName').value.trim(),address=document.getElementById('mpAddress').value.trim(),lat=parseFloat(document.getElementById('mpLat').value),lng=parseFloat(document.getElementById('mpLng').value),dayOfWeek=parseInt(document.getElementById('mpDay').value),order=parseInt(document.getElementById('mpOrder').value)||1;if(!name){toast('Nombre obligatorio','err');return;}if(!address){toast('Direccion obligatoria','err');return;}if(isNaN(lat)||isNaN(lng)){toast('Espera la georreferenciacion','err');return;}if(id){var p=pointById(id);if(p)Object.assign(p,{name:name,address:address,lat:lat,lng:lng,dayOfWeek:dayOfWeek,order:order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else if(p&&p.assignedTo)openVisitorDetail(p.assignedTo);}else{if(!vid){toast('Sin visitador','err');return;}D.points.push({id:uid(),name:name,address:address,lat:lat,lng:lng,assignedTo:vid,dayOfWeek:dayOfWeek,order:order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else openVisitorDetail(vid);}toast(id?'Punto actualizado':'Punto creado');}
 function openNewVisitor(){document.getElementById('editVisitorId').value='';['mvName','mvUsername','mvPassword'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('modalVisitorTitle').textContent='Nuevo Visitador';openModal('modalVisitor');}
 function editVisitor(id){var u=userById(id);if(!u)return;document.getElementById('editVisitorId').value=id;document.getElementById('mvName').value=u.name;document.getElementById('mvUsername').value=u.username;document.getElementById('mvPassword').value='';document.getElementById('modalVisitorTitle').textContent='Editar Visitador';openModal('modalVisitor');}
-function saveVisitor(){var id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contrasena minimo 4 caracteres','err');return;}if(D.users.length>=40&&!id){toast('Maximo 40 perfiles','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario ya existe','err');return;}if(id){var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;}}else{D.users.push({id:uid(),username:username,password:password,role:'visitor',name:name,active:true});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Visitador creado — ya puede iniciar sesion en cualquier dispositivo');}
+function saveVisitor(){var id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contrasena minimo 4 caracteres','err');return;}if(D.users.length>=40&&!id){toast('Maximo 40 perfiles','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario ya existe','err');return;}if(id){var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;}}else{D.users.push({id:uid(),username:username,password:password,role:'visitor',name:name,active:true});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Visitador creado — ya puede iniciar sesion');}
 function renderAdminVisitas(){var fv=document.getElementById('filterVisitVisitor').value,fs=document.getElementById('filterVisitStatus').value;var l=D.visits.slice();if(fv)l=l.filter(function(v){return v.visitorId===fv;});if(fs)l=l.filter(function(v){return v.status===fs;});l.sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminVisitsList');if(!l.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}el.innerHTML=l.map(function(v){var pt=pointById(v.pointId),vis=userById(v.visitorId);var b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':v.status==='cancelled'?'badge-cancel':'badge-pending';var lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':v.status==='cancelled'?'Cancelada':'Pendiente';var ph=v.photo?'<img src="'+v.photo+'" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto(\''+v.id+'\')">':'';return '<div class="user-item" onclick="viewPhoto(\''+v.id+'\')"><div class="avatar" style="background:'+avatarColor(v.visitorId)+';width:34px;height:34px;font-size:11px;">'+(vis?initials(vis.name):'?')+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+(pt?esc(pt.name):'Eliminado')+'</div><div style="font-size:11px;color:var(--muted);">'+(vis?esc(vis.name):'?')+' &middot; '+fmtDateShort(v.date)+' '+(v.arrivalTime||'')+(v.closeTime?' &rarr; '+v.closeTime:'')+'</div>'+(v.jefeNombre?'<div style="font-size:11px;color:var(--muted);">Jefe: '+esc(v.jefeNombre)+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;">'+ph+'<span class="badge '+b+'">'+lb+'</span></div></div>';}).join('');}
 function viewPhoto(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v||!v.photo){toast('Sin foto','info');return;}var pt=pointById(v.pointId),vis=userById(v.visitorId);document.getElementById('modalPhotoImg').src=v.photo;document.getElementById('modalPhotoInfo').innerHTML='<strong>'+(pt?esc(pt.name):'?')+'</strong><br>'+(vis?esc(vis.name):'?')+' &middot; '+fmtDate(v.date)+' '+(v.arrivalTime||'')+'<br>Jefe: '+esc(v.jefeNombre||'N/D')+(v.notes?'<br><em>'+esc(v.notes)+'</em>':'');openModal('modalPhoto');}
 
@@ -532,72 +493,53 @@ function superSaveUser(){var id=document.getElementById('superEditId').value,nam
 function switchVisitorTab(tab,btn){currentVisitorTab=tab;document.querySelectorAll('#visitorScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#visitorScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('vTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='hoy')renderVisitorToday();if(tab==='semana')renderVisitorWeek();if(tab==='perfil')renderVisitorProfile();}
 function renderVisitor(){var h=new Date().getHours();var sal=h<12?'Buenos dias':h<18?'Buenas tardes':'Buenas noches';document.getElementById('visitorGreeting').textContent=sal+', '+currentUser.name.split(' ')[0]+'!';var d=new Date();var days=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];var months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];document.getElementById('visitorDate').textContent=days[d.getDay()]+', '+d.getDate()+' de '+months[d.getMonth()]+' '+d.getFullYear();renderVisitorToday();}
 function buildMapsRouteUrl(pts){if(!pts||!pts.length)return null;if(pts.length===1)return mapsLink(pts[0].lat,pts[0].lng,pts[0].address);var origin=encodeURIComponent(pts[0].lat+','+pts[0].lng);var dest=encodeURIComponent(pts[pts.length-1].lat+','+pts[pts.length-1].lng);var waypoints=pts.slice(1,-1).map(function(p){return encodeURIComponent(p.lat+','+p.lng);}).join('|');return 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+dest+(waypoints?'&waypoints='+waypoints:'')+'&travelmode=driving';}
+function todayForDow(t){var d=new Date(),c=d.getDay()===0?7:d.getDay(),diff=c-t,r=new Date(d);r.setDate(d.getDate()-diff);return r.getFullYear()+'-'+String(r.getMonth()+1).padStart(2,'0')+'-'+String(r.getDate()).padStart(2,'0');}
 
 // =============================================
-// PREVIEW DE RUTA — CORREGIDO
+// PREVIEW DE RUTA CON SELECTOR DE DIAS
 // =============================================
-function openRoutePreview(selectedDow) {
-  if (selectedDow === undefined) selectedDow = todayDow();
+function openRoutePreview(selectedDow){
+  if(selectedDow===undefined)selectedDow=todayDow();
+  var allMyPts=D.points.filter(function(p){return p.assignedTo===currentUser.id;});
+  var daysWithPts=[1,2,3,4,5,6].filter(function(d){return allMyPts.some(function(p){return p.dayOfWeek===d;});});
+  if(!daysWithPts.length){toast('Sin puntos asignados','info');return;}
+  if(daysWithPts.indexOf(selectedDow)===-1)selectedDow=daysWithPts[0];
+  var myPts=allMyPts.filter(function(p){return p.dayOfWeek===selectedDow;}).sort(function(a,b){return a.order-b.order;});
+  var startH=8,startM=0;
+  var totalMin=myPts.length*MIN_PER_PUNTO;
+  var endTotalMin=startH*60+startM+totalMin;
+  var endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
+  var doneCt=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(selectedDow)&&v.status==='completed';}).length;
+  var mapsUrl=buildMapsRouteUrl(myPts);
+  var totalHours=Math.floor(totalMin/60),totalMinsRemainder=totalMin%60;
+  var durationText=totalHours+'h '+totalMinsRemainder+'min';
+  var isToday=selectedDow===todayDow();
 
-  var allMyPts = D.points.filter(function(p) { return p.assignedTo === currentUser.id; });
-  var daysWithPts = [1,2,3,4,5,6].filter(function(d) {
-    return allMyPts.some(function(p) { return p.dayOfWeek === d; });
+  var dayTabsHtml='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;">';
+  daysWithPts.forEach(function(d){
+    var isSelected=d===selectedDow,isT=d===todayDow();
+    var ptsCount=allMyPts.filter(function(p){return p.dayOfWeek===d;}).length;
+    var doneCount=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(d)&&v.status==='completed';}).length;
+    var pct=ptsCount>0?Math.round(doneCount/ptsCount*100):0;
+    dayTabsHtml+='<button onclick="openRoutePreview('+d+')" style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:'+(isSelected?'2px solid var(--primary)':'1.5px solid var(--border)')+';background:'+(isSelected?'var(--primary)':'var(--card)')+';color:'+(isSelected?'#fff':'var(--fg)')+';font-size:12px;font-weight:700;cursor:pointer;">'+DOW_NAME[d]+(isT?' <span style="font-size:9px;opacity:0.8;">Hoy</span>':'')+'<br><span style="font-size:10px;opacity:0.75;">'+doneCount+'/'+ptsCount+' · '+pct+'%</span></button>';
   });
+  dayTabsHtml+='</div>';
 
-  if (!daysWithPts.length) { toast('Sin puntos asignados', 'info'); return; }
-  if (daysWithPts.indexOf(selectedDow) === -1) selectedDow = daysWithPts[0];
-
-  var myPts = allMyPts.filter(function(p) { return p.dayOfWeek === selectedDow; }).sort(function(a,b) { return a.order - b.order; });
-
-  var startH = 8, startM = 0;
-  var totalMin = myPts.length * MIN_PER_PUNTO;
-  var endTotalMin = startH * 60 + startM + totalMin;
-  var endH = Math.floor(endTotalMin / 60) % 24, endMM = endTotalMin % 60;
-  var doneCt = D.visits.filter(function(v) { return v.visitorId === currentUser.id && v.date === todayForDow(selectedDow) && v.status === 'completed'; }).length;
-  var mapsUrl = buildMapsRouteUrl(myPts);
-  var totalHours = Math.floor(totalMin / 60);
-  var totalMinsRemainder = totalMin % 60;
-  var durationText = totalHours + 'h ' + totalMinsRemainder + 'min';
-  var isToday = selectedDow === todayDow();
-
-  // Selector de días
-  var dayTabsHtml = '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;">';
-  daysWithPts.forEach(function(d) {
-    var isSelected = d === selectedDow;
-    var isT = d === todayDow();
-    var ptsCount = allMyPts.filter(function(p) { return p.dayOfWeek === d; }).length;
-    var doneCount = D.visits.filter(function(v) { return v.visitorId === currentUser.id && v.date === todayForDow(d) && v.status === 'completed'; }).length;
-    var pct = ptsCount > 0 ? Math.round(doneCount / ptsCount * 100) : 0;
-    dayTabsHtml += '<button onclick="openRoutePreview(' + d + ')" style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:' + (isSelected ? '2px solid var(--primary)' : '1.5px solid var(--border)') + ';background:' + (isSelected ? 'var(--primary)' : 'var(--card)') + ';color:' + (isSelected ? '#fff' : 'var(--fg)') + ';font-size:12px;font-weight:700;cursor:pointer;">' + DOW_NAME[d] + (isT ? ' <span style="font-size:9px;opacity:0.8;">Hoy</span>' : '') + '<br><span style="font-size:10px;opacity:0.75;">' + doneCount + '/' + ptsCount + ' · ' + pct + '%</span></button>';
+  var stopsHtml='';
+  myPts.forEach(function(p,i){
+    var estMin=startH*60+startM+(i*MIN_PER_PUNTO);
+    var estH=Math.floor(estMin/60)%24,estMM=estMin%60;
+    var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===todayForDow(selectedDow);});
+    var done=visit&&visit.status==='completed',inProg=visit&&visit.status==='in-progress';
+    var numBg=done?'var(--success)':inProg?'var(--info)':'var(--primary)';
+    var numIcon=done?'<i class="fa-solid fa-check" style="font-size:14px;"></i>':(inProg?'<i class="fa-solid fa-play" style="font-size:12px;"></i>':String(i+1));
+    var statusLabel=done?'<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>':inProg?'<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>':'<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';
+    stopsHtml+='<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:'+numBg+';">'+numIcon+'</div><div class="preview-stop-body"><div class="preview-stop-name">'+esc(p.name)+'</div><div class="preview-stop-addr">'+esc(p.address)+'</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~'+fmt(estH,estMM)+'</div>'+statusLabel+'</div><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';
   });
-  dayTabsHtml += '</div>';
-
-  // Paradas
-  var stopsHtml = '';
-  myPts.forEach(function(p, i) {
-    var estMin = startH * 60 + startM + (i * MIN_PER_PUNTO);
-    var estH = Math.floor(estMin / 60) % 24, estMM = estMin % 60;
-    var visit = D.visits.find(function(v) { return v.pointId === p.id && v.visitorId === currentUser.id && v.date === todayForDow(selectedDow); });
-    var done = visit && visit.status === 'completed';
-    var inProg = visit && visit.status === 'in-progress';
-    var numBg = done ? 'var(--success)' : inProg ? 'var(--info)' : 'var(--primary)';
-    var numIcon = done ? '<i class="fa-solid fa-check" style="font-size:14px;"></i>' : (inProg ? '<i class="fa-solid fa-play" style="font-size:12px;"></i>' : String(i + 1));
-    var statusLabel = done ? '<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>' : inProg ? '<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>' : '<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';
-    stopsHtml += '<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:' + numBg + ';">' + numIcon + '</div><div class="preview-stop-body"><div class="preview-stop-name">' + esc(p.name) + '</div><div class="preview-stop-addr">' + esc(p.address) + '</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~' + fmt(estH, estMM) + '</div>' + statusLabel + '</div><a href="' + mapsLink(p.lat, p.lng, p.address) + '" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';
-  });
-
-  document.getElementById('routePreviewContent').innerHTML =
-    dayTabsHtml +
-    '<div class="preview-header"><div class="preview-day">' + DOW_NAME[selectedDow] + (isToday ? ' <span style="font-size:14px;opacity:0.8;">— Hoy</span>' : '') + '</div><div class="preview-sub">' + doneCt + ' de ' + myPts.length + ' puntos completados · ' + fmt(startH, startM) + ' → ' + fmt(endH, endMM) + '</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> ' + durationText + '</span><span><i class="fa-solid fa-map-pin"></i> ' + myPts.length + ' puntos</span><span><i class="fa-solid fa-car"></i> ~' + MIN_PER_PUNTO + 'min c/u</span></div></div>' +
-    stopsHtml +
-    (mapsUrl ? '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="preview-nav-btn"><i class="fa-solid fa-diamond-turn-right"></i> Iniciar navegacion completa</a>' : '') +
-    '<button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal(\'modalRoutePreview\')"><i class="fa-solid fa-xmark"></i> Cerrar</button>';
-
-  openModal('modalRoutePreview');
-}
 
   document.getElementById('routePreviewContent').innerHTML=
-    '<div class="preview-header"><div class="preview-day">'+DOW_NAME[dow]+'</div><div class="preview-sub">'+doneCt+' de '+myPts.length+' puntos completados</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> '+durationText+'</span><span><i class="fa-solid fa-map-pin"></i> '+myPts.length+' puntos</span><span><i class="fa-solid fa-car"></i> ~'+MIN_PER_PUNTO+'min c/u</span></div></div>'+
+    dayTabsHtml+
+    '<div class="preview-header"><div class="preview-day">'+DOW_NAME[selectedDow]+(isToday?' <span style="font-size:14px;opacity:0.8;">— Hoy</span>':'')+'</div><div class="preview-sub">'+doneCt+' de '+myPts.length+' puntos completados · '+fmt(startH,startM)+' → '+fmt(endH,endMM)+'</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> '+durationText+'</span><span><i class="fa-solid fa-map-pin"></i> '+myPts.length+' puntos</span><span><i class="fa-solid fa-car"></i> ~'+MIN_PER_PUNTO+'min c/u</span></div></div>'+
     stopsHtml+
     (mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="preview-nav-btn"><i class="fa-solid fa-diamond-turn-right"></i> Iniciar navegacion completa</a>':'')+
     '<button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal(\'modalRoutePreview\')"><i class="fa-solid fa-xmark"></i> Cerrar</button>';
@@ -614,26 +556,22 @@ function renderVisitorToday(){
   var allDone=doneCt===myPts.length;
   var mapsUrl=buildMapsRouteUrl(myPts);
   var gpsOk=gpsPermission==='granted';
-
-  var summaryHtml='<div class="route-card" style="padding:16px;border-left-color:'+(allDone?'var(--success)':'var(--primary)')+';"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:'+(allDone?'var(--success-light)':'var(--primary-50)')+';color:'+(allDone?'var(--success)':'var(--primary)')+';display:flex;align-items:center;justify-content:center;font-size:18px;"><i class="fa-solid '+(allDone?'fa-circle-check':'fa-route')+'"></i></div><div><div style="font-size:15px;font-weight:800;">'+DOW_NAME[dow]+'</div><div style="font-size:12px;color:var(--muted);">'+doneCt+'/'+myPts.length+' puntos &middot; '+fmt(startH,startM)+' &rarr; '+fmt(endH,endMM)+'</div></div></div>'+(!gpsOk?'<span style="font-size:9px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:8px;"></i> Sin GPS</span>':'<span style="font-size:9px;font-weight:700;background:var(--success-light);color:#166534;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:8px;"></i> GPS</span>')+'</div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" style="flex:1;" onclick="openRoutePreview()"><i class="fa-solid fa-eye"></i> Previsualizar ruta</button>'+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:1;background:var(--info);color:#fff;text-decoration:none;"><i class="fa-solid fa-diamond-turn-right"></i> Navegar</a>':'')+'</div></div>';
-
+  var summaryHtml='<div class="route-card" style="padding:16px;border-left-color:'+(allDone?'var(--success)':'var(--primary)')+';"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:'+(allDone?'var(--success-light)':'var(--primary-50)')+';color:'+(allDone?'var(--success)':'var(--primary)')+';display:flex;align-items:center;justify-content:center;font-size:18px;"><i class="fa-solid '+(allDone?'fa-circle-check':'fa-route')+'"></i></div><div><div style="font-size:15px;font-weight:800;">'+DOW_NAME[dow]+'</div><div style="font-size:12px;color:var(--muted);">'+doneCt+'/'+myPts.length+' puntos &middot; '+fmt(startH,startM)+' &rarr; '+fmt(endH,endMM)+'</div></div></div>'+(!gpsOk?'<span style="font-size:9px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:8px;"></i> Sin GPS</span>':'<span style="font-size:9px;font-weight:700;background:var(--success-light);color:#166634;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:8px;"></i> GPS</span>')+'</div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" style="flex:1;" onclick="openRoutePreview()"><i class="fa-solid fa-eye"></i> Previsualizar ruta</button>'+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:1;background:var(--info);color:#fff;text-decoration:none;"><i class="fa-solid fa-diamond-turn-right"></i> Navegar</a>':'')+'</div></div>';
   var pointsCards=myPts.map(function(p){
     var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today();});
     var st=visit?visit.status:'pending';
     var b=st==='completed'?'badge-done':st==='in-progress'?'badge-progress':st==='cancelled'?'badge-cancel':'badge-pending';
     var lb=st==='completed'?'Completada':st==='in-progress'?'En Curso':st==='cancelled'?'Cancelada':'Pendiente';
     var act='';
-    if(st==='pending') act='<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="arriveToPoint(\''+p.id+'\')" style="flex:1;"><i class="fa-solid fa-location-crosshairs"></i> Llegada</button><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:0 0 auto;background:var(--info-light);color:var(--info);padding:8px 12px;"><i class="fa-solid fa-map"></i></a></div>';
-    else if(st==='in-progress') act='<button class="btn btn-success btn-sm" onclick="openCloseVisit(\''+visit.id+'\',\''+p.id+'\')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>';
-    else if(st==='completed'&&visit.photo) act='<img src="'+visit.photo+'" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewPhoto(\''+visit.id+'\')">';
-    return '<div class="card"><div class="point-card-inner" style="border:none;padding:0;"><div class="point-num">'+p.order+'</div><div class="point-info"><div class="point-name">'+esc(p.name)+'</div><div style="margin-top:4px;display:flex;align-items:center;gap:6px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><span class="badge '+b+'">'+lb+'</span></div>'+act+'</div>';
+    if(st==='pending')act='<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="arriveToPoint(\''+p.id+'\')" style="flex:1;"><i class="fa-solid fa-location-crosshairs"></i> Llegada</button><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:0 0 auto;background:var(--info-light);color:var(--info);padding:8px 12px;"><i class="fa-solid fa-map"></i></a></div>';
+    else if(st==='in-progress')act='<button class="btn btn-success btn-sm" onclick="openCloseVisit(\''+visit.id+'\',\''+p.id+'\')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>';
+    else if(st==='completed'&&visit.photo)act='<img src="'+visit.photo+'" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewPhoto(\''+visit.id+'\')">';
+    return '<div class="card"><div class="point-card-inner" style="border:none;padding:0;"><div class="point-num">'+p.order+'</div><div class="point-info"><div class="point-name">'+esc(p.name)+'</div><div style="margin-top:4px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><span class="badge '+b+'">'+lb+'</span></div>'+act+'</div>';
   }).join('');
-
   el.innerHTML=summaryHtml+pointsCards;
 }
 
 function arriveToPoint(pid){
-  var _this=this;
   if(gpsPermission==='denied'){var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast('Llegada registrada (sin coordenadas GPS)','info');return;}
   toast('Obteniendo GPS...','info');
   getGPS().then(function(gps){gpsPermission='granted';var pt=pointById(pid);if(!pt)return;var dist=haversine(gps.lat,gps.lng,pt.lat,pt.lng),ok=dist<=300;if(!ok)toast('A '+Math.round(dist)+'m del punto (300m max.)','info');var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:gps.lat,arrivalLng:gps.lng,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast(ok?'Llegada registrada':'Llegada registrada (fuera de rango)');}).catch(function(e){toast('No se pudo obtener GPS: '+e,'err');});
@@ -641,7 +579,6 @@ function arriveToPoint(pid){
 function openCloseVisit(vid,pid){var pt=pointById(pid);document.getElementById('closeVisitId').value=vid;document.getElementById('closeVisitPointName').textContent=pt?pt.name:'';document.getElementById('closeVisitPointAddr').innerHTML=pt?addrHTML(pt.address,pt.lat,pt.lng):'';document.getElementById('closeJefe').value='';document.getElementById('closeNotes').value='';currentPhotoData=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoCaptureArea').style.display='block';document.getElementById('visitPhotoInput').value='';openModal('modalCloseVisit');}
 function completeVisit(){var vid=document.getElementById('closeVisitId').value,jefe=document.getElementById('closeJefe').value.trim(),notes=document.getElementById('closeNotes').value.trim();if(!currentPhotoData){toast('Toma una foto','err');return;}if(!jefe){toast('Nombre del jefe obligatorio','err');return;}var cL=null,cN=null;getGPS().then(function(g){cL=g.lat;cN=g.lng;}).catch(function(){});var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');var v=D.visits.find(function(x){return x.id===vid;});if(v){v.closeTime=time;v.closeLat=cL;v.closeLng=cN;v.photo=currentPhotoData;v.jefeNombre=jefe;v.notes=notes;v.status='completed';}save(D);closeModal('modalCloseVisit');currentPhotoData=null;renderVisitorToday();toast('Visita completada');}
 
-function todayForDow(t){var d=new Date(),c=d.getDay()===0?7:d.getDay(),diff=c-t,r=new Date(d);r.setDate(d.getDate()-diff);return r.getFullYear()+'-'+String(r.getMonth()+1).padStart(2,'0')+'-'+String(r.getDate()).padStart(2,'0');}
 function renderVisitorWeek(){var el=document.getElementById('visitorWeekSummary'),dow=todayDow(),days=[1,2,3,4,5,6].filter(function(d){return d<=dow;});var h='';days.forEach(function(day){var pts=D.points.filter(function(p){return p.assignedTo===currentUser.id&&p.dayOfWeek===day;}).sort(function(a,b){return a.order-b.order;});var visits=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(day);});var dn=visits.filter(function(v){return v.status==='completed';}).length,total=pts.length,pct=total>0?Math.round(dn/total*100):0,isToday=day===dow;var circ=2*Math.PI*22,off=circ-(pct/100)*circ,rc=pct===100?'var(--success)':pct>0?'var(--primary)':'var(--border)';h+='<div class="card" style="'+(isToday?'border-color:var(--primary);background:var(--primary-50);':'')+'"><div style="display:flex;align-items:center;gap:14px;"><div class="progress-ring"><svg width="56" height="56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fg" cx="28" cy="28" r="22" stroke="'+rc+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"/></svg><div class="ring-text" style="color:'+rc+';">'+pct+'%</div></div><div style="flex:1;"><div style="font-size:15px;font-weight:800;">'+DOW_NAME[day]+(isToday?' <span style="font-size:11px;color:var(--primary);font-weight:600;">&mdash; Hoy</span>':'')+'</div><div style="font-size:12px;color:var(--muted);">'+fmtDateShort(todayForDow(day))+' &middot; '+dn+'/'+total+'</div>'+pts.map(function(p){var vs=visits.find(function(v){return v.pointId===p.id;});var s=vs?vs.status:'none';var ic=s==='completed'?'fa-check-circle" style="color:var(--success)':s==='in-progress'?'fa-spinner" style="color:#2563EB':'fa-circle" style="color:var(--border)';return '<div style="font-size:12px;margin-top:3px;"><i class="fa-solid '+ic+';font-size:10px;"></i> '+esc(p.name)+'</div>';}).join('')+'</div></div></div>';});if(!h)h='<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Sin informacion</p></div>';el.innerHTML=h;}
 function renderVisitorProfile(){document.getElementById('vProfileAvatar').style.background=avatarColor(currentUser.id);document.getElementById('vProfileAvatar').textContent=initials(currentUser.name);document.getElementById('vProfileName').textContent=currentUser.name;document.getElementById('vProfileUser').textContent='@'+currentUser.username;var all=D.visits.filter(function(v){return v.visitorId===currentUser.id;}),td=all.filter(function(v){return v.date===today()&&v.status==='completed';}).length;var wk=0;for(var d=1;d<=todayDow();d++)wk+=all.filter(function(v){return v.date===todayForDow(d)&&v.status==='completed';}).length;document.getElementById('vProfileTotal').textContent=all.filter(function(v){return v.status==='completed';}).length;document.getElementById('vProfileToday').textContent=td;document.getElementById('vProfileWeek').textContent=wk;}
 
