@@ -536,34 +536,65 @@ function buildMapsRouteUrl(pts){if(!pts||!pts.length)return null;if(pts.length==
 // =============================================
 // PREVIEW DE RUTA — CORREGIDO
 // =============================================
-function openRoutePreview(){
-  var dow=todayDow();
-  var myPts=D.points.filter(function(p){return p.assignedTo===currentUser.id&&p.dayOfWeek===dow;}).sort(function(a,b){return a.order-b.order;});
-  if(!myPts.length){toast('Sin puntos para hoy','info');return;}
+function openRoutePreview(selectedDow) {
+  if (selectedDow === undefined) selectedDow = todayDow();
 
-  var startH=8,startM=0;
-  var totalMin=myPts.length*MIN_PER_PUNTO;
-  var endTotalMin=startH*60+startM+totalMin;
-  var doneCt=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===today()&&v.status==='completed';}).length;
-  var mapsUrl=buildMapsRouteUrl(myPts);
-
-  // Calcular tiempo formateado
-  var totalHours=Math.floor(totalMin/60);
-  var totalMinsRemainder=totalMin%60;
-  var durationText=totalHours+'h '+totalMinsRemainder+'min';
-
-  var stopsHtml='';
-  myPts.forEach(function(p,i){
-    var estMin=startH*60+startM+(i*MIN_PER_PUNTO);
-    var estH=Math.floor(estMin/60)%24,estMM=estMin%60;
-    var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today();});
-    var done=visit&&visit.status==='completed';
-    var inProg=visit&&visit.status==='in-progress';
-    var numBg=done?'var(--success)':inProg?'var(--info)':'var(--primary)';
-    var numIcon=done?'<i class="fa-solid fa-check" style="font-size:14px;"></i>':(inProg?'<i class="fa-solid fa-play" style="font-size:12px;"></i>':String(i+1));
-    var statusLabel=done?'<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>':inProg?'<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>':'<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';
-    stopsHtml+='<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:'+numBg+';">'+numIcon+'</div><div class="preview-stop-body"><div class="preview-stop-name">'+esc(p.name)+'</div><div class="preview-stop-addr">'+esc(p.address)+'</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~'+fmt(estH,estMM)+'</div>'+statusLabel+'</div><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';
+  var allMyPts = D.points.filter(function(p) { return p.assignedTo === currentUser.id; });
+  var daysWithPts = [1,2,3,4,5,6].filter(function(d) {
+    return allMyPts.some(function(p) { return p.dayOfWeek === d; });
   });
+
+  if (!daysWithPts.length) { toast('Sin puntos asignados', 'info'); return; }
+  if (daysWithPts.indexOf(selectedDow) === -1) selectedDow = daysWithPts[0];
+
+  var myPts = allMyPts.filter(function(p) { return p.dayOfWeek === selectedDow; }).sort(function(a,b) { return a.order - b.order; });
+
+  var startH = 8, startM = 0;
+  var totalMin = myPts.length * MIN_PER_PUNTO;
+  var endTotalMin = startH * 60 + startM + totalMin;
+  var endH = Math.floor(endTotalMin / 60) % 24, endMM = endTotalMin % 60;
+  var doneCt = D.visits.filter(function(v) { return v.visitorId === currentUser.id && v.date === todayForDow(selectedDow) && v.status === 'completed'; }).length;
+  var mapsUrl = buildMapsRouteUrl(myPts);
+  var totalHours = Math.floor(totalMin / 60);
+  var totalMinsRemainder = totalMin % 60;
+  var durationText = totalHours + 'h ' + totalMinsRemainder + 'min';
+  var isToday = selectedDow === todayDow();
+
+  // Selector de días
+  var dayTabsHtml = '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;">';
+  daysWithPts.forEach(function(d) {
+    var isSelected = d === selectedDow;
+    var isT = d === todayDow();
+    var ptsCount = allMyPts.filter(function(p) { return p.dayOfWeek === d; }).length;
+    var doneCount = D.visits.filter(function(v) { return v.visitorId === currentUser.id && v.date === todayForDow(d) && v.status === 'completed'; }).length;
+    var pct = ptsCount > 0 ? Math.round(doneCount / ptsCount * 100) : 0;
+    dayTabsHtml += '<button onclick="openRoutePreview(' + d + ')" style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:' + (isSelected ? '2px solid var(--primary)' : '1.5px solid var(--border)') + ';background:' + (isSelected ? 'var(--primary)' : 'var(--card)') + ';color:' + (isSelected ? '#fff' : 'var(--fg)') + ';font-size:12px;font-weight:700;cursor:pointer;">' + DOW_NAME[d] + (isT ? ' <span style="font-size:9px;opacity:0.8;">Hoy</span>' : '') + '<br><span style="font-size:10px;opacity:0.75;">' + doneCount + '/' + ptsCount + ' · ' + pct + '%</span></button>';
+  });
+  dayTabsHtml += '</div>';
+
+  // Paradas
+  var stopsHtml = '';
+  myPts.forEach(function(p, i) {
+    var estMin = startH * 60 + startM + (i * MIN_PER_PUNTO);
+    var estH = Math.floor(estMin / 60) % 24, estMM = estMin % 60;
+    var visit = D.visits.find(function(v) { return v.pointId === p.id && v.visitorId === currentUser.id && v.date === todayForDow(selectedDow); });
+    var done = visit && visit.status === 'completed';
+    var inProg = visit && visit.status === 'in-progress';
+    var numBg = done ? 'var(--success)' : inProg ? 'var(--info)' : 'var(--primary)';
+    var numIcon = done ? '<i class="fa-solid fa-check" style="font-size:14px;"></i>' : (inProg ? '<i class="fa-solid fa-play" style="font-size:12px;"></i>' : String(i + 1));
+    var statusLabel = done ? '<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>' : inProg ? '<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>' : '<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';
+    stopsHtml += '<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:' + numBg + ';">' + numIcon + '</div><div class="preview-stop-body"><div class="preview-stop-name">' + esc(p.name) + '</div><div class="preview-stop-addr">' + esc(p.address) + '</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~' + fmt(estH, estMM) + '</div>' + statusLabel + '</div><a href="' + mapsLink(p.lat, p.lng, p.address) + '" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';
+  });
+
+  document.getElementById('routePreviewContent').innerHTML =
+    dayTabsHtml +
+    '<div class="preview-header"><div class="preview-day">' + DOW_NAME[selectedDow] + (isToday ? ' <span style="font-size:14px;opacity:0.8;">— Hoy</span>' : '') + '</div><div class="preview-sub">' + doneCt + ' de ' + myPts.length + ' puntos completados · ' + fmt(startH, startM) + ' → ' + fmt(endH, endMM) + '</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> ' + durationText + '</span><span><i class="fa-solid fa-map-pin"></i> ' + myPts.length + ' puntos</span><span><i class="fa-solid fa-car"></i> ~' + MIN_PER_PUNTO + 'min c/u</span></div></div>' +
+    stopsHtml +
+    (mapsUrl ? '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="preview-nav-btn"><i class="fa-solid fa-diamond-turn-right"></i> Iniciar navegacion completa</a>' : '') +
+    '<button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal(\'modalRoutePreview\')"><i class="fa-solid fa-xmark"></i> Cerrar</button>';
+
+  openModal('modalRoutePreview');
+}
 
   document.getElementById('routePreviewContent').innerHTML=
     '<div class="preview-header"><div class="preview-day">'+DOW_NAME[dow]+'</div><div class="preview-sub">'+doneCt+' de '+myPts.length+' puntos completados</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> '+durationText+'</span><span><i class="fa-solid fa-map-pin"></i> '+myPts.length+' puntos</span><span><i class="fa-solid fa-car"></i> ~'+MIN_PER_PUNTO+'min c/u</span></div></div>'+
