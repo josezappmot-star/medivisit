@@ -398,13 +398,46 @@
     </div>
   </div>
   <div class="app-body">
-    <div class="tab-content active" id="sTab-users"><div class="section-title">Todos los Usuarios</div><div id="superUserList"></div></div>
+    <!-- TAB: Usuarios -->
+    <div class="tab-content active" id="sTab-users">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div class="section-title" style="margin:0;">Todos los Usuarios</div>
+        <button class="btn btn-primary btn-sm" onclick="superNuevoUsuario()"><i class="fa-solid fa-plus"></i> Nuevo</button>
+      </div>
+      <div id="superUserList"></div>
+    </div>
+    <!-- TAB: Detalle usuario -->
     <div class="tab-content" id="sTab-superDetail">
       <button class="back-btn" onclick="switchSuperTab('users',document.querySelectorAll('#superScreen .tab-btn')[0])" style="margin-bottom:14px;"><i class="fa-solid fa-arrow-left"></i> Volver</button>
       <div id="superDetailContent"></div>
     </div>
+    <!-- TAB: Visitas -->
+    <div class="tab-content" id="sTab-sVisitas">
+      <div class="section-title" style="margin-bottom:12px;">Todas las Visitas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <select class="form-input" id="sFilterLab" onchange="renderSuperVisitas()" style="font-size:12px;"><option value="">Todos los labs</option><option value="nestle">Nestlé</option><option value="abamia">Abamia</option><option value="fresenius">Fresenius</option><option value="ketolance">Ketolance</option></select>
+        <select class="form-input" id="sFilterStatus" onchange="renderSuperVisitas()" style="font-size:12px;"><option value="">Todos los estados</option><option value="completed">Completadas</option><option value="in-progress">En curso</option><option value="pending">Pendientes</option></select>
+      </div>
+      <div id="superVisitasList"></div>
+    </div>
+    <!-- TAB: Fotos -->
+    <div class="tab-content" id="sTab-sFotos">
+      <div class="section-title" style="margin-bottom:12px;">Galería de Evidencias</div>
+      <select class="form-input" id="sFilterFotoLab" onchange="renderSuperFotos()" style="font-size:12px;margin-bottom:12px;"><option value="">Todos los labs</option><option value="nestle">Nestlé</option><option value="abamia">Abamia</option><option value="fresenius">Fresenius</option><option value="ketolance">Ketolance</option></select>
+      <div id="superFotosList" class="gallery-grid"></div>
+    </div>
+    <!-- TAB: Laboratorios -->
+    <div class="tab-content" id="sTab-sLabs">
+      <div class="section-title" style="margin-bottom:12px;">Estado por Laboratorio</div>
+      <div id="superLabsList"></div>
+    </div>
   </div>
-  <div class="tab-bar"><button class="tab-btn active" onclick="switchSuperTab('users',this)"><i class="fa-solid fa-users-gear"></i>Usuarios</button></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchSuperTab('users',this)"><i class="fa-solid fa-users-gear"></i>Usuarios</button>
+    <button class="tab-btn" onclick="switchSuperTab('sVisitas',this)"><i class="fa-solid fa-clipboard-list"></i>Visitas</button>
+    <button class="tab-btn" onclick="switchSuperTab('sFotos',this)"><i class="fa-solid fa-images"></i>Fotos</button>
+    <button class="tab-btn" onclick="switchSuperTab('sLabs',this)"><i class="fa-solid fa-flask"></i>Labs</button>
+  </div>
   <div class="app-footer"><strong>MedVisit</strong> &middot; Creado por TesJua<br><span style="font-size:10px;">Innovacion tecnologica con proposito humano</span></div>
 </div>
 
@@ -462,7 +495,7 @@
 </div>
 <div class="modal-overlay" id="modalCloseVisit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Cerrar Visita</div><input type="hidden" id="closeVisitId"><div style="background:var(--primary-50);border-radius:12px;padding:14px;margin-bottom:18px;"><div style="font-size:13px;font-weight:700;color:var(--primary);" id="closeVisitPointName"></div><div id="closeVisitPointAddr" style="font-size:12px;color:var(--muted);margin-top:2px;"></div></div><input type="file" id="visitPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoTaken(event)"><div class="form-group"><label class="form-label">Foto del Punto</label><div id="photoCaptureArea"><div class="photo-capture-btn" onclick="document.getElementById('visitPhotoInput').click()"><i class="fa-solid fa-camera"></i><span>Tomar Foto</span></div></div><img id="photoPreview" class="photo-preview" style="display:none;"></div><div class="form-group"><label class="form-label">Nombre del Jefe del Punto</label><input class="form-input" id="closeJefe" placeholder="Nombre del responsable"></div><div class="form-group"><label class="form-label">Notas (opcional)</label><textarea class="form-input" id="closeNotes" placeholder="Observaciones..."></textarea></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalCloseVisit')">Cancelar</button><button class="btn btn-success" style="flex:1;" onclick="completeVisit()"><i class="fa-solid fa-check"></i> Completar</button></div></div></div>
 <div class="modal-overlay" id="modalPhoto"><div class="modal-sheet" style="padding:8px 8px 24px;"><div class="modal-handle"></div><div class="modal-title" style="padding:0 12px;">Evidencia</div><img id="modalPhotoImg" style="width:100%;border-radius:12px;"><div style="padding:8px 12px 0;"><div id="modalPhotoInfo" style="font-size:13px;color:var(--muted);line-height:1.5;"></div></div><button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modalPhoto')">Cerrar</button></div></div>
-<div class="modal-overlay" id="modalSuperEdit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Editar Usuario</div><input type="hidden" id="superEditId"><div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="seName"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="seUsername" autocapitalize="off"></div><div class="form-group"><label class="form-label">Nueva Contrasena</label><input class="form-input" type="text" id="sePassword" placeholder="Dejar vacio para no cambiar"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-input" id="seRole"><option value="visitor">Visitador</option><option value="admin">Administrador</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalSuperEdit')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="superSaveUser()">Guardar</button></div></div></div>
+<div class="modal-overlay" id="modalSuperEdit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalSuperEditTitle">Editar Usuario</div><input type="hidden" id="superEditId"><div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="seName"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="seUsername" autocapitalize="off"></div><div class="form-group"><label class="form-label">Nueva Contrasena</label><input class="form-input" type="text" id="sePassword" placeholder="Dejar vacio para no cambiar"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-input" id="seRole"><option value="visitor">Visitador</option><option value="admin">Administrador</option></select></div><div class="form-group"><label class="form-label">Laboratorio</label><select class="form-input" id="seLabId"><option value="nestle">Nestlé</option><option value="abamia">Abamia</option><option value="fresenius">Fresenius</option><option value="ketolance">Ketolance</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalSuperEdit')">Cancelar</button><button class="btn btn-danger btn-sm" id="superDeleteBtn" onclick="var id=document.getElementById('superEditId').value;if(id)superDeleteUser(id);" style="display:none;"><i class="fa-solid fa-trash"></i></button><button class="btn btn-primary" style="flex:2;" onclick="superSaveUser()">Guardar</button></div></div></div>
 <div class="modal-overlay" id="modalRoutePreview"><div class="modal-sheet" style="max-height:92dvh;"><div class="modal-handle"></div><div id="routePreviewContent"></div></div></div>
 
 <!-- ══════════════════════════════════════════
@@ -840,13 +873,78 @@ function viewVisitPhoto(vid){var v=D.visits.find(function(x){return x.id===vid;}
 
 function verVisitaProfesional(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v)return;var vis=userById(v.visitorId);var html='<div style="display:flex;flex-direction:column;gap:12px;">';html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Profesional</div><div style="font-size:16px;font-weight:800;">'+esc(v.nombreProfesional||'Sin nombre')+'</div>';if(v.especialidad)html+='<div style="font-size:13px;color:var(--muted);margin-top:2px;">'+esc(v.especialidad)+'</div>';if(v.telefono)html+='<div style="font-size:13px;margin-top:6px;"><i class="fa-solid fa-phone" style="color:var(--primary);font-size:11px;"></i> '+esc(v.telefono)+'</div>';html+='</div>';html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Ubicacion</div>';if(v.gps&&v.gps.lat){html+='<div style="font-size:12px;color:var(--info);margin-bottom:4px;"><i class="fa-solid fa-satellite-dish" style="font-size:10px;"></i> GPS: '+v.gps.lat.toFixed(5)+', '+v.gps.lng.toFixed(5)+'</div>';}html+='<div style="font-size:13px;">'+esc(v.direccionConsultorio||'Sin direccion')+'</div></div>';if(v.obsequio)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Obsequio entregado</div><div style="font-size:13px;">'+esc(v.obsequio)+'</div></div>';if(v.photo)html+='<img src="'+v.photo+'" style="width:100%;border-radius:12px;border:1px solid var(--border);">';if(v.firma)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Firma del profesional</div><img src="'+v.firma+'" style="width:100%;border-radius:8px;border:1px solid var(--border);background:#fafafa;"></div>';if(v.notas)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Notas</div><div style="font-size:13px;">'+esc(v.notas)+'</div></div>';html+='<div style="font-size:12px;color:var(--muted);text-align:center;">Visitado por: '+(vis?esc(vis.name):'?')+' &middot; '+fmtDate(v.date)+(v.arrivalTime?' &middot; '+v.arrivalTime:'')+'</div>';html+='</div>';document.getElementById('modalVerProfContent').innerHTML=html;openModal('modalVerProfesional');}
 
-function switchSuperTab(tab,btn){currentSuperTab=tab;if(tab!=='superDetail')lastSuperDetailId=null;document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='users')renderSuperAdmin();}
+function switchSuperTab(tab,btn){currentSuperTab=tab;if(tab!=='superDetail')lastSuperDetailId=null;document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-'+tab).classList.add('active');if(btn)btn.classList.add('active');if(tab==='users')renderSuperAdmin();else if(tab==='sVisitas')renderSuperVisitas();else if(tab==='sFotos')renderSuperFotos();else if(tab==='sLabs')renderSuperLabs();}}
 function renderSuperAdmin(){var el=document.getElementById('superUserList');el.innerHTML=D.users.map(function(u){var roleBadge=u.role==='admin'?'<span class="badge badge-progress" style="font-size:10px;">Admin</span>':'<span class="badge badge-done" style="font-size:10px;">Visitador</span>';var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');    return '<div class="user-item" onclick="openSuperDetail(\''+u.id+'\')"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(u.name)+' '+roleBadge+' '+labBadge+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts+' puntos &middot; '+done+' completadas</div><div class="pw-display"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="event.stopPropagation();copyPw(this)" data-pw="'+pwSafe+'" title="Copiar"><i class="fa-solid fa-copy"></i></button></div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;align-self:center;"></i></div>';
   }).join('');}
 function copyPw(btn){var pw=btn.getAttribute('data-pw');navigator.clipboard.writeText(pw).then(function(){toast('Contrasena copiada','info');}).catch(function(){toast('No se pudo copiar','err');});}
 function openSuperDetail(uid){lastSuperDetailId=uid;currentSuperTab='superDetail';var u=userById(uid);if(!u)return;var pts=D.points.filter(function(p){return p.assignedTo===uid;}).sort(function(a,b){return a.dayOfWeek-b.dayOfWeek||a.order-b.order;});var visits=D.visits.filter(function(v){return v.visitorId===uid;});var photos=visits.filter(function(v){return v.photo;});document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-superDetail').classList.add('active');var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');var userInfo='<div class="visitor-detail-header"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';width:52px;height:52px;font-size:18px;">'+initials(u.name)+'</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+visits.filter(function(v){return v.status==='completed';}).length+' completadas</div><div class="pw-display" style="margin-top:6px;"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="copyPw(this)" data-pw="'+pwSafe+'"><i class="fa-solid fa-copy"></i></button></div></div><button class="btn btn-ghost btn-sm" onclick="superEditUser(\''+u.id+'\')"><i class="fa-solid fa-pen"></i> Editar</button></div>';var photoSection='';if(photos.length)photoSection='<div class="section-title" style="margin-top:20px;">Fotos de Evidencia ('+photos.length+')</div><div class="gallery-grid">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="viewVisitPhoto(\''+p.id+'\')" title="'+fmtDateShort(p.date)+'">';}).join('')+'</div>';var ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';else{var byDay={};pts.forEach(function(p){if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});ph=Object.keys(byDay).sort().map(function(day){return '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">'+DOW_NAME[day]+'</div>'+byDay[day].map(function(p){return '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:28px;height:28px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;">'+p.order+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+esc(p.name)+'</div><div style="margin-top:3px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm(\''+p.id+'\',\''+uid+'\')" style="width:28px;height:28px;padding:0;background:var(--danger-light);color:var(--danger);flex-shrink:0;"><i class="fa-solid fa-trash" style="font-size:10px;"></i></button></div></div>';}).join('')+'</div>';}).join('');}document.getElementById('superDetailContent').innerHTML=userInfo+'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="section-title" style="margin:0;">Puntos</div><button class="btn btn-primary btn-sm" onclick="openNewPointForVisitor(\''+uid+'\');_superBackTo=\''+uid+'\'"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+ph+photoSection;}
-function superEditUser(id){var u=userById(id);if(!u)return;document.getElementById('superEditId').value=id;document.getElementById('seName').value=u.name;document.getElementById('seUsername').value=u.username;document.getElementById('sePassword').value='';document.getElementById('seRole').value=u.role;openModal('modalSuperEdit');}
-function superSaveUser(){var id=document.getElementById('superEditId').value,name=document.getElementById('seName').value.trim(),username=document.getElementById('seUsername').value.trim(),password=document.getElementById('sePassword').value,role=document.getElementById('seRole').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario duplicado','err');return;}var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;u.role=role;}save(D);closeModal('modalSuperEdit');renderSuperAdmin();toast('Actualizado');}
+function superEditUser(id){var u=userById(id);if(!u)return;document.getElementById('superEditId').value=id;document.getElementById('seName').value=u.name;document.getElementById('seUsername').value=u.username;document.getElementById('sePassword').value='';document.getElementById('seRole').value=u.role;document.getElementById('seLabId').value=u.labId||'nestle';document.getElementById('modalSuperEditTitle').textContent='Editar Usuario';document.getElementById('superDeleteBtn').style.display='inline-flex';openModal('modalSuperEdit');}
+function superSaveUser(){var id=document.getElementById('superEditId').value,name=document.getElementById('seName').value.trim(),username=document.getElementById('seUsername').value.trim(),password=document.getElementById('sePassword').value,role=document.getElementById('seRole').value,labId=document.getElementById('seLabId').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario duplicado','err');return;}if(id){var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;u.role=role;u.labId=labId;}}else{if(!password||password.length<4){toast('Contrasena minimo 4 caracteres','err');return;}D.users.push({id:uid(),username:username,password:password,role:role,name:name,active:true,labId:labId});}save(D);closeModal('modalSuperEdit');renderSuperAdmin();toast(id?'Actualizado':'Usuario creado');}
+
+function superNuevoUsuario(){document.getElementById('superEditId').value='';document.getElementById('seName').value='';document.getElementById('seUsername').value='';document.getElementById('sePassword').value='';document.getElementById('seRole').value='visitor';document.getElementById('seLabId').value='nestle';document.getElementById('modalSuperEditTitle').textContent='Nuevo Usuario';openModal('modalSuperEdit');}
+
+function superDeleteUser(id){
+  showConfirm('Eliminar Usuario','Esta accion no se puede deshacer.','danger',function(){
+    D.users=D.users.filter(function(u){return u.id!==id;});
+    D.points=D.points.filter(function(p){return p.assignedTo!==id;});
+    D.visits=D.visits.filter(function(v){return v.visitorId!==id;});
+    save(D);renderSuperAdmin();toast('Usuario eliminado');
+  });
+}
+
+function renderSuperVisitas(){
+  var fl=document.getElementById('sFilterLab').value;
+  var fs=document.getElementById('sFilterStatus').value;
+  var list=D.visits.slice();
+  if(fl)list=list.filter(function(v){return v.labId===fl||(userById(v.visitorId)&&userById(v.visitorId).labId===fl);});
+  if(fs)list=list.filter(function(v){return v.status===fs;});
+  list.sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});
+  var el=document.getElementById('superVisitasList');
+  if(!list.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}
+  el.innerHTML=list.map(function(v){
+    var pt=pointById(v.pointId),vis=userById(v.visitorId);
+    var lab=LABS.find(function(l){return l.id===(v.labId||(vis&&vis.labId));});
+    var b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':'badge-pending';
+    var lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':'Pendiente';
+    var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||'Profesional'):((pt?esc(pt.name):null)||esc(v.lugar)||'Visita');
+    var labBadge=lab?'<span style="font-size:9px;padding:2px 6px;border-radius:5px;background:'+lab.colorLight+';color:'+lab.color+';font-weight:700;">'+esc(lab.name)+'</span>':'';
+    return '<div class="user-item" onclick="verDetalleVisita(\''+v.id+'\')">'+'<div class="avatar" style="background:'+avatarColor(v.visitorId)+';width:34px;height:34px;font-size:11px;">'+(vis?initials(vis.name):'?')+'</div>'+'<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+nombre+' '+labBadge+'</div><div style="font-size:11px;color:var(--muted);">'+(vis?esc(vis.name):'?')+' &middot; '+fmtDateShort(v.date)+' '+(v.arrivalTime||'')+(v.closeTime?' &rarr; '+v.closeTime:'')+'</div></div>'+'<span class="badge '+b+'">'+lb+'</span></div>';
+  }).join('');
+}
+
+function renderSuperFotos(){
+  var fl=document.getElementById('sFilterFotoLab').value;
+  var photos=D.visits.filter(function(v){return v.photo&&(!fl||(userById(v.visitorId)&&userById(v.visitorId).labId===fl)||(v.labId===fl));});
+  var el=document.getElementById('superFotosList');
+  if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image-slash"></i><p>Sin fotos</p></div>';return;}
+  el.innerHTML=photos.map(function(v){
+    var vis=userById(v.visitorId);
+    return '<img src="'+v.photo+'" onclick="viewVisitPhoto(\''+v.id+'\')" title="'+(vis?esc(vis.name):'?')+' — '+fmtDateShort(v.date)+'" style="cursor:pointer;">';
+  }).join('');
+}
+
+function renderSuperLabs(){
+  var el=document.getElementById('superLabsList');
+  el.innerHTML=LABS.map(function(lab){
+    var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.labId===lab.id;});
+    var points=D.points.filter(function(p){return visitors.some(function(v){return v.id===p.assignedTo;});});
+    var visits=D.visits.filter(function(v){return visitors.some(function(u){return u.id===v.visitorId;})&&v.status==='completed';});
+    var profCt=visits.filter(function(v){return v.tipoVisita==='profesional';}).length;
+    return '<div class="card" style="margin-bottom:12px;border-left:4px solid '+lab.color+';padding:16px;">'+
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
+      '<div style="width:38px;height:38px;border-radius:10px;background:'+lab.color+';display:flex;align-items:center;justify-content:center;color:#fff;"><i class="fa-solid '+lab.icon+'"></i></div>'+
+      '<div style="flex:1;"><div style="font-size:16px;font-weight:800;">'+esc(lab.name)+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);">'+visitors.length+' visitadores &middot; '+points.length+' puntos</div></div></div>'+
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'+
+      '<div class="stat-card" style="text-align:center;padding:8px;"><div style="font-size:18px;font-weight:900;color:'+lab.color+';">'+visits.length+'</div><div style="font-size:10px;color:var(--muted);">Completadas</div></div>'+
+      '<div class="stat-card" style="text-align:center;padding:8px;"><div style="font-size:18px;font-weight:900;color:#7C3AED;">'+profCt+'</div><div style="font-size:10px;color:var(--muted);">Profesionales</div></div>'+
+      '<div class="stat-card" style="text-align:center;padding:8px;"><div style="font-size:18px;font-weight:900;color:var(--success);">'+visitors.filter(function(u){return u.active;}).length+'</div><div style="font-size:10px;color:var(--muted);">Activos</div></div>'+
+      '</div>'+
+      '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;">EQUIPO</div>'+
+      visitors.map(function(u){var uv=D.visits.filter(function(v){return v.visitorId===u.id&&v.status==='completed';}).length;return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);"><div class="avatar" style="background:'+avatarColor(u.id)+';width:28px;height:28px;font-size:10px;">'+initials(u.name)+'</div><div style="flex:1;font-size:12px;">'+esc(u.name)+'</div><span style="font-size:11px;font-weight:700;color:'+lab.color+';">'+uv+' visitas</span></div>';}).join('')+
+      '</div>';
+  }).join('');
+}
 
 // ══════════════════════════════════════════════════════════
 // VISITADOR
@@ -1212,345 +1310,6 @@ function confirmarMapaPicker(){
   toast('Ubicacion guardada del mapa');
 }
 </script>
-<script>
-// ══════════════════════════════════════════════════════════
-// MÓDULO DE INFORMES — MedVisit
-// ══════════════════════════════════════════════════════════
-var rptDesde=today(),rptHasta=today(),rptPreset='semana';
-var rptCharts={};
-
-function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function addDaysStr(str,n){var d=new Date(str+'T12:00:00');d.setDate(d.getDate()+n);return fmtD(d);}
-function subMonths(n){var d=new Date();d.setMonth(d.getMonth()-n);return fmtD(d);}
-
-function setRptPreset(p){
-  rptPreset=p;
-  var d=new Date();
-  rptHasta=today();
-  if(p==='hoy'){rptDesde=today();}
-  else if(p==='semana'){var dow=d.getDay()===0?7:d.getDay();d.setDate(d.getDate()-(dow-1));rptDesde=fmtD(d);}
-  else if(p==='mes'){d.setDate(1);rptDesde=fmtD(d);}
-  else if(p==='3meses'){rptDesde=subMonths(3);}
-  else if(p==='custom'){document.getElementById('rptCustomDiv').style.display='grid';document.getElementById('rptDesdeInput').value=rptDesde;document.getElementById('rptHastaInput').value=rptHasta;_updateRptLabel();return;}
-  document.getElementById('rptCustomDiv').style.display='none';
-  _updateRptLabel();
-  document.querySelectorAll('#rptPresetBtns .btn').forEach(function(b){b.classList.remove('btn-primary');b.classList.add('btn-ghost');});
-  var idx={hoy:0,semana:1,mes:2,'3meses':3,custom:4}[p];
-  var btns=document.querySelectorAll('#rptPresetBtns .btn');
-  if(btns[idx]){btns[idx].classList.remove('btn-ghost');btns[idx].classList.add('btn-primary');}
-  renderRptLabCards();
-}
-
-function aplicarFechasCustom(){
-  rptDesde=document.getElementById('rptDesdeInput').value||rptDesde;
-  rptHasta=document.getElementById('rptHastaInput').value||rptHasta;
-  _updateRptLabel();renderRptLabCards();
-}
-
-function _updateRptLabel(){
-  var el=document.getElementById('rptRangeLabel');
-  if(el)el.textContent=rptDesde===rptHasta?fmtDate(rptDesde):fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta);
-}
-
-// ── Datos del reporte ─────────────────────────────────────
-function getRptData(labId){
-  var visitors=D.users.filter(function(u){return u.role==='visitor'&&(!labId||u.labId===labId);});
-  var vids=visitors.map(function(u){return u.id;});
-  var visits=D.visits.filter(function(v){return vids.indexOf(v.visitorId)>=0&&v.date>=rptDesde&&v.date<=rptHasta;});
-  var completed=visits.filter(function(v){return v.status==='completed';});
-  var byV={};
-  visitors.forEach(function(u){
-    var uv=completed.filter(function(v){return v.visitorId===u.id;});
-    var pts=D.points.filter(function(p){return p.assignedTo===u.id&&(!labId||p.labId===labId);});
-    byV[u.id]={user:u,completed:uv.length,general:uv.filter(function(v){return!v.tipoVisita||v.tipoVisita==='general';}).length,prof:uv.filter(function(v){return v.tipoVisita==='profesional';}).length,visits:uv,points:pts};
-  });
-  return {visitors:visitors,visits:visits,completed:completed,byV:byV};
-}
-
-// ── Render tab ────────────────────────────────────────────
-function renderInformes(){
-  _updateRptLabel();
-  setRptPreset(rptPreset);
-}
-
-function renderRptLabCards(){
-  var el=document.getElementById('rptLabCards');
-  if(!el)return;
-  el.innerHTML=LABS.map(function(lab){
-    var d=getRptData(lab.id);
-    var pct=d.visitors.length>0?Math.round(d.completed.length/(d.visitors.length||1)):0;
-    return '<div class="card" style="margin-bottom:12px;border-left:4px solid '+lab.color+';padding:14px;">'+
-      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'+
-      '<div style="width:42px;height:42px;border-radius:12px;background:'+lab.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;"><i class="fa-solid '+lab.icon+'"></i></div>'+
-      '<div style="flex:1;"><div style="font-size:15px;font-weight:800;">'+esc(lab.name)+'</div>'+
-      '<div style="font-size:11px;color:var(--muted);">'+d.visitors.length+' visit. &middot; '+d.completed.length+' completadas &middot; '+d.byV&&Object.values(d.byV).reduce(function(s,v){return s+v.prof;},0)+' prof.</div></div>'+
-      '<div style="font-size:22px;font-weight:900;color:'+lab.color+';">'+pct+'%</div></div>'+
-      '<div style="display:flex;gap:7px;flex-wrap:wrap;">'+
-      '<button class="btn btn-sm btn-primary" onclick="generarPDF(\''+lab.id+'\')"><i class="fa-solid fa-file-pdf"></i> PDF</button>'+
-      '<button class="btn btn-sm btn-success" onclick="generarExcel(\''+lab.id+'\')"><i class="fa-solid fa-file-excel"></i> Excel</button>'+
-      '<button class="btn btn-sm" style="background:#7C3AED;color:#fff;" onclick="generarPPTX(\''+lab.id+'\')"><i class="fa-solid fa-file-powerpoint"></i> PPTX</button>'+
-      '</div></div>';
-  }).join('');
-}
-
-// ── Helpers de color hex ──────────────────────────────────
-function hexToRgb(h){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return[r,g,b];}
-
-// ══════════════════════════════════════════════════════════
-// PDF
-// ══════════════════════════════════════════════════════════
-function generarPDF(labId){
-  if(typeof jspdf==='undefined'){toast('Cargando libreria PDF...','info');setTimeout(function(){generarPDF(labId);},1500);return;}
-  var jsPDF=jspdf.jsPDF;
-  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
-  var data=getRptData(labId);
-  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var color=lab?lab.color:'#0F766E';
-  var rgb=hexToRgb(color);
-  var labName=lab?lab.name:'Todos los Laboratorios';
-  var W=210,margin=16;
-
-  // Portada
-  doc.setFillColor(rgb[0],rgb[1],rgb[2]);
-  doc.rect(0,0,W,70,'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(24);doc.setFont('helvetica','bold');
-  doc.text('MedVisit',margin,22);
-  doc.setFontSize(16);doc.setFont('helvetica','normal');
-  doc.text('Informe de Cumplimiento',margin,32);
-  doc.setFontSize(20);doc.setFont('helvetica','bold');
-  doc.text(labName,margin,48);
-  doc.setFontSize(10);doc.setFont('helvetica','normal');
-  doc.text('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),margin,58);
-  doc.text('Generado: '+new Date().toLocaleString('es-MX'),margin,64);
-
-  // Resumen
-  doc.setTextColor(0,0,0);
-  doc.setFontSize(13);doc.setFont('helvetica','bold');
-  doc.text('Resumen Ejecutivo',margin,82);
-  doc.setFontSize(10);doc.setFont('helvetica','normal');
-  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
-  var rows=[
-    ['Total visitadores',data.visitors.length],
-    ['Visitas completadas',data.completed.length],
-    ['Visitas a profesionales',totalProf],
-    ['Visitas generales',data.completed.length-totalProf]
-  ];
-  doc.autoTable({startY:86,head:[['Indicador','Valor']],body:rows,theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:10}});
-
-  // Tabla por visitador
-  var y=doc.lastAutoTable.finalY+10;
-  doc.setFontSize(13);doc.setFont('helvetica','bold');
-  doc.text('Cumplimiento por Visitador',margin,y);
-  var visRows=data.visitors.map(function(u){
-    var bv=data.byV[u.id];
-    return[u.name,'@'+u.username,bv.completed,bv.general,bv.prof];
-  });
-  doc.autoTable({startY:y+4,head:[['Nombre','Usuario','Completadas','Generales','Profesionales']],body:visRows.length?visRows:[['Sin visitadores','','','','']],theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:9}});
-
-  // Puntos por visitador
-  data.visitors.forEach(function(u){
-    var bv=data.byV[u.id];
-    if(!bv.visits.length)return;
-    doc.addPage();
-    doc.setFillColor(rgb[0],rgb[1],rgb[2]);
-    doc.rect(0,0,W,18,'F');
-    doc.setTextColor(255,255,255);
-    doc.setFontSize(13);doc.setFont('helvetica','bold');
-    doc.text(u.name,margin,12);
-    doc.setTextColor(0,0,0);
-    var ptRows=bv.visits.map(function(v){
-      var pt=pointById(v.pointId);
-      var tipo=v.tipoVisita==='profesional'?'Profesional':'General';
-      var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||'Profesional'):(pt?pt.name:(v.lugar||'—'));
-      return[fmtDateShort(v.date),nombre,tipo,v.arrivalTime||'—',v.closeTime||'—',v.status==='completed'?'\u2713 Completada':'En curso'];
-    });
-    doc.autoTable({startY:22,head:[['Fecha','Punto/Profesional','Tipo','Llegada','Cierre','Estado']],body:ptRows,theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:8}});
-  });
-
-  doc.save('MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.pdf');
-  toast('PDF generado');
-}
-
-// ══════════════════════════════════════════════════════════
-// EXCEL
-// ══════════════════════════════════════════════════════════
-function generarExcel(labId){
-  if(typeof XLSX==='undefined'){toast('Cargando libreria Excel...','info');setTimeout(function(){generarExcel(labId);},1500);return;}
-  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
-  var labName=lab?lab.name:'General';
-  var data=getRptData(labId);
-  var wb=XLSX.utils.book_new();
-
-  // Hoja resumen
-  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
-  var resumen=[
-    ['MedVisit — Informe de Cumplimiento'],
-    ['Laboratorio',labName],
-    ['Periodo',fmtDateShort(rptDesde)+' — '+fmtDate(rptHasta)],
-    ['Generado',new Date().toLocaleString('es-MX')],
-    [],
-    ['RESUMEN'],
-    ['Total visitadores',data.visitors.length],
-    ['Visitas completadas',data.completed.length],
-    ['Visitas generales',data.completed.length-totalProf],
-    ['Visitas a profesionales',totalProf],
-    [],
-    ['CUMPLIMIENTO POR VISITADOR'],
-    ['Nombre','Usuario','Laboratorio','Completadas','Generales','Profesionales']
-  ];
-  data.visitors.forEach(function(u){
-    var bv=data.byV[u.id];
-    resumen.push([u.name,'@'+u.username,u.labId||'—',bv.completed,bv.general,bv.prof]);
-  });
-  var ws1=XLSX.utils.aoa_to_sheet(resumen);
-  ws1['!cols']=[{wch:30},{wch:18},{wch:14},{wch:14},{wch:14},{wch:14}];
-  XLSX.utils.book_append_sheet(wb,ws1,'Resumen');
-
-  // Hoja detalle de visitas
-  var detalle=[['Fecha','Visitador','Laboratorio','Punto/Lugar','Tipo','Profesional','Especialidad','Llegada','Cierre','Estado']];
-  data.visits.filter(function(v){return v.status==='completed';}).forEach(function(v){
-    var u=userById(v.visitorId);
-    var pt=pointById(v.pointId);
-    detalle.push([v.date,u?u.name:'?',u?u.labId:'?',pt?pt.name:(v.lugar||'—'),v.tipoVisita||'general',v.nombreProfesional||'—',v.especialidad||'—',v.arrivalTime||'—',v.closeTime||'—',v.status]);
-  });
-  var ws2=XLSX.utils.aoa_to_sheet(detalle);
-  ws2['!cols']=[{wch:12},{wch:24},{wch:12},{wch:28},{wch:12},{wch:24},{wch:18},{wch:10},{wch:10},{wch:14}];
-  XLSX.utils.book_append_sheet(wb,ws2,'Visitas');
-
-  // Hoja comparativa por laboratorio (solo en informe general)
-  if(!labId){
-    var comp=[['Laboratorio','Visitadores','Completadas','Generales','Profesionales','% Cumplimiento']];
-    LABS.forEach(function(l){
-      var ld=getRptData(l.id);
-      var pct=ld.visitors.length>0?Math.round(ld.completed.length/ld.visitors.length):0;
-      var prof=Object.values(ld.byV).reduce(function(s,v){return s+v.prof;},0);
-      comp.push([l.name,ld.visitors.length,ld.completed.length,ld.completed.length-prof,prof,pct+'%']);
-    });
-    var ws3=XLSX.utils.aoa_to_sheet(comp);
-    ws3['!cols']=[{wch:16},{wch:14},{wch:14},{wch:14},{wch:16},{wch:16}];
-    XLSX.utils.book_append_sheet(wb,ws3,'Comparativo Labs');
-  }
-
-  XLSX.writeFile(wb,'MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.xlsx');
-  toast('Excel generado');
-}
-
-// ══════════════════════════════════════════════════════════
-// PPTX
-// ══════════════════════════════════════════════════════════
-function generarPPTX(labId){
-  if(typeof PptxGenJS==='undefined'){toast('Cargando libreria PPTX...','info');setTimeout(function(){generarPPTX(labId);},2000);return;}
-  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
-  var labName=lab?lab.name:'Todos los Laboratorios';
-  var color=lab?lab.color.replace('#',''):'0F766E';
-  var data=getRptData(labId);
-  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
-
-  var pptx=new PptxGenJS();
-  pptx.layout='LAYOUT_16x9';
-  pptx.title='MedVisit — '+labName;
-
-  // Slide 1: Portada
-  var s1=pptx.addSlide();
-  s1.background={color:color};
-  s1.addText('MedVisit',{x:0.5,y:0.8,w:9,h:0.8,fontSize:36,bold:true,color:'FFFFFF',fontFace:'Calibri'});
-  s1.addText('Informe de Cumplimiento',{x:0.5,y:1.5,w:9,h:0.5,fontSize:18,color:'FFFFFF',fontFace:'Calibri'});
-  s1.addText(labName,{x:0.5,y:2.2,w:9,h:0.7,fontSize:28,bold:true,color:'FFFFFF',fontFace:'Calibri'});
-  s1.addText('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),{x:0.5,y:3.1,w:9,h:0.4,fontSize:14,color:'FFFFFF',fontFace:'Calibri'});
-  s1.addText('Generado: '+new Date().toLocaleDateString('es-MX'),{x:0.5,y:3.6,w:9,h:0.35,fontSize:12,color:'FFFFFF',fontFace:'Calibri'});
-
-  // Slide 2: Resumen ejecutivo
-  var s2=pptx.addSlide();
-  s2.addText('Resumen Ejecutivo',{x:0.5,y:0.3,w:9,h:0.6,fontSize:24,bold:true,color:color,fontFace:'Calibri'});
-  var kpis=[
-    {label:'Visitadores',val:data.visitors.length},
-    {label:'Visitas Completadas',val:data.completed.length},
-    {label:'A Profesionales',val:totalProf},
-    {label:'Generales',val:data.completed.length-totalProf}
-  ];
-  kpis.forEach(function(k,i){
-    var x=0.5+(i%2)*4.7,y=1.1+Math.floor(i/2)*1.5;
-    s2.addShape(pptx.ShapeType.roundRect,{x:x,y:y,w:4.2,h:1.2,fill:{color:color+'22'},line:{color:color,width:1.5}});
-    s2.addText(String(k.val),{x:x,y:y+0.05,w:4.2,h:0.7,fontSize:36,bold:true,color:color,align:'center',fontFace:'Calibri'});
-    s2.addText(k.label,{x:x,y:y+0.75,w:4.2,h:0.35,fontSize:13,color:'444444',align:'center',fontFace:'Calibri'});
-  });
-
-  // Slide 3: Tabla de cumplimiento por visitador
-  var s3=pptx.addSlide();
-  s3.addText('Cumplimiento por Visitador',{x:0.5,y:0.3,w:9,h:0.6,fontSize:22,bold:true,color:color,fontFace:'Calibri'});
-  var tableRows=[[
-    {text:'Visitador',options:{bold:true,fill:color,color:'FFFFFF'}},
-    {text:'Completadas',options:{bold:true,fill:color,color:'FFFFFF'}},
-    {text:'Generales',options:{bold:true,fill:color,color:'FFFFFF'}},
-    {text:'Profesionales',options:{bold:true,fill:color,color:'FFFFFF'}}
-  ]];
-  data.visitors.forEach(function(u,i){
-    var bv=data.byV[u.id];
-    var bg=i%2===0?'F8F9FA':'FFFFFF';
-    tableRows.push([
-      {text:u.name,options:{fill:bg}},
-      {text:String(bv.completed),options:{fill:bg,align:'center'}},
-      {text:String(bv.general),options:{fill:bg,align:'center'}},
-      {text:String(bv.prof),options:{fill:bg,align:'center'}}
-    ]);
-  });
-  if(tableRows.length===1)tableRows.push([{text:'Sin visitadores',options:{colspan:4}}]);
-  s3.addTable(tableRows,{x:0.5,y:1.0,w:9,colW:[4,1.8,1.6,1.6],fontSize:11,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
-
-  // Slides por visitador
-  data.visitors.forEach(function(u){
-    var bv=data.byV[u.id];
-    if(!bv.visits.length)return;
-    var sv=pptx.addSlide();
-    sv.addShape(pptx.ShapeType.rect,{x:0,y:0,w:10,h:0.9,fill:{color:color}});
-    sv.addText(u.name,{x:0.3,y:0.1,w:9,h:0.7,fontSize:20,bold:true,color:'FFFFFF',fontFace:'Calibri'});
-    sv.addText('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),{x:0.3,y:0.55,w:9,h:0.28,fontSize:10,color:'FFFFFF',fontFace:'Calibri'});
-    var vrows=[[
-      {text:'Fecha',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Punto / Profesional',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Tipo',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Llegada',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Cierre',options:{bold:true,fill:color,color:'FFFFFF'}}
-    ]];
-    bv.visits.slice(0,12).forEach(function(v,i){
-      var pt=pointById(v.pointId);
-      var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||'Profesional'):(pt?pt.name:(v.lugar||'—'));
-      var bg=i%2===0?'F8F9FA':'FFFFFF';
-      vrows.push([
-        {text:fmtDateShort(v.date),options:{fill:bg}},
-        {text:nombre.substring(0,30),options:{fill:bg}},
-        {text:v.tipoVisita==='profesional'?'Prof.':'General',options:{fill:bg,align:'center'}},
-        {text:v.arrivalTime||'—',options:{fill:bg,align:'center'}},
-        {text:v.closeTime||'—',options:{fill:bg,align:'center'}}
-      ]);
-    });
-    sv.addTable(vrows,{x:0.3,y:1.0,w:9.4,colW:[1.4,3.8,1.3,1.4,1.5],fontSize:9,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
-    if(bv.visits.length>12)sv.addText('...y '+(bv.visits.length-12)+' visitas más en Excel',{x:0.3,y:6.8,w:9,h:0.3,fontSize:9,color:'888888',fontFace:'Calibri'});
-  });
-
-  // Slide comparativo de labs (solo general)
-  if(!labId){
-    var sc=pptx.addSlide();
-    sc.addText('Comparativo por Laboratorio',{x:0.5,y:0.3,w:9,h:0.6,fontSize:22,bold:true,color:color,fontFace:'Calibri'});
-    var crows=[[
-      {text:'Laboratorio',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Visitadores',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Completadas',options:{bold:true,fill:color,color:'FFFFFF'}},
-      {text:'Profesionales',options:{bold:true,fill:color,color:'FFFFFF'}}
-    ]];
-    LABS.forEach(function(l,i){
-      var ld=getRptData(l.id);
-      var lprof=Object.values(ld.byV).reduce(function(s,v){return s+v.prof;},0);
-      crows.push([{text:l.name},{text:String(ld.visitors.length),options:{align:'center'}},{text:String(ld.completed.length),options:{align:'center'}},{text:String(lprof),options:{align:'center'}}]);
-    });
-    sc.addTable(crows,{x:0.5,y:1.0,w:9,colW:[3,2,2,2],fontSize:12,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
-  }
-
-  pptx.writeFile({fileName:'MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.pptx'});
-  toast('PPTX generado');
-}
-
-</script>
+<script src="reports.js"></script>
 </body>
 </html>
