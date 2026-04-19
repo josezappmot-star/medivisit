@@ -13,6 +13,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root{--primary:#0F766E;--primary-light:#14B8A6;--primary-50:#F0FDFA;--primary-100:#CCFBF1;--accent:#F59E0B;--accent-light:#FEF3C7;--danger:#DC2626;--danger-light:#FEE2E2;--success:#16A34A;--success-light:#DCFCE7;--info:#2563EB;--info-light:#DBEAFE;--bg:#F1F5F9;--card:#FFFFFF;--fg:#0F172A;--muted:#64748B;--border:#E2E8F0;--radius:14px;}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -42,6 +49,7 @@
     .conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse-dot 2s infinite;}
     .conn-badge.offline .conn-dot{animation:none;opacity:0.6;}
     @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
+    .lab-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:700;margin-bottom:10px;background:rgba(255,255,255,0.15);color:#fff;}
     .app-header{background:var(--card);padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;}
     .app-header h2{font-size:20px;line-height:1.2;}
     .app-header .sub{font-size:12px;color:var(--muted);font-weight:400;font-family:'Inter',sans-serif;}
@@ -113,6 +121,7 @@
     .badge-progress{background:#DBEAFE;color:#1E40AF;}
     .badge-done{background:#DCFCE7;color:#166534;}
     .badge-cancel{background:#FEE2E2;color:#991B1B;}
+    .badge-prof{background:#EDE9FE;color:#5B21B6;}
     .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff;flex-shrink:0;}
     .map-link{color:var(--info);text-decoration:none;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;}
     .map-link:active{opacity:0.7;}
@@ -210,6 +219,41 @@
     .preview-stop-map-btn:active{transform:scale(0.95);background:#BFDBFE;}
     .preview-nav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:14px;font-weight:700;text-decoration:none;margin-top:18px;transition:all .15s;}
     .preview-nav-btn:active{transform:scale(0.97);}
+
+    /* ── Tipo visita selector ── */
+    .visit-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+    .visit-type-btn{border:2px solid var(--border);border-radius:14px;padding:16px 12px;cursor:pointer;background:var(--bg);transition:all .18s;text-align:left;display:flex;flex-direction:column;gap:6px;}
+    .visit-type-btn.active{border-color:var(--primary);background:var(--primary-50);}
+    .visit-type-icon{width:38px;height:38px;border-radius:10px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:4px;}
+    .visit-type-btn.active .visit-type-icon{background:var(--primary);}
+    .visit-type-name{font-size:13px;font-weight:700;color:var(--fg);}
+    .visit-type-desc{font-size:11px;color:var(--muted);line-height:1.4;}
+
+    /* ── Firma canvas ── */
+    .firma-canvas{width:100%;height:150px;border:1.5px solid var(--border);border-radius:10px;background:#fafafa;cursor:crosshair;display:block;touch-action:none;}
+    .firma-canvas.signed{border-color:var(--success);}
+    .firma-actions{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+    .firma-hint{font-size:11px;color:var(--muted);}
+    .firma-clear{font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;}
+    .firma-badge{display:none;align-items:center;gap:5px;font-size:12px;color:var(--success);margin-top:4px;font-weight:700;}
+    .firma-badge.show{display:flex;}
+
+    /* ── Toggle obsequio ── */
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg);border-radius:10px;}
+    .toggle-label{font-size:13px;font-weight:600;}
+    .toggle-sub{font-size:11px;color:var(--muted);}
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle input{opacity:0;width:0;height:0;}
+    .toggle-track{position:absolute;inset:0;background:var(--border);border-radius:12px;cursor:pointer;transition:background .2s;}
+    .toggle input:checked+.toggle-track{background:var(--primary);}
+    .toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none;}
+    .toggle input:checked~.toggle-thumb{transform:translateX(20px);}
+    .obsequio-detail{display:none;margin-top:10px;}
+    .obsequio-detail.show{display:block;}
+
+    /* ── GPS chip ── */
+    .gps-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary-50);border:1px solid rgba(15,118,110,0.15);border-radius:10px;font-size:12px;color:var(--primary);font-weight:600;margin-bottom:10px;}
+
     @media(min-width:640px){.app-body{padding:20px 24px 90px;}.stat-grid{grid-template-columns:repeat(4,1fr);}.canvas-grid{grid-template-columns:1fr 1fr;}.modal-sheet{border-radius:20px;margin-bottom:20px;}.modal-overlay{align-items:center;}.gallery-grid{grid-template-columns:repeat(4,1fr);}}
   </style>
 </head>
@@ -228,7 +272,7 @@
   <div class="gps-perm-card">
     <div class="gps-perm-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
     <div style="font-size:17px;font-weight:800;margin-bottom:8px;">Activar ubicacion</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;">Para mostrarte la sugerencia de ruta y registrar tu llegada a cada punto, necesitamos acceder a tu ubicacion actual.</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;">Para registrar tu llegada a cada punto necesitamos acceder a tu ubicacion actual.</div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <button class="btn btn-primary" onclick="requestGpsAndInit()"><i class="fa-solid fa-location-dot"></i> Permitir ubicacion</button>
       <button class="btn btn-outline" onclick="skipGpsAndInit()">Continuar sin ubicacion</button>
@@ -242,6 +286,7 @@
   <div class="login-card">
     <h1>MedVisit</h1>
     <p class="sub" id="loginGreeting">Creado por TesJua</p>
+    <div id="labChip" class="lab-chip" style="display:none;"><i class="fa-solid fa-flask" style="font-size:9px;"></i> <span id="labChipName"></span></div>
     <div id="loginConnBadge" class="conn-badge offline"><span class="conn-dot"></span> Verificando conexion...</div>
     <div style="display:flex;flex-direction:column;gap:14px;">
       <input class="login-input" type="text" id="loginUser" placeholder="Usuario" autocomplete="username" autocapitalize="off">
@@ -252,6 +297,18 @@
     <div class="login-attempts" id="loginAttempts"></div>
     <p style="color:rgba(255,255,255,0.35);font-size:10px;margin-top:20px;">Innovacion tecnologica con proposito humano</p>
   </div>
+</div>
+
+<!-- LAB SELECT -->
+<div class="screen" id="labSelectScreen">
+  <div class="app-header">
+    <div style="flex:1;min-width:0;"><h2>MedVisit</h2><div class="sub" id="labSelectGreeting">Selecciona un laboratorio</div></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div class="header-conn online" id="labSelectConn"><span class="hdot"></span>Cloud</div>
+      <button class="header-btn" onclick="confirmLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+  <div class="app-body" id="labSelectBody"></div>
 </div>
 
 <!-- ADMIN -->
@@ -268,7 +325,7 @@
     <div class="tab-content active" id="aTab-canvas"></div>
     <div class="tab-content" id="aTab-visitadores">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-        <div class="section-title" style="margin:0;">Visitadores (<span id="visitorCount">0</span>/40)</div>
+        <div class="section-title" style="margin:0;">Visitadores (<span id="visitorCount">0</span>/50)</div>
         <button class="btn btn-primary btn-sm" onclick="openNewVisitor()"><i class="fa-solid fa-plus"></i> Nuevo</button>
       </div>
       <div id="visitorList"></div>
@@ -283,6 +340,9 @@
         <select class="form-input" style="width:auto;flex:1;min-width:120px;" id="filterVisitStatus" onchange="renderAdminVisitas()">
           <option value="">Todos</option><option value="pending">Pendiente</option><option value="in-progress">En Curso</option><option value="completed">Completada</option><option value="cancelled">Cancelada</option>
         </select>
+        <select class="form-input" style="width:auto;flex:1;min-width:120px;" id="filterVisitType" onchange="renderAdminVisitas()">
+          <option value="">Todos los tipos</option><option value="general">General</option><option value="profesional">Profesional</option>
+        </select>
       </div>
       <div id="adminVisitsList"></div>
     </div>
@@ -290,12 +350,40 @@
       <div class="section-title">Galeria de Evidencia Fotografica</div>
       <div id="adminPhotoGallery"></div>
     </div>
+    <div class="tab-content" id="aTab-informes">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="section-title" style="margin-bottom:10px;">Rango de Fechas</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="rptPresetBtns">
+          <button class="btn btn-ghost btn-sm" onclick="setRptPreset('hoy')">Hoy</button>
+          <button class="btn btn-ghost btn-sm" onclick="setRptPreset('semana')">Esta semana</button>
+          <button class="btn btn-ghost btn-sm" onclick="setRptPreset('mes')">Este mes</button>
+          <button class="btn btn-ghost btn-sm" onclick="setRptPreset('3meses')">3 meses</button>
+          <button class="btn btn-ghost btn-sm" onclick="setRptPreset('custom')">Personalizado</button>
+        </div>
+        <div id="rptCustomDiv" style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div><label class="form-label">Desde</label><input class="form-input" type="date" id="rptDesdeInput" onchange="aplicarFechasCustom()"></div>
+          <div><label class="form-label">Hasta</label><input class="form-input" type="date" id="rptHastaInput" onchange="aplicarFechasCustom()"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">Periodo: <strong id="rptRangeLabel">—</strong></div>
+      </div>
+      <div class="card" style="margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-size:14px;font-weight:800;"><i class="fa-solid fa-globe" style="color:var(--primary);"></i> Informe General — Todos los laboratorios</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-primary" onclick="generarPDF(null)"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+          <button class="btn btn-sm btn-success" onclick="generarExcel(null)"><i class="fa-solid fa-file-excel"></i> Excel</button>
+          <button class="btn btn-sm" style="background:#7C3AED;color:#fff;" onclick="generarPPTX(null)"><i class="fa-solid fa-file-powerpoint"></i> PPTX</button>
+        </div>
+      </div>
+      <div class="section-title">Por Laboratorio</div>
+      <div id="rptLabCards"></div>
+    </div>
   </div>
   <div class="tab-bar" id="adminTabBar">
     <button class="tab-btn active" onclick="switchAdminTab('canvas',this)"><i class="fa-solid fa-chart-pie"></i>Panel</button>
     <button class="tab-btn" onclick="switchAdminTab('visitadores',this)"><i class="fa-solid fa-user-group"></i>Equipo</button>
     <button class="tab-btn" onclick="switchAdminTab('visitas',this)"><i class="fa-solid fa-clipboard-list"></i>Visitas</button>
     <button class="tab-btn" onclick="switchAdminTab('fotos',this)"><i class="fa-solid fa-images"></i>Fotos</button>
+    <button class="tab-btn" onclick="switchAdminTab('informes',this)"><i class="fa-solid fa-chart-bar"></i>Informes</button>
   </div>
   <div class="app-footer"><strong>MedVisit</strong> &middot; Creado por TesJua<br><span style="font-size:10px;">Innovacion tecnologica con proposito humano</span></div>
 </div>
@@ -354,21 +442,160 @@
   <div class="app-footer"><strong>MedVisit</strong> &middot; Creado por TesJua<br><span style="font-size:10px;">Innovacion tecnologica con proposito humano</span></div>
 </div>
 
-<!-- MODALES -->
-<div class="modal-overlay" id="modalVisitor"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalVisitorTitle">Nuevo Visitador</div><input type="hidden" id="editVisitorId"><div class="form-group"><label class="form-label">Nombre Completo</label><input class="form-input" id="mvName" placeholder="Ej: Juan Perez Garcia"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="mvUsername" placeholder="Ej: jperez" autocapitalize="off"></div><div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" type="password" id="mvPassword" placeholder="Minimo 4 caracteres"></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalVisitor')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="saveVisitor()">Guardar</button></div></div></div>
-<div class="modal-overlay" id="modalPoint"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalPointTitle">Nuevo Punto</div><input type="hidden" id="editPointId"><input type="hidden" id="editPointVisitorId" value=""><div class="form-group"><label class="form-label">Nombre del Punto</label><input class="form-input" id="mpName" placeholder="Ej: Farmacia San Rafael"></div><div class="form-group"><label class="form-label">Direccion Completa</label><input class="form-input" id="mpAddress" placeholder="Calle, numero, colonia, ciudad..." onblur="geocodeAddress()"><div id="geoStatus" style="display:none;"></div></div><div id="gpsCoordsRow" style="display:none;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"><div><label class="form-label">Latitud</label><input class="form-input" id="mpLat" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div><div><label class="form-label">Longitud</label><input class="form-input" id="mpLng" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="form-group"><label class="form-label">Dia</label><select class="form-input" id="mpDay"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miercoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sabado</option></select></div><div class="form-group"><label class="form-label">Orden</label><input class="form-input" type="number" id="mpOrder" placeholder="1, 2..." min="1"></div></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalPoint')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="savePoint()"><i class="fa-solid fa-map-pin"></i> Guardar</button></div></div></div>
+<!-- MODALES EXISTENTES -->
+<div class="modal-overlay" id="modalVisitor"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalVisitorTitle">Nuevo Visitador</div><input type="hidden" id="editVisitorId"><div class="form-group"><label class="form-label">Nombre Completo</label><input class="form-input" id="mvName" placeholder="Ej: Juan Perez Garcia"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="mvUsername" placeholder="Ej: jperez" autocapitalize="off"></div><div class="form-group"><label class="form-label">Contrasena</label><input class="form-input" type="password" id="mvPassword" placeholder="Minimo 4 caracteres"></div><div class="form-group" id="mvLabGroup"><label class="form-label">Laboratorio <span style="color:var(--danger);">*</span></label><select class="form-input" id="mvLabId"><option value="nestle">Nestlé</option><option value="abamia">Abamia</option><option value="fresenius">Fresenius</option><option value="ketolance">Ketolance</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalVisitor')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="saveVisitor()">Guardar</button></div></div></div>
+<div class="modal-overlay" id="modalPoint"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="modalPointTitle">Nuevo Punto</div><input type="hidden" id="editPointId"><input type="hidden" id="editPointVisitorId" value=""><div class="form-group"><label class="form-label">Nombre del Punto</label><input class="form-input" id="mpName" placeholder="Ej: Farmacia San Rafael"></div><div class="form-group"><label class="form-label">Direccion Completa</label><input class="form-input" id="mpAddress" placeholder="Cra 7 #45-20, Bogota..." onblur="geocodeAddress()"><div id="geoStatus" style="display:none;"></div></div><div id="gpsCoordsRow" style="display:none;"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;"><div><label class="form-label">Latitud</label><input class="form-input" id="mpLat" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div><div><label class="form-label">Longitud</label><input class="form-input" id="mpLng" readonly style="background:var(--success-light);font-weight:700;color:var(--success);"></div></div><button class="btn btn-ghost btn-sm" style="width:100%;margin-bottom:12px;border:1.5px dashed var(--primary);color:var(--primary);" onclick="abrirMapaPicker()"><i class="fa-solid fa-map-location-dot"></i> Ajustar ubicacion en el mapa</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="form-group"><label class="form-label">Dia</label><select class="form-input" id="mpDay"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miercoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sabado</option></select></div><div class="form-group"><label class="form-label">Orden</label><input class="form-input" type="number" id="mpOrder" placeholder="1, 2..." min="1"></div></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalPoint')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="savePoint()"><i class="fa-solid fa-map-pin"></i> Guardar</button></div></div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="form-group"><label class="form-label">Dia</label><select class="form-input" id="mpDay"><option value="1">Lunes</option><option value="2">Martes</option><option value="3">Miercoles</option><option value="4">Jueves</option><option value="5">Viernes</option><option value="6">Sabado</option></select></div><div class="form-group"><label class="form-label">Orden</label><input class="form-input" type="number" id="mpOrder" placeholder="1, 2..." min="1"></div></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalPoint')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="savePoint()"><i class="fa-solid fa-map-pin"></i> Guardar</button></div></div></div>
+
+<!-- MODAL MAPA PICKER -->
+<div class="modal-overlay" id="modalMapPicker" style="z-index:3000;">
+  <div style="background:#fff;width:100%;height:100%;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:#fff;z-index:10;">
+      <button onclick="closeModal('modalMapPicker')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);"><i class="fa-solid fa-arrow-left"></i></button>
+      <div style="flex:1;"><div style="font-size:15px;font-weight:800;">Ubica el punto en el mapa</div><div style="font-size:11px;color:var(--muted);">Arrastra el pin hasta la ubicacion exacta</div></div>
+    </div>
+    <div id="leafletMap" style="flex:1;width:100%;"></div>
+    <div style="padding:12px 16px;background:#fff;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px;"><i class="fa-solid fa-crosshairs" style="color:var(--primary);"></i> <span id="mapPickerCoords">Mueve el mapa para posicionar el pin</span></div>
+      <button class="btn btn-primary" style="width:100%;" onclick="confirmarMapaPicker()"><i class="fa-solid fa-check"></i> Confirmar esta ubicacion</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modalCloseVisit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Cerrar Visita</div><input type="hidden" id="closeVisitId"><div style="background:var(--primary-50);border-radius:12px;padding:14px;margin-bottom:18px;"><div style="font-size:13px;font-weight:700;color:var(--primary);" id="closeVisitPointName"></div><div id="closeVisitPointAddr" style="font-size:12px;color:var(--muted);margin-top:2px;"></div></div><input type="file" id="visitPhotoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoTaken(event)"><div class="form-group"><label class="form-label">Foto del Punto</label><div id="photoCaptureArea"><div class="photo-capture-btn" onclick="document.getElementById('visitPhotoInput').click()"><i class="fa-solid fa-camera"></i><span>Tomar Foto</span></div></div><img id="photoPreview" class="photo-preview" style="display:none;"></div><div class="form-group"><label class="form-label">Nombre del Jefe del Punto</label><input class="form-input" id="closeJefe" placeholder="Nombre del responsable"></div><div class="form-group"><label class="form-label">Notas (opcional)</label><textarea class="form-input" id="closeNotes" placeholder="Observaciones..."></textarea></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalCloseVisit')">Cancelar</button><button class="btn btn-success" style="flex:1;" onclick="completeVisit()"><i class="fa-solid fa-check"></i> Completar</button></div></div></div>
 <div class="modal-overlay" id="modalPhoto"><div class="modal-sheet" style="padding:8px 8px 24px;"><div class="modal-handle"></div><div class="modal-title" style="padding:0 12px;">Evidencia</div><img id="modalPhotoImg" style="width:100%;border-radius:12px;"><div style="padding:8px 12px 0;"><div id="modalPhotoInfo" style="font-size:13px;color:var(--muted);line-height:1.5;"></div></div><button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modalPhoto')">Cerrar</button></div></div>
 <div class="modal-overlay" id="modalSuperEdit"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Editar Usuario</div><input type="hidden" id="superEditId"><div class="form-group"><label class="form-label">Nombre</label><input class="form-input" id="seName"></div><div class="form-group"><label class="form-label">Usuario</label><input class="form-input" id="seUsername" autocapitalize="off"></div><div class="form-group"><label class="form-label">Nueva Contrasena</label><input class="form-input" type="text" id="sePassword" placeholder="Dejar vacio para no cambiar"></div><div class="form-group"><label class="form-label">Rol</label><select class="form-input" id="seRole"><option value="visitor">Visitador</option><option value="admin">Administrador</option></select></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalSuperEdit')">Cancelar</button><button class="btn btn-primary" style="flex:1;" onclick="superSaveUser()">Guardar</button></div></div></div>
 <div class="modal-overlay" id="modalRoutePreview"><div class="modal-sheet" style="max-height:92dvh;"><div class="modal-handle"></div><div id="routePreviewContent"></div></div></div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: NUEVA VISITA (selector de tipo)
+══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalNuevaVisita">
+  <div class="modal-sheet" style="max-height:95dvh;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Nueva visita</div>
+
+    <!-- Selector tipo -->
+    <div id="visitaTipoSelector">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:10px;">Tipo de visita</div>
+      <div class="visit-type-grid">
+        <button class="visit-type-btn" id="btnTipoGeneral" onclick="selectVisitType('general')">
+          <div class="visit-type-icon">🏪</div>
+          <div class="visit-type-name">Visita general</div>
+          <div class="visit-type-desc">Farmacia, drogueria o punto de venta</div>
+        </button>
+        <button class="visit-type-btn" id="btnTipoProfesional" onclick="selectVisitType('profesional')">
+          <div class="visit-type-icon">👨‍⚕️</div>
+          <div class="visit-type-name">Visita a profesional</div>
+          <div class="visit-type-desc">Medico, especialista u otro profesional</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- FORM GENERAL -->
+    <div id="formVisitaGeneral" style="display:none;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <button onclick="selectVisitType(null)" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;font-weight:600;padding:0;"><i class="fa-solid fa-arrow-left"></i> Cambiar tipo</button>
+      </div>
+      <div class="gps-chip" id="gpsChipGeneral"><i class="fa-solid fa-satellite-dish" style="font-size:11px;"></i> <span id="gpsTextGeneral">Obteniendo ubicacion...</span></div>
+      <div class="form-group"><label class="form-label">Nombre del lugar <span style="color:var(--danger);">*</span></label><input class="form-input" id="vg-lugar" placeholder="Ej. Drogueria La Rebaja"></div>
+      <div class="form-group"><label class="form-label">Direccion</label><input class="form-input" id="vg-direccion" placeholder="Calle / Carrera / Barrio"></div>
+      <div class="form-group"><label class="form-label">Contacto</label><input class="form-input" id="vg-contacto" placeholder="Nombre de quien atendio"></div>
+      <div class="form-group"><label class="form-label">Notas</label><textarea class="form-input" id="vg-notas" placeholder="Observaciones, pedidos..."></textarea></div>
+      <div class="form-group">
+        <label class="form-label">Foto de evidencia</label>
+        <input type="file" id="vg-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewVisitaFoto(this,'vg-preview')">
+        <div class="photo-capture-btn" onclick="document.getElementById('vg-foto').click()"><i class="fa-solid fa-camera"></i><span>Tomar foto</span></div>
+        <img id="vg-preview" class="photo-preview" style="display:none;">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalNuevaVisita')">Cancelar</button>
+        <button class="btn btn-success" style="flex:1;" id="btnGuardarGeneral" onclick="guardarVisitaGeneral()"><i class="fa-solid fa-check"></i> Guardar</button>
+      </div>
+    </div>
+
+    <!-- FORM PROFESIONAL -->
+    <div id="formVisitaProfesional" style="display:none;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <button onclick="selectVisitType(null)" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;font-weight:600;padding:0;"><i class="fa-solid fa-arrow-left"></i> Cambiar tipo</button>
+      </div>
+      <div class="gps-chip" id="gpsChipProf"><i class="fa-solid fa-satellite-dish" style="font-size:11px;"></i> <span id="gpsTextProf">Obteniendo ubicacion...</span></div>
+      <div class="form-group"><label class="form-label">Nombre del profesional <span style="color:var(--danger);">*</span></label><input class="form-input" id="vp-nombre" placeholder="Dr. / Dra. Nombre Apellido"></div>
+      <div class="form-group"><label class="form-label">Especialidad</label><input class="form-input" id="vp-especialidad" placeholder="Ej. Cardiologia, Medicina general..."></div>
+      <div class="form-group"><label class="form-label">Numero de contacto <span style="color:var(--danger);">*</span></label><input class="form-input" type="tel" id="vp-telefono" placeholder="3XX XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Direccion del consultorio <span style="color:var(--danger);">*</span></label><input class="form-input" id="vp-direccion" placeholder="Calle, carrera, consultorio, piso..."></div>
+      <div class="form-group">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Entrega de obsequio o detalle</div><div class="toggle-sub">Muestras, material, regalo</div></div>
+          <label class="toggle"><input type="checkbox" id="vp-toggleObsequio" onchange="toggleObsequioField(this.checked)"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+        <div id="vp-obsequioDetail" class="obsequio-detail">
+          <textarea class="form-input" id="vp-obsequio" placeholder="Ej. 2 muestras Ketolance 10mg, 1 bolígrafo..." style="margin-top:8px;"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Foto de evidencia <span style="color:var(--danger);">*</span></label>
+        <input type="file" id="vp-foto" accept="image/*" capture="environment" style="display:none;" onchange="previewVisitaFoto(this,'vp-preview')">
+        <div class="photo-capture-btn" onclick="document.getElementById('vp-foto').click()"><i class="fa-solid fa-camera"></i><span>Tomar foto con el profesional</span></div>
+        <img id="vp-preview" class="photo-preview" style="display:none;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Firma del profesional <span style="color:var(--danger);">* obligatoria</span></label>
+        <canvas id="vp-firmaCanvas" class="firma-canvas" width="600" height="150"></canvas>
+        <div class="firma-actions">
+          <span class="firma-hint">El medico firma aqui con el dedo</span>
+          <button class="firma-clear" onclick="clearFirmaProf()">Borrar firma</button>
+        </div>
+        <div class="firma-badge" id="vp-firmaBadge"><i class="fa-solid fa-check-circle"></i> Firma registrada</div>
+      </div>
+      <div class="form-group"><label class="form-label">Notas adicionales</label><textarea class="form-input" id="vp-notas" placeholder="Temas tratados, proxima visita..."></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalNuevaVisita')">Cancelar</button>
+        <button class="btn btn-success" style="flex:1;" id="btnGuardarProf" onclick="guardarVisitaProfesional()" disabled><i class="fa-solid fa-check"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER VISITA PROFESIONAL -->
+<div class="modal-overlay" id="modalVerProfesional">
+  <div class="modal-sheet" style="max-height:95dvh;">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Detalle visita profesional</div>
+    <div id="modalVerProfContent"></div>
+    <button class="btn btn-outline" style="margin-top:16px;" onclick="closeModal('modalVerProfesional')">Cerrar</button>
+  </div>
+</div>
+
 <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-box"><div class="confirm-icon" id="confirmIcon"><i id="confirmIconI"></i></div><div class="confirm-title" id="confirmTitle"></div><div class="confirm-msg" id="confirmMsg"></div><div class="confirm-actions"><button class="btn btn-outline" onclick="cancelConfirm()">Cancelar</button><button class="btn" id="confirmOkBtn" onclick="executeConfirm()">Confirmar</button></div></div></div>
 
 <script>
+// ══════════════════════════════════════════════════════════
+// IDENTIDAD DEL LABORATORIO
+// Cambia estos valores en cada copia del proyecto
+// ══════════════════════════════════════════════════════════
+var LAB_NOMBRE = 'Mi Laboratorio';   // ← cambia por el nombre real
+var LAB_COLOR  = '#0F766E';          // ← color del laboratorio
+var LAB_ID     = 'default';          // ← id corto ej: 'abamia', 'nestle'
+var LABS=[
+  {id:'nestle',  name:'Nestlé',    color:'#E2001A',colorLight:'#FEE2E2',icon:'fa-cube'},
+  {id:'abamia',  name:'Abamia',    color:'#0066CC',colorLight:'#DBEAFE',icon:'fa-pills'},
+  {id:'fresenius',name:'Fresenius',color:'#009036',colorLight:'#DCFCE7',icon:'fa-syringe'},
+  {id:'ketolance',name:'Ketolance',color:'#F59E0B',colorLight:'#FEF3C7',icon:'fa-flask'}
+];
+
+// ══════════════════════════════════════════════════════════
+// FIREBASE CONFIG — reemplaza con las credenciales reales
+// ══════════════════════════════════════════════════════════
 var FIREBASE_CONFIG={apiKey:"AIzaSyB-1_xhBuzfcL_XUFkT0yZfa6rCMl6DV0Q",authDomain:"medvisit-app-e5991.firebaseapp.com",databaseURL:"https://medvisit-app-e5991-default-rtdb.firebaseio.com",projectId:"medvisit-app-e5991",storageBucket:"medvisit-app-e5991.firebasestorage.app",messagingSenderId:"372705290165",appId:"1:372705290165:web:8694260ce573e172ee5bfc"};
 var SUPER_ADMIN_KEY='TesJua2024!';
 var MAX_LOGIN_ATTEMPTS=5,LOCKOUT_SECONDS=30,SESSION_MINUTES=30;
 var AV_COLORS=['#0F766E','#D97706','#DC2626','#7C3AED','#2563EB','#DB2777','#059669','#EA580C','#4F46E5','#0891B2'];
 var MIN_PER_PUNTO=15;
+
+// Mostrar chip de laboratorio en login
+(function(){
+  var chip=document.getElementById('labChip'),name=document.getElementById('labChipName');
+  if(LAB_NOMBRE&&LAB_NOMBRE!=='Mi Laboratorio'){chip.style.display='inline-flex';name.textContent=LAB_NOMBRE;}
+})();
 
 function avatarColor(id){var h=0;for(var i=0;i<(id||'').length;i++)h=id.charCodeAt(i)+((h<<5)-h);return AV_COLORS[Math.abs(h)%AV_COLORS.length];}
 function initials(n){if(!n)return'??';var p=n.trim().split(/\s+/);return p.length>=2?(p[0][0]+p[1][0]).toUpperCase():n.substring(0,2).toUpperCase();}
@@ -391,19 +618,21 @@ function getGreeting(){var h=new Date().getHours();if(h>=5&&h<12)return 'Buenos 
 function setLoginGreeting(){var el=document.getElementById('loginGreeting');if(el)el.textContent=getGreeting()+' — Ingresa tus datos para continuar';}
 setLoginGreeting();
 
-var D=defaultData(),currentUser=null,currentPhotoData=null,_superBackTo=null;
+var D=defaultData(),currentUser=null,currentPhotoData=null,_superBackTo=null,currentLabId=null;
 var firebaseReady=false,firebaseOnline=false,myLastWriteId=null;
 var currentAdminTab='canvas',currentVisitorTab='hoy',currentSuperTab='users';
 var lastVisitorDetailId=null,lastSuperDetailId=null,dbRef=null,gpsPermission='unknown';
+var profFirmaCanvas=null,profFirmaCtx=null,profFirmaActiva=false;
+var visitaGpsCoords=null,visitaFotoDataGeneral=null,visitaFotoDataProf=null;
 
-function defaultData(){return{_writeId:null,users:[{id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},{id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Perez Garcia',active:true},{id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'Maria Lopez Hernandez',active:true},{id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martinez',active:true}],points:[{id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1},{id:'p2',name:'Clinica del Valle',address:'Calle Amsterdam 56, Hipodromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2},{id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Avila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1},{id:'p4',name:'Distribuidora Medica Sur',address:'Av. Revolucion 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1},{id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacan, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2},{id:'p6',name:'Clinica Santa Maria',address:'Av. Tlahuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1},{id:'p7',name:'Sanatorio del Angel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1},{id:'p8',name:'FarmaExpress Satelite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Mex.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1}],visits:[{id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed'},{id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed'},{id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'}]};}
+function defaultData(){return{_writeId:null,users:[{id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},{id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Perez Garcia',active:true,labId:'nestle'},{id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'Maria Lopez Hernandez',active:true,labId:'nestle'},{id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martinez',active:true,labId:'nestle'}],points:[{id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1,labId:'nestle'},{id:'p2',name:'Clinica del Valle',address:'Calle Amsterdam 56, Hipodromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2,labId:'nestle'},{id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Avila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1,labId:'nestle'},{id:'p4',name:'Distribuidora Medica Sur',address:'Av. Revolucion 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1,labId:'nestle'},{id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacan, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2,labId:'nestle'},{id:'p6',name:'Clinica Santa Maria',address:'Av. Tlahuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1,labId:'nestle'},{id:'p7',name:'Sanatorio del Angel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1,labId:'nestle'},{id:'p8',name:'FarmaExpress Satelite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Mex.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1,labId:'nestle'}],visits:[{id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:'nestle'}]};}
 
 function saveLocal(d){try{localStorage.setItem('medvisit_v5',JSON.stringify(d));}catch(e){}}
 function save(d){myLastWriteId=Date.now()+'_'+Math.random().toString(36).substr(2,6);d._writeId=myLastWriteId;saveLocal(d);if(firebaseReady&&dbRef){dbRef.ref('medvisit').set(d).catch(function(err){console.error('Error Firebase:',err);toast('Error de sincronizacion. Datos guardados localmente.','err');});}}
 function updateConnBadge(){var b=document.getElementById('loginConnBadge');if(firebaseOnline){b.className='conn-badge online';b.innerHTML='<span class="conn-dot"></span> Conectado a la nube';}else if(firebaseReady){b.className='conn-badge offline';b.innerHTML='<span class="conn-dot"></span> Sin conexion temporal';}}
-function updateHeaderConn(){['adminConn','visitorConn','superConn'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var s=id==='superConn';if(firebaseOnline){el.className='header-conn online';if(s){el.style.background='rgba(255,255,255,0.15)';el.style.color='#fff';}el.innerHTML='<span class="hdot"></span>Cloud';}else{el.className='header-conn offline';if(s){el.style.background='rgba(255,255,255,0.1)';el.style.color='rgba(255,255,255,0.5)';}el.innerHTML='<span class="hdot"></span>Local';}});}
+function updateHeaderConn(){['adminConn','visitorConn','superConn','labSelectConn'].forEach(function(id){var el=document.getElementById(id);if(!el)return;var s=id==='superConn';if(firebaseOnline){el.className='header-conn online';if(s){el.style.background='rgba(255,255,255,0.15)';el.style.color='#fff';}el.innerHTML='<span class="hdot"></span>Cloud';}else{el.className='header-conn offline';if(s){el.style.background='rgba(255,255,255,0.1)';el.style.color='rgba(255,255,255,0.5)';}el.innerHTML='<span class="hdot"></span>Local';}});}
 function showSyncIndicator(){var el=document.getElementById('syncIndicator');el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2000);}
-function renderCurrentScreen(){if(!currentUser)return;if(document.querySelector('.modal-overlay.open')||document.querySelector('.confirm-overlay.open'))return;try{if(currentUser.role==='super'){if(currentSuperTab==='users')renderSuperAdmin();else if(currentSuperTab==='superDetail'&&lastSuperDetailId)openSuperDetail(lastSuperDetailId);}else if(currentUser.role==='admin'){if(currentAdminTab==='canvas')renderCanvasDashboard();else if(currentAdminTab==='visitadores')renderVisitorList();else if(currentAdminTab==='visitas'){populateVisitFilter();renderAdminVisitas();}else if(currentAdminTab==='fotos')renderPhotoGallery();else if(currentAdminTab==='visitorDetail'&&lastVisitorDetailId)openVisitorDetail(lastVisitorDetailId);}else{if(currentVisitorTab==='hoy')renderVisitorToday();else if(currentVisitorTab==='semana')renderVisitorWeek();else if(currentVisitorTab==='perfil')renderVisitorProfile();}}catch(e){console.error('renderCurrentScreen:',e);}}
+function renderCurrentScreen(){if(!currentUser)return;if(document.querySelector('.modal-overlay.open')||document.querySelector('.confirm-overlay.open'))return;try{if(currentUser.role==='super'){if(currentSuperTab==='users')renderSuperAdmin();else if(currentSuperTab==='superDetail'&&lastSuperDetailId)openSuperDetail(lastSuperDetailId);}else if(currentUser.role==='admin'){if(!currentLabId){renderLabSelect();return;}if(currentAdminTab==='canvas')renderCanvasDashboard();else if(currentAdminTab==='visitadores')renderVisitorList();else if(currentAdminTab==='visitas'){populateVisitFilter();renderAdminVisitas();}else if(currentAdminTab==='fotos')renderPhotoGallery();else if(currentAdminTab==='informes')renderInformes();else if(currentAdminTab==='visitorDetail'&&lastVisitorDetailId)openVisitorDetail(lastVisitorDetailId);}else{if(currentVisitorTab==='hoy')renderVisitorToday();else if(currentVisitorTab==='semana')renderVisitorWeek();else if(currentVisitorTab==='perfil')renderVisitorProfile();}}catch(e){console.error('renderCurrentScreen:',e);}}
 
 function initFirebase(){
   var loginBtn=document.getElementById('loginBtn'),connBadge=document.getElementById('loginConnBadge');
@@ -428,14 +657,140 @@ function cancelConfirm(){document.getElementById('confirmOverlay').classList.rem
 function executeConfirm(){document.getElementById('confirmOverlay').classList.remove('open');if(confirmCallback)confirmCallback();confirmCallback=null;}
 function confirmLogout(){showConfirm('Cerrar Sesion','Se perdera el progreso no guardado.','logout',function(){doLogout();});}
 
+
+// Normaliza direcciones colombianas para Nominatim
+function _normCO(addr){
+  return addr
+    .replace(/\bCra\.?\b/gi,'Carrera').replace(/\bCl\.?\b/gi,'Calle')
+    .replace(/\bAv\.?\s*Cra\.?\b/gi,'Avenida Carrera').replace(/\bAv\.?\s*Cl\.?\b/gi,'Avenida Calle')
+    .replace(/\bTv\.?\b/gi,'Transversal').replace(/\bDg\.?\b/gi,'Diagonal')
+    .replace(/\bKm\.?\b/gi,'Km')
+    .replace(/#/g,' ').replace(/\s+/g,' ').trim();
+}
+// Version simplificada: quita letras de los numeros (69a->69, 77bis->77) y el tercer numero (-27)
+function _simplCO(addr){
+  return _normCO(addr)
+    .replace(/([0-9]+)\s*[a-zA-Z]+\b/g,'$1')  // 69a→69, 77bis→77
+    .replace(/-\s*\d+/g,'')                    // -27 → nada
+    .replace(/\s+/g,' ').trim();
+}
+
 var geoTimer=null;
-function geocodeAddress(){clearTimeout(geoTimer);var a=document.getElementById('mpAddress').value.trim(),st=document.getElementById('geoStatus'),cr=document.getElementById('gpsCoordsRow');if(!a){st.style.display='none';cr.style.display='none';return;}st.style.display='flex';st.className='geo-status searching';st.innerHTML='<span class="spinner-sm"></span> Buscando ubicacion...';geoTimer=setTimeout(function(){fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(a)+'&limit=1',{headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(d){if(d&&d.length>0){document.getElementById('mpLat').value=parseFloat(d[0].lat).toFixed(6);document.getElementById('mpLng').value=parseFloat(d[0].lon).toFixed(6);cr.style.display='block';st.className='geo-status found';st.innerHTML='<i class="fa-solid fa-check-circle"></i> '+esc(d[0].display_name.substring(0,70));}else{cr.style.display='none';st.className='geo-status error';st.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> No encontrada';}}).catch(function(e){cr.style.display='none';st.className='geo-status error';st.innerHTML='<i class="fa-solid fa-wifi"></i> Sin conexion';});},800);}
+function geocodeAddress(){
+  clearTimeout(geoTimer);
+  var raw=document.getElementById('mpAddress').value.trim();
+  var st=document.getElementById('geoStatus'),cr=document.getElementById('gpsCoordsRow');
+  if(!raw){st.style.display='none';cr.style.display='none';return;}
+  st.style.display='flex';st.className='geo-status searching';
+  st.innerHTML='<span class="spinner-sm"></span> Buscando en Colombia...';
+  geoTimer=setTimeout(function(){
+    // Construimos 4 variantes progresivamente más simples
+    var norm=_normCO(raw);
+    var simp=_simplCO(raw);
+    // Detectar ciudad: si la dirección no menciona ciudad, agregar Bogotá
+    var ciudad=/bogot|medell|cali|barranq|cartagena|cucuta|bucaramanga|pereira|manizales|ibague|neiva|pasto|villavicencio/i.test(raw)?'':'Bogotá';
+    var variants=[
+      norm+(ciudad?' '+ciudad:'')+', Colombia',
+      simp+(ciudad?' '+ciudad:'')+', Colombia',
+      simp+' Colombia',
+      // última opción: solo la ciudad / barrio si hay
+      (simp.split(' ').slice(-2).join(' '))+' Colombia'
+    ];
+    _tryGeoVariants(variants,0,cr,st);
+  },700);
+}
+
+function _tryGeoVariants(variants,idx,cr,st){
+  if(idx>=variants.length){
+    cr.style.display='none';
+    st.className='geo-status error';
+    st.innerHTML='<i class="fa-solid fa-triangle-exclamation"></i> No encontrada — intenta con barrio o ciudad';
+    return;
+  }
+  var q=variants[idx];
+  var url='https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&countrycodes=co&limit=1&addressdetails=1';
+  fetch(url,{headers:{'Accept':'application/json','Accept-Language':'es'}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d&&d.length>0){_setGeoResult(d[0],cr,st);}
+      else{_tryGeoVariants(variants,idx+1,cr,st);}
+    })
+    .catch(function(){
+      cr.style.display='none';
+      st.className='geo-status error';
+      st.innerHTML='<i class="fa-solid fa-wifi"></i> Sin conexion a internet';
+    });
+}
+
+function _setGeoResult(r,cr,st){
+  document.getElementById('mpLat').value=parseFloat(r.lat).toFixed(6);
+  document.getElementById('mpLng').value=parseFloat(r.lon).toFixed(6);
+  cr.style.display='block';
+  st.className='geo-status found';
+  var disp=(r.display_name||'').substring(0,90);
+  st.innerHTML='<i class="fa-solid fa-check-circle"></i> '+esc(disp);
+}
 
 function toast(msg,type){type=type||'ok';var w=document.getElementById('toastWrap'),t=document.createElement('div');t.className='toast toast-'+type;var icon=type==='ok'?'fa-circle-check':type==='err'?'fa-circle-xmark':'fa-circle-info';t.innerHTML='<i class="fa-solid '+icon+'"></i><span>'+esc(msg)+'</span>';w.appendChild(t);setTimeout(function(){t.classList.add('out');setTimeout(function(){t.remove();},250);},3000);}
 function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
 document.querySelectorAll('.modal-overlay').forEach(function(o){o.addEventListener('click',function(e){if(e.target===o)closeModal(o.id);});});
-function getGPS(){return new Promise(function(ok,no){if(!navigator.geolocation)return no('GPS no disponible');navigator.geolocation.getCurrentPosition(function(p){ok({lat:p.coords.latitude,lng:p.coords.longitude});},function(e){no('GPS: '+e.message);},{enableHighAccuracy:true,timeout:15000,maximumAge:0});});}
+
+// ══════════════════════════════════════════════════════════
+// GPS MEJORADO — alta precisión con fallback inteligente
+// ══════════════════════════════════════════════════════════
+function getGPS(){
+  return new Promise(function(resolve,reject){
+    if(!navigator.geolocation){reject('GPS no disponible');return;}
+    var done=false,wid=null,timer=null;
+    function finish(pos){
+      if(done)return;done=true;
+      if(wid!=null){navigator.geolocation.clearWatch(wid);wid=null;}
+      if(timer){clearTimeout(timer);timer=null;}
+      resolve({lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy||999});
+    }
+    function fail(e){
+      if(done)return;done=true;
+      if(wid!=null){navigator.geolocation.clearWatch(wid);wid=null;}
+      if(timer){clearTimeout(timer);timer=null;}
+      // fallback sin alta precision
+      navigator.geolocation.getCurrentPosition(
+        function(p){resolve({lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy||999});},
+        function(){reject('GPS no disponible. Activa la ubicacion del dispositivo.');},
+        {enableHighAccuracy:false,timeout:12000,maximumAge:10000}
+      );
+    }
+    // watchPosition recibe multiples fixes y para cuando accuracy < 50m o tras 15s
+    wid=navigator.geolocation.watchPosition(
+      function(pos){
+        var acc=pos.coords.accuracy||999;
+        if(acc<=80||done)finish(pos);
+      },
+      fail,
+      {enableHighAccuracy:true,timeout:15000,maximumAge:0}
+    );
+    // Timeout de seguridad: tomar la mejor lectura que haya en 15s
+    timer=setTimeout(function(){
+      if(!done){
+        navigator.geolocation.getCurrentPosition(finish,fail,{enableHighAccuracy:true,timeout:3000,maximumAge:5000});
+      }
+    },15000);
+  });
+}
+
+// GPS para visitas profesionales/generales — obtiene y muestra en chip
+function obtenerGPSVisita(chipId, textId){
+  var textEl=document.getElementById(textId);
+  textEl.textContent='Obteniendo ubicacion...';
+  getGPS().then(function(gps){
+    visitaGpsCoords=gps;
+    textEl.textContent=gps.lat.toFixed(5)+', '+gps.lng.toFixed(5)+' (±'+Math.round(gps.accuracy||0)+'m)';
+  }).catch(function(){
+    visitaGpsCoords=null;
+    textEl.textContent='No disponible — se guardara sin coordenadas';
+  });
+}
+
 function handlePhotoTaken(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas'),M=800;var w=img.width,h=img.height;if(w>M||h>M){if(w>h){h=h*M/w;w=M;}else{w=w*M/h;h=M;}}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);currentPhotoData=c.toDataURL('image/jpeg',0.7);var p=document.getElementById('photoPreview');p.src=currentPhotoData;p.style.display='block';document.getElementById('photoCaptureArea').style.display='none';};img.src=ev.target.result;};r.readAsDataURL(f);}
 function showScreen(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
 function showGpsPermOverlay(){document.getElementById('gpsPermOverlay').classList.add('open');}
@@ -451,53 +806,56 @@ function doLogin(){
   var user=D.users.find(function(x){return x.username===u&&x.password===p&&x.active;});
   if(!user){loginAttempts++;var rem=MAX_LOGIN_ATTEMPTS-loginAttempts;if(rem<=0){err.textContent='';att.style.display='none';lockoutEnd=Date.now()+LOCKOUT_SECONDS*1000;showLockout();return;}err.textContent='Usuario o contrasena incorrectos';att.style.display='block';att.textContent=rem+' intento'+(rem>1?'s':'')+' restante'+(rem>1?'s':'');att.style.color=rem<=2?'#FCA5A5':'rgba(255,255,255,0.4)';return;}
   currentUser={id:user.id,username:user.username,role:user.role,name:user.name};err.textContent='';loginAttempts=0;att.style.display='none';resetSession();
-  if(user.role==='admin'){showScreen('adminScreen');renderAdmin();toast(getGreeting()+', '+user.name.split(' ')[0]+'!');}
+  if(user.role==='admin'){currentLabId=null;showScreen('labSelectScreen');document.getElementById('labSelectGreeting').textContent=getGreeting()+', '+user.name.split(' ')[0]+' — Selecciona un laboratorio';renderLabSelect();toast(getGreeting()+', '+user.name.split(' ')[0]+'!');}
   else{gpsPermission='unknown';showGpsPermOverlay();toast(getGreeting()+', '+user.name.split(' ')[0]+'!');}
 }
-function doLogout(){currentUser=null;gpsPermission='unknown';stopSession();document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';document.getElementById('loginError').textContent='';document.getElementById('loginAttempts').style.display='none';lastVisitorDetailId=null;lastSuperDetailId=null;currentAdminTab='canvas';currentVisitorTab='hoy';currentSuperTab='users';showScreen('loginScreen');}
+function doLogout(){currentUser=null;currentLabId=null;_visitDow=null;gpsPermission='unknown';stopSession();document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';document.getElementById('loginError').textContent='';document.getElementById('loginAttempts').style.display='none';lastVisitorDetailId=null;lastSuperDetailId=null;currentAdminTab='canvas';currentVisitorTab='hoy';currentSuperTab='users';showScreen('loginScreen');}
 document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
 document.getElementById('loginUser').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('loginPass').focus();});
 
-function switchAdminTab(tab,btn){currentAdminTab=tab;if(tab!=='visitorDetail')lastVisitorDetailId=null;document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('aTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='canvas')renderCanvasDashboard();if(tab==='visitadores')renderVisitorList();if(tab==='visitas'){populateVisitFilter();renderAdminVisitas();}if(tab==='fotos')renderPhotoGallery();}
+function switchAdminTab(tab,btn){currentAdminTab=tab;if(tab!=='visitorDetail')lastVisitorDetailId=null;document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('aTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='canvas')renderCanvasDashboard();if(tab==='visitadores')renderVisitorList();if(tab==='visitas'){populateVisitFilter();renderAdminVisitas();}if(tab==='fotos')renderPhotoGallery();if(tab==='informes')renderInformes();}
 
-function renderCanvasDashboard(){var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.active;});var allVisits=D.visits.filter(function(v){return v.date===today();});var allDone=allVisits.filter(function(v){return v.status==='completed';}).length;var allTotal=D.points.filter(function(p){return visitors.some(function(v){return v.id===p.assignedTo;})&&p.dayOfWeek===todayDow();}).length;var overallPct=allTotal>0?Math.round(allDone/allTotal*100):0;var el=document.getElementById('aTab-canvas');var html='<div class="canvas-hero" style="background:linear-gradient(135deg,'+pctColor(overallPct)+','+pctColor(Math.min(100,overallPct+30))+');"><div style="display:flex;align-items:center;justify-content:space-between;"><div><div class="hero-label">Cumplimiento del Equipo Hoy</div><div class="hero-big">'+overallPct+'%</div><div class="hero-sub">'+allDone+' de '+allTotal+' visitas completadas &middot; '+visitors.length+' visitadores</div></div><div class="progress-ring" style="width:80px;height:80px;"><svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="'+(2*Math.PI*34)+'" stroke-dashoffset="'+(2*Math.PI*34-(overallPct/100)*2*Math.PI*34)+'"/></svg><div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">'+overallPct+'%</div></div></div></div>';var inProgress=allVisits.filter(function(v){return v.status==='in-progress';}).length;var pending=allVisits.filter(function(v){return v.status==='pending';}).length;html+='<div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;"><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">'+allDone+'</div><div class="stat-label">Completadas</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">'+inProgress+'</div><div class="stat-label">En Curso</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">'+pending+'</div><div class="stat-label">Pendientes</div></div></div>';html+='<div class="section-title">Rendimiento por Visitador</div><div class="canvas-grid">';visitors.forEach(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id&&p.dayOfWeek===todayDow();});var visits=D.visits.filter(function(v){return v.visitorId===u.id&&v.date===today();});var done=visits.filter(function(v){return v.status==='completed';}).length;var total=pts.length;var pct=total>0?Math.round(done/total*100):0;var photos=D.visits.filter(function(v){return v.visitorId===u.id&&v.photo;}).slice(-3);var badgeHTML='';if(pct===100)badgeHTML='<div class="card-badge" style="background:rgba(22,163,74,0.15);color:#16A34A;"><i class="fa-solid fa-check"></i> Completo</div>';else if(pct>=50)badgeHTML='<div class="card-badge" style="background:rgba(37,99,235,0.1);color:#2563EB;">En progreso</div>';else if(pct>0)badgeHTML='<div class="card-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Iniciando</div>';else badgeHTML='<div class="card-badge" style="background:rgba(100,116,139,0.1);color:#64748B;">Sin iniciar</div>';var photoStrip='';if(photos.length)photoStrip='<div class="photo-strip">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="event.stopPropagation();viewPhoto(\''+p.id+'\')" title="Ver evidencia">';}).join('')+'</div>';html+='<div class="canvas-card" style="background:'+pctColorBg(pct)+';" onclick="openVisitorDetail(\''+u.id+'\')"><div class="card-stripe" style="background:'+pctColor(pct)+';"></div>'+badgeHTML+'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="card-avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div class="card-name">'+esc(u.name)+'</div><div class="card-username">@'+esc(u.username)+' &middot; '+DOW_NAME[todayDow()]+'</div></div><div class="card-pct" style="color:'+pctColor(pct)+';">'+pct+'%</div></div><div class="card-bar"><div class="card-bar-fill" style="width:'+pct+'%;background:'+pctColor(pct)+';"></div></div><div class="card-stats"><span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> '+done+'</span><span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> '+total+'</span><span><i class="fa-solid fa-camera" style="font-size:9px;"></i> '+photos.length+'</span></div>'+photoStrip+'</div>';});html+='</div>';if(!visitors.length)html+='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores registrados</p></div>';el.innerHTML=html;requestAnimationFrame(function(){el.querySelectorAll('.card-bar-fill').forEach(function(bar){var w=bar.style.width;bar.style.width='0%';requestAnimationFrame(function(){bar.style.width=w;});});});}
+function renderCanvasDashboard(){var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.active&&u.labId===currentLabId;});var allVisits=D.visits.filter(function(v){return v.date===today()&&v.labId===currentLabId;});var allDone=allVisits.filter(function(v){return v.status==='completed';}).length;var allTotal=D.points.filter(function(p){return visitors.some(function(v){return v.id===p.assignedTo;})&&p.dayOfWeek===todayDow();}).length;var overallPct=allTotal>0?Math.round(allDone/allTotal*100):0;var el=document.getElementById('aTab-canvas');var labBadge=LAB_NOMBRE&&LAB_NOMBRE!=='Mi Laboratorio'?'<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;margin-bottom:10px;"><i class="fa-solid fa-flask" style="font-size:9px;"></i> '+esc(LAB_NOMBRE)+'</div><br>':'';var html='<div class="canvas-hero" style="background:linear-gradient(135deg,'+pctColor(overallPct)+','+pctColor(Math.min(100,overallPct+30))+');"><div style="display:flex;align-items:center;justify-content:space-between;"><div>'+labBadge+'<div class="hero-label">Cumplimiento del Equipo Hoy</div><div class="hero-big">'+overallPct+'%</div><div class="hero-sub">'+allDone+' de '+allTotal+' visitas completadas &middot; '+visitors.length+' visitadores</div></div><div class="progress-ring" style="width:80px;height:80px;"><svg width="80" height="80"><circle class="ring-bg" cx="40" cy="40" r="34" stroke="rgba(255,255,255,0.2)"/><circle class="ring-fg" cx="40" cy="40" r="34" stroke="#fff" stroke-width="5" stroke-dasharray="'+(2*Math.PI*34)+'" stroke-dashoffset="'+(2*Math.PI*34-(overallPct/100)*2*Math.PI*34)+'"/></svg><div class="ring-text" style="color:#fff;font-size:16px;font-weight:900;">'+overallPct+'%</div></div></div></div>';var inProgress=allVisits.filter(function(v){return v.status==='in-progress';}).length;var pending=allVisits.filter(function(v){return v.status==='pending';}).length;var profCt=allVisits.filter(function(v){return v.tipoVisita==='profesional';}).length;html+='<div class="stat-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:20px;"><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--success);">'+allDone+'</div><div class="stat-label">Completadas</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--info);">'+inProgress+'</div><div class="stat-label">En Curso</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:var(--accent);">'+pending+'</div><div class="stat-label">Pendientes</div></div><div class="stat-card" style="text-align:center;"><div class="stat-num" style="color:#7C3AED;">'+profCt+'</div><div class="stat-label">A Profesionales</div></div></div>';html+='<div class="section-title">Rendimiento por Visitador</div><div class="canvas-grid">';visitors.forEach(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id&&p.dayOfWeek===todayDow();});var visits=D.visits.filter(function(v){return v.visitorId===u.id&&v.date===today();});var done=visits.filter(function(v){return v.status==='completed';}).length;var total=pts.length;var pct=total>0?Math.round(done/total*100):0;var photos=D.visits.filter(function(v){return v.visitorId===u.id&&v.photo;}).slice(-3);var profVisits=D.visits.filter(function(v){return v.visitorId===u.id&&v.tipoVisita==='profesional';}).length;var badgeHTML='';if(pct===100)badgeHTML='<div class="card-badge" style="background:rgba(22,163,74,0.15);color:#16A34A;"><i class="fa-solid fa-check"></i> Completo</div>';else if(pct>=50)badgeHTML='<div class="card-badge" style="background:rgba(37,99,235,0.1);color:#2563EB;">En progreso</div>';else if(pct>0)badgeHTML='<div class="card-badge" style="background:rgba(245,158,11,0.1);color:#D97706;">Iniciando</div>';else badgeHTML='<div class="card-badge" style="background:rgba(100,116,139,0.1);color:#64748B;">Sin iniciar</div>';var photoStrip='';if(photos.length)photoStrip='<div class="photo-strip">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="event.stopPropagation();viewVisitPhoto(\''+p.id+'\')" title="Ver evidencia">';}).join('')+'</div>';html+='<div class="canvas-card" style="background:'+pctColorBg(pct)+';" onclick="openVisitorDetail(\''+u.id+'\')"><div class="card-stripe" style="background:'+pctColor(pct)+';"></div>'+badgeHTML+'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;"><div class="card-avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div class="card-name">'+esc(u.name)+'</div><div class="card-username">@'+esc(u.username)+' &middot; '+DOW_NAME[todayDow()]+'</div></div><div class="card-pct" style="color:'+pctColor(pct)+';">'+pct+'%</div></div><div class="card-bar"><div class="card-bar-fill" style="width:'+pct+'%;background:'+pctColor(pct)+';"></div></div><div class="card-stats"><span><i class="fa-solid fa-check" style="color:var(--success);font-size:9px;"></i> '+done+'</span><span><i class="fa-solid fa-map-pin" style="font-size:9px;"></i> '+total+'</span><span><i class="fa-solid fa-user-doctor" style="font-size:9px;color:#7C3AED;"></i> '+profVisits+'</span></div>'+photoStrip+'</div>';});html+='</div>';if(!visitors.length)html+='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores registrados</p></div>';el.innerHTML=html;requestAnimationFrame(function(){el.querySelectorAll('.card-bar-fill').forEach(function(bar){var w=bar.style.width;bar.style.width='0%';requestAnimationFrame(function(){bar.style.width=w;});});});}
 
-function renderPhotoGallery(){var photos=D.visits.filter(function(v){return v.photo;}).sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminPhotoGallery');if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image"></i><p>Sin fotos de evidencia aun</p></div>';return;}el.innerHTML='<div class="gallery-grid">'+photos.map(function(v){var pt=pointById(v.pointId);var vis=userById(v.visitorId);return '<img src="'+v.photo+'" onclick="viewPhoto(\''+v.id+'\')" title="'+(vis?esc(vis.name):'?')+' — '+(pt?esc(pt.name):'?')+' — '+fmtDateShort(v.date)+'">';}).join('')+'</div>';}
-function renderAdmin(){document.getElementById('adminGreeting').textContent='Hola, '+currentUser.name;renderCanvasDashboard();populateVisitFilter();}
-function populateVisitFilter(){var s=document.getElementById('filterVisitVisitor');var c=s.value;s.innerHTML='<option value="">Todos</option>';D.users.filter(function(u){return u.role==='visitor'&&u.active;}).forEach(function(u){s.innerHTML+='<option value="'+u.id+'">'+esc(u.name)+'</option>';});s.value=c;}
-function renderVisitorList(){var list=D.users.filter(function(u){return u.role==='visitor';});document.getElementById('visitorCount').textContent=list.length;var el=document.getElementById('visitorList');if(!list.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores</p></div>';return;}el.innerHTML=list.map(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id;});var dn=D.visits.filter(function(v){return v.visitorId===u.id&&v.status==='completed';}).length;return '<div class="user-item" onclick="openVisitorDetail(\''+u.id+'\')"><div class="avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+dn+' visitas</div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;"></i></div>';}).join('');}
+function renderPhotoGallery(){var photos=D.visits.filter(function(v){return v.photo&&v.labId===currentLabId;}).sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminPhotoGallery');if(!photos.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-image"></i><p>Sin fotos de evidencia aun</p></div>';return;}el.innerHTML='<div class="gallery-grid">'+photos.map(function(v){var pt=pointById(v.pointId);var vis=userById(v.visitorId);var badge=v.tipoVisita==='profesional'?'<span class="badge badge-prof" style="font-size:9px;position:absolute;top:4px;left:4px;">Prof.</span>':'';return '<div style="position:relative;"><img src="'+v.photo+'" onclick="viewVisitPhoto(\''+v.id+'\')" title="'+(vis?esc(vis.name):'?')+' — '+fmtDateShort(v.date)+'">'+badge+'</div>';}).join('')+'</div>';}
+function renderAdmin(){var lab=LABS.find(function(l){return l.id===currentLabId;});document.getElementById('adminGreeting').textContent=(lab?lab.name+' — ':'')+currentUser.name;renderCanvasDashboard();populateVisitFilter();}
+function populateVisitFilter(){var s=document.getElementById('filterVisitVisitor');var c=s.value;s.innerHTML='<option value="">Todos</option>';D.users.filter(function(u){return u.role==='visitor'&&u.active&&u.labId===currentLabId;}).forEach(function(u){s.innerHTML+='<option value="'+u.id+'">'+esc(u.name)+'</option>';});s.value=c;}
+function renderVisitorList(){var list=D.users.filter(function(u){return u.role==='visitor'&&u.labId===currentLabId;});document.getElementById('visitorCount').textContent=list.length;var el=document.getElementById('visitorList');if(!list.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-user-slash"></i><p>No hay visitadores</p></div>';return;}el.innerHTML=list.map(function(u){var pts=D.points.filter(function(p){return p.assignedTo===u.id;});var dn=D.visits.filter(function(v){return v.visitorId===u.id&&v.status==='completed';}).length;return '<div class="user-item" onclick="openVisitorDetail(\''+u.id+'\')"><div class="avatar" style="background:'+avatarColor(u.id)+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+dn+' visitas</div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;"></i></div>';}).join('');}
 
-function openVisitorDetail(vid){lastVisitorDetailId=vid;currentAdminTab='visitorDetail';var u=userById(vid);if(!u)return;var pts=D.points.filter(function(p){return p.assignedTo===vid;}).sort(function(a,b){return a.dayOfWeek-b.dayOfWeek||a.order-b.order;});var dn=D.visits.filter(function(v){return v.visitorId===vid&&v.status==='completed';}).length;document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('aTab-visitorDetail').classList.add('active');var ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';else{var byDay={};pts.forEach(function(p){if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});ph=Object.keys(byDay).sort().map(function(day){return '<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">'+DOW_NAME[day]+' <span style="color:var(--muted);font-weight:500;">('+byDay[day].length+')</span></div>'+byDay[day].map(function(p){var v=D.visits.find(function(x){return x.pointId===p.id&&x.visitorId===vid&&x.date===today();});var photoThumb=v&&v.photo?'<img src="'+v.photo+'" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto(\''+v.id+'\')" style="margin-left:auto;">':'';return '<div class="card" style="padding:14px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">'+p.order+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(p.name)+'</div><div style="margin-top:4px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div>'+photoThumb+'<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editPointForVisitor(\''+p.id+'\',\''+vid+'\')" style="width:32px;height:32px;padding:0;"><i class="fa-solid fa-pen" style="font-size:11px;"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm(\''+p.id+'\',\''+vid+'\')" style="width:32px;height:32px;padding:0;background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button></div></div></div>';}).join('')+'</div>';}).join('');}
+function openVisitorDetail(vid){lastVisitorDetailId=vid;currentAdminTab='visitorDetail';var u=userById(vid);if(!u)return;var pts=D.points.filter(function(p){return p.assignedTo===vid;}).sort(function(a,b){return a.dayOfWeek-b.dayOfWeek||a.order-b.order;});var dn=D.visits.filter(function(v){return v.visitorId===vid&&v.status==='completed';}).length;document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('aTab-visitorDetail').classList.add('active');var ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';else{var byDay={};pts.forEach(function(p){if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});ph=Object.keys(byDay).sort().map(function(day){return '<div style="margin-bottom:16px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px;">'+DOW_NAME[day]+' <span style="color:var(--muted);font-weight:500;">('+byDay[day].length+')</span></div>'+byDay[day].map(function(p){var v=D.visits.find(function(x){return x.pointId===p.id&&x.visitorId===vid&&x.date===today();});var photoThumb=v&&v.photo?'<img src="'+v.photo+'" class="visit-photo-thumb" onclick="event.stopPropagation();viewVisitPhoto(\''+v.id+'\')" style="margin-left:auto;">':'';return '<div class="card" style="padding:14px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div style="width:32px;height:32px;border-radius:8px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0;">'+p.order+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(p.name)+'</div><div style="margin-top:4px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div>'+photoThumb+'<div style="display:flex;gap:4px;flex-shrink:0;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editPointForVisitor(\''+p.id+'\',\''+vid+'\')" style="width:32px;height:32px;padding:0;"><i class="fa-solid fa-pen" style="font-size:11px;"></i></button><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm(\''+p.id+'\',\''+vid+'\')" style="width:32px;height:32px;padding:0;background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash" style="font-size:11px;"></i></button></div></div></div>';}).join('')+'</div>';}).join('');}
 document.getElementById('visitorDetailContent').innerHTML='<div class="visitor-detail-header"><div class="avatar" style="background:'+avatarColor(u.id)+';width:52px;height:52px;font-size:18px;">'+initials(u.name)+'</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+dn+' completadas</div></div><div style="display:flex;gap:6px;"><button class="btn btn-ghost btn-sm" onclick="editVisitor(\''+u.id+'\')"><i class="fa-solid fa-user-pen"></i></button><button class="btn btn-sm" onclick="deleteVisitorConfirm(\''+u.id+'\')" style="background:var(--danger-light);color:var(--danger);"><i class="fa-solid fa-trash"></i></button></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="section-title" style="margin:0;">Puntos</div><button class="btn btn-primary btn-sm" onclick="openNewPointForVisitor(\''+vid+'\')"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+ph;}
 function deletePointConfirm(pid,vid){var pt=pointById(pid);showConfirm('Eliminar Punto','Se eliminara "'+(pt?pt.name:'')+'" y sus visitas asociadas.','danger',function(){D.points=D.points.filter(function(p){return p.id!==pid;});D.visits=D.visits.filter(function(v){return v.pointId!==pid;});save(D);openVisitorDetail(vid);toast('Punto eliminado','err');});}
 function deleteVisitorConfirm(vid){var u=userById(vid);showConfirm('Eliminar Visitador','Se eliminara "'+(u?u.name:'')+'", sus puntos y visitas.','danger',function(){D.users=D.users.filter(function(u){return u.id!==vid;});D.points=D.points.filter(function(p){return p.assignedTo!==vid;});D.visits=D.visits.filter(function(v){return v.visitorId!==vid;});save(D);switchAdminTab('visitadores',document.querySelectorAll('#adminScreen .tab-btn')[1]);toast('Eliminado','err');});}
 function openNewPointForVisitor(vid){document.getElementById('editPointId').value='';document.getElementById('editPointVisitorId').value=vid;['mpName','mpAddress','mpLat','mpLng','mpOrder'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('mpDay').value=todayDow();document.getElementById('gpsCoordsRow').style.display='none';document.getElementById('geoStatus').style.display='none';document.getElementById('modalPointTitle').textContent='Nuevo Punto';openModal('modalPoint');}
 function editPointForVisitor(pid,vid){var p=pointById(pid);if(!p)return;document.getElementById('editPointId').value=pid;document.getElementById('editPointVisitorId').value=vid;document.getElementById('mpName').value=p.name;document.getElementById('mpAddress').value=p.address;document.getElementById('mpLat').value=p.lat||'';document.getElementById('mpLng').value=p.lng||'';document.getElementById('mpDay').value=p.dayOfWeek;document.getElementById('mpOrder').value=p.order||'';document.getElementById('gpsCoordsRow').style.display=p.lat!=null?'block':'none';document.getElementById('geoStatus').style.display='none';document.getElementById('modalPointTitle').textContent='Editar Punto';openModal('modalPoint');}
-function savePoint(){var id=document.getElementById('editPointId').value,vid=document.getElementById('editPointVisitorId').value,name=document.getElementById('mpName').value.trim(),address=document.getElementById('mpAddress').value.trim(),lat=parseFloat(document.getElementById('mpLat').value),lng=parseFloat(document.getElementById('mpLng').value),dayOfWeek=parseInt(document.getElementById('mpDay').value),order=parseInt(document.getElementById('mpOrder').value)||1;if(!name){toast('Nombre obligatorio','err');return;}if(!address){toast('Direccion obligatoria','err');return;}if(isNaN(lat)||isNaN(lng)){toast('Espera la georreferenciacion','err');return;}if(id){var p=pointById(id);if(p)Object.assign(p,{name:name,address:address,lat:lat,lng:lng,dayOfWeek:dayOfWeek,order:order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else if(p&&p.assignedTo)openVisitorDetail(p.assignedTo);}else{if(!vid){toast('Sin visitador','err');return;}D.points.push({id:uid(),name:name,address:address,lat:lat,lng:lng,assignedTo:vid,dayOfWeek:dayOfWeek,order:order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else openVisitorDetail(vid);}toast(id?'Punto actualizado':'Punto creado');}
-function openNewVisitor(){document.getElementById('editVisitorId').value='';['mvName','mvUsername','mvPassword'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('modalVisitorTitle').textContent='Nuevo Visitador';openModal('modalVisitor');}
+function savePoint(){var id=document.getElementById('editPointId').value,vid=document.getElementById('editPointVisitorId').value,name=document.getElementById('mpName').value.trim(),address=document.getElementById('mpAddress').value.trim(),lat=parseFloat(document.getElementById('mpLat').value),lng=parseFloat(document.getElementById('mpLng').value),dayOfWeek=parseInt(document.getElementById('mpDay').value),order=parseInt(document.getElementById('mpOrder').value)||1;if(!name){toast('Nombre obligatorio','err');return;}if(!address){toast('Direccion obligatoria','err');return;}if(isNaN(lat)||isNaN(lng)){toast('Espera la georreferenciacion','err');return;}if(id){var p=pointById(id);if(p)Object.assign(p,{name:name,address:address,lat:lat,lng:lng,dayOfWeek:dayOfWeek,order:order});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else if(p&&p.assignedTo)openVisitorDetail(p.assignedTo);}else{if(!vid){toast('Sin visitador','err');return;}D.points.push({id:uid(),name:name,address:address,lat:lat,lng:lng,assignedTo:vid,dayOfWeek:dayOfWeek,order:order,labId:currentLabId||getUserLabId(vid)});save(D);closeModal('modalPoint');if(_superBackTo){openSuperDetail(_superBackTo);_superBackTo=null;}else openVisitorDetail(vid);}toast(id?'Punto actualizado':'Punto creado');}
+function openNewVisitor(){document.getElementById('editVisitorId').value='';['mvName','mvUsername','mvPassword'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('mvLabId').value=currentLabId||'nestle';document.getElementById('modalVisitorTitle').textContent='Nuevo Visitador';openModal('modalVisitor');}
 function editVisitor(id){var u=userById(id);if(!u)return;document.getElementById('editVisitorId').value=id;document.getElementById('mvName').value=u.name;document.getElementById('mvUsername').value=u.username;document.getElementById('mvPassword').value='';document.getElementById('modalVisitorTitle').textContent='Editar Visitador';openModal('modalVisitor');}
-function saveVisitor(){var id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contrasena minimo 4 caracteres','err');return;}if(D.users.length>=40&&!id){toast('Maximo 40 perfiles','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario ya existe','err');return;}if(id){var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;}}else{D.users.push({id:uid(),username:username,password:password,role:'visitor',name:name,active:true});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Visitador creado — ya puede iniciar sesion');}
-function renderAdminVisitas(){var fv=document.getElementById('filterVisitVisitor').value,fs=document.getElementById('filterVisitStatus').value;var l=D.visits.slice();if(fv)l=l.filter(function(v){return v.visitorId===fv;});if(fs)l=l.filter(function(v){return v.status===fs;});l.sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminVisitsList');if(!l.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}el.innerHTML=l.map(function(v){var pt=pointById(v.pointId),vis=userById(v.visitorId);var b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':v.status==='cancelled'?'badge-cancel':'badge-pending';var lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':v.status==='cancelled'?'Cancelada':'Pendiente';var ph=v.photo?'<img src="'+v.photo+'" class="visit-photo-thumb" onclick="event.stopPropagation();viewPhoto(\''+v.id+'\')">':'';return '<div class="user-item" onclick="viewPhoto(\''+v.id+'\')"><div class="avatar" style="background:'+avatarColor(v.visitorId)+';width:34px;height:34px;font-size:11px;">'+(vis?initials(vis.name):'?')+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+(pt?esc(pt.name):'Eliminado')+'</div><div style="font-size:11px;color:var(--muted);">'+(vis?esc(vis.name):'?')+' &middot; '+fmtDateShort(v.date)+' '+(v.arrivalTime||'')+(v.closeTime?' &rarr; '+v.closeTime:'')+'</div>'+(v.jefeNombre?'<div style="font-size:11px;color:var(--muted);">Jefe: '+esc(v.jefeNombre)+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px;">'+ph+'<span class="badge '+b+'">'+lb+'</span></div></div>';}).join('');}
-function viewPhoto(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v||!v.photo){toast('Sin foto','info');return;}var pt=pointById(v.pointId),vis=userById(v.visitorId);document.getElementById('modalPhotoImg').src=v.photo;document.getElementById('modalPhotoInfo').innerHTML='<strong>'+(pt?esc(pt.name):'?')+'</strong><br>'+(vis?esc(vis.name):'?')+' &middot; '+fmtDate(v.date)+' '+(v.arrivalTime||'')+'<br>Jefe: '+esc(v.jefeNombre||'N/D')+(v.notes?'<br><em>'+esc(v.notes)+'</em>':'');openModal('modalPhoto');}
+function saveVisitor(){var id=document.getElementById('editVisitorId').value,name=document.getElementById('mvName').value.trim(),username=document.getElementById('mvUsername').value.trim(),password=document.getElementById('mvPassword').value,labSel=document.getElementById('mvLabId').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(!id&&(!password||password.length<4)){toast('Contrasena minimo 4 caracteres','err');return;}if(D.users.length>=50&&!id){toast('Maximo 50 perfiles','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario ya existe','err');return;}if(id){var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;u.labId=labSel;}}else{D.users.push({id:uid(),username:username,password:password,role:'visitor',name:name,active:true,labId:labSel});}save(D);closeModal('modalVisitor');renderVisitorList();populateVisitFilter();toast(id?'Actualizado':'Visitador creado — ya puede iniciar sesion');}
+function renderAdminVisitas(){var fv=document.getElementById('filterVisitVisitor').value,fs=document.getElementById('filterVisitStatus').value,ft=document.getElementById('filterVisitType').value;var l=D.visits.filter(function(v){return v.labId===currentLabId;});if(fv)l=l.filter(function(v){return v.visitorId===fv;});if(fs)l=l.filter(function(v){return v.status===fs;});if(ft)l=l.filter(function(v){return (v.tipoVisita||'general')===ft;});l.sort(function(a,b){return(b.date+(b.closeTime||'')).localeCompare(a.date+(a.closeTime||''));});var el=document.getElementById('adminVisitsList');if(!l.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-filter-circle-xmark"></i><p>Sin resultados</p></div>';return;}el.innerHTML=l.map(function(v){var pt=pointById(v.pointId),vis=userById(v.visitorId);var b=v.status==='completed'?'badge-done':v.status==='in-progress'?'badge-progress':v.status==='cancelled'?'badge-cancel':'badge-pending';var lb=v.status==='completed'?'Completada':v.status==='in-progress'?'En Curso':v.status==='cancelled'?'Cancelada':'Pendiente';var ph=v.photo?'<img src="'+v.photo+'" class="visit-photo-thumb" onclick="event.stopPropagation();viewVisitPhoto(\''+v.id+'\')">':'';var tipoBadge=v.tipoVisita==='profesional'?'<span class="badge badge-prof" style="font-size:10px;">Prof.</span>':'';var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||v.lugar||'Profesional'):((pt?esc(pt.name):null)||esc(v.lugar)||'Visita');return '<div class="user-item" onclick="verDetalleVisita(\''+v.id+'\')"><div class="avatar" style="background:'+avatarColor(v.visitorId)+';width:34px;height:34px;font-size:11px;">'+(vis?initials(vis.name):'?')+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+nombre+' '+tipoBadge+'</div><div style="font-size:11px;color:var(--muted);">'+(vis?esc(vis.name):'?')+' &middot; '+fmtDateShort(v.date)+' '+(v.arrivalTime||'')+(v.closeTime?' &rarr; '+v.closeTime:'')+'</div></div><div style="display:flex;align-items:center;gap:8px;">'+ph+'<span class="badge '+b+'">'+lb+'</span></div></div>';}).join('');}
+
+function verDetalleVisita(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v)return;if(v.tipoVisita==='profesional'){verVisitaProfesional(vid);}else{viewVisitPhoto(vid);}}
+
+function viewVisitPhoto(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v||!v.photo){toast('Sin foto','info');return;}var pt=pointById(v.pointId),vis=userById(v.visitorId);document.getElementById('modalPhotoImg').src=v.photo;document.getElementById('modalPhotoInfo').innerHTML='<strong>'+(pt?esc(pt.name):(esc(v.lugar)||'Visita'))+'</strong><br>'+(vis?esc(vis.name):'?')+' &middot; '+fmtDate(v.date)+' '+(v.arrivalTime||'')+'<br>Jefe: '+esc(v.jefeNombre||'N/D')+(v.notes?'<br><em>'+esc(v.notes)+'</em>':'');openModal('modalPhoto');}
+
+function verVisitaProfesional(vid){var v=D.visits.find(function(x){return x.id===vid;});if(!v)return;var vis=userById(v.visitorId);var html='<div style="display:flex;flex-direction:column;gap:12px;">';html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Profesional</div><div style="font-size:16px;font-weight:800;">'+esc(v.nombreProfesional||'Sin nombre')+'</div>';if(v.especialidad)html+='<div style="font-size:13px;color:var(--muted);margin-top:2px;">'+esc(v.especialidad)+'</div>';if(v.telefono)html+='<div style="font-size:13px;margin-top:6px;"><i class="fa-solid fa-phone" style="color:var(--primary);font-size:11px;"></i> '+esc(v.telefono)+'</div>';html+='</div>';html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Ubicacion</div>';if(v.gps&&v.gps.lat){html+='<div style="font-size:12px;color:var(--info);margin-bottom:4px;"><i class="fa-solid fa-satellite-dish" style="font-size:10px;"></i> GPS: '+v.gps.lat.toFixed(5)+', '+v.gps.lng.toFixed(5)+'</div>';}html+='<div style="font-size:13px;">'+esc(v.direccionConsultorio||'Sin direccion')+'</div></div>';if(v.obsequio)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Obsequio entregado</div><div style="font-size:13px;">'+esc(v.obsequio)+'</div></div>';if(v.photo)html+='<img src="'+v.photo+'" style="width:100%;border-radius:12px;border:1px solid var(--border);">';if(v.firma)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Firma del profesional</div><img src="'+v.firma+'" style="width:100%;border-radius:8px;border:1px solid var(--border);background:#fafafa;"></div>';if(v.notas)html+='<div class="card" style="padding:14px;"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:6px;">Notas</div><div style="font-size:13px;">'+esc(v.notas)+'</div></div>';html+='<div style="font-size:12px;color:var(--muted);text-align:center;">Visitado por: '+(vis?esc(vis.name):'?')+' &middot; '+fmtDate(v.date)+(v.arrivalTime?' &middot; '+v.arrivalTime:'')+'</div>';html+='</div>';document.getElementById('modalVerProfContent').innerHTML=html;openModal('modalVerProfesional');}
 
 function switchSuperTab(tab,btn){currentSuperTab=tab;if(tab!=='superDetail')lastSuperDetailId=null;document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='users')renderSuperAdmin();}
-function renderSuperAdmin(){var el=document.getElementById('superUserList');el.innerHTML=D.users.map(function(u){var roleBadge=u.role==='admin'?'<span class="badge badge-progress" style="font-size:10px;">Admin</span>':'<span class="badge badge-done" style="font-size:10px;">Visitador</span>';var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');return '<div class="user-item" onclick="openSuperDetail(\''+u.id+'\')"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(u.name)+' '+roleBadge+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+'</div><div class="pw-display"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="event.stopPropagation();copyPw(this)" data-pw="'+pwSafe+'" title="Copiar"><i class="fa-solid fa-copy"></i></button></div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;align-self:center;"></i></div>';}).join('');}
+function renderSuperAdmin(){var el=document.getElementById('superUserList');el.innerHTML=D.users.map(function(u){var roleBadge=u.role==='admin'?'<span class="badge badge-progress" style="font-size:10px;">Admin</span>':'<span class="badge badge-done" style="font-size:10px;">Visitador</span>';var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');    return '<div class="user-item" onclick="openSuperDetail(\''+u.id+'\')"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';">'+initials(u.name)+'</div><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">'+esc(u.name)+' '+roleBadge+' '+labBadge+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts+' puntos &middot; '+done+' completadas</div><div class="pw-display"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="event.stopPropagation();copyPw(this)" data-pw="'+pwSafe+'" title="Copiar"><i class="fa-solid fa-copy"></i></button></div></div><i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:14px;align-self:center;"></i></div>';
+  }).join('');}
 function copyPw(btn){var pw=btn.getAttribute('data-pw');navigator.clipboard.writeText(pw).then(function(){toast('Contrasena copiada','info');}).catch(function(){toast('No se pudo copiar','err');});}
-function openSuperDetail(uid){lastSuperDetailId=uid;currentSuperTab='superDetail';var u=userById(uid);if(!u)return;var pts=D.points.filter(function(p){return p.assignedTo===uid;}).sort(function(a,b){return a.dayOfWeek-b.dayOfWeek||a.order-b.order;});var visits=D.visits.filter(function(v){return v.visitorId===uid;});var photos=visits.filter(function(v){return v.photo;});document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-superDetail').classList.add('active');var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');var userInfo='<div class="visitor-detail-header"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';width:52px;height:52px;font-size:18px;">'+initials(u.name)+'</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+visits.filter(function(v){return v.status==='completed';}).length+' completadas</div><div class="pw-display" style="margin-top:6px;"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="copyPw(this)" data-pw="'+pwSafe+'"><i class="fa-solid fa-copy"></i></button></div></div><button class="btn btn-ghost btn-sm" onclick="superEditUser(\''+u.id+'\')"><i class="fa-solid fa-pen"></i> Editar</button></div>';var photoSection='';if(photos.length)photoSection='<div class="section-title" style="margin-top:20px;">Fotos de Evidencia ('+photos.length+')</div><div class="gallery-grid">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="viewPhoto(\''+p.id+'\')" title="'+fmtDateShort(p.date)+'">';}).join('')+'</div>';var ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';else{var byDay={};pts.forEach(function(p){if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});ph=Object.keys(byDay).sort().map(function(day){return '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">'+DOW_NAME[day]+'</div>'+byDay[day].map(function(p){return '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:28px;height:28px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;">'+p.order+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+esc(p.name)+'</div><div style="margin-top:3px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm(\''+p.id+'\',\''+uid+'\')" style="width:28px;height:28px;padding:0;background:var(--danger-light);color:var(--danger);flex-shrink:0;"><i class="fa-solid fa-trash" style="font-size:10px;"></i></button></div></div>';}).join('')+'</div>';}).join('');}document.getElementById('superDetailContent').innerHTML=userInfo+'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="section-title" style="margin:0;">Puntos</div><button class="btn btn-primary btn-sm" onclick="openNewPointForVisitor(\''+uid+'\');_superBackTo=\''+uid+'\'"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+ph+photoSection;}
+function openSuperDetail(uid){lastSuperDetailId=uid;currentSuperTab='superDetail';var u=userById(uid);if(!u)return;var pts=D.points.filter(function(p){return p.assignedTo===uid;}).sort(function(a,b){return a.dayOfWeek-b.dayOfWeek||a.order-b.order;});var visits=D.visits.filter(function(v){return v.visitorId===uid;});var photos=visits.filter(function(v){return v.photo;});document.querySelectorAll('#superScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#superScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('sTab-superDetail').classList.add('active');var pwSafe=u.password.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;');var userInfo='<div class="visitor-detail-header"><div class="avatar" style="background:'+(u.role==='admin'?'#7C3AED':avatarColor(u.id))+';width:52px;height:52px;font-size:18px;">'+initials(u.name)+'</div><div style="flex:1;"><div style="font-size:17px;font-weight:800;" class="serif">'+esc(u.name)+'</div><div style="font-size:12px;color:var(--muted);">@'+esc(u.username)+' &middot; '+pts.length+' puntos &middot; '+visits.filter(function(v){return v.status==='completed';}).length+' completadas</div><div class="pw-display" style="margin-top:6px;"><i class="fa-solid fa-key" style="color:var(--accent);font-size:10px;"></i><span class="pw-text">'+pwSafe+'</span><button class="pw-btn" onclick="copyPw(this)" data-pw="'+pwSafe+'"><i class="fa-solid fa-copy"></i></button></div></div><button class="btn btn-ghost btn-sm" onclick="superEditUser(\''+u.id+'\')"><i class="fa-solid fa-pen"></i> Editar</button></div>';var photoSection='';if(photos.length)photoSection='<div class="section-title" style="margin-top:20px;">Fotos de Evidencia ('+photos.length+')</div><div class="gallery-grid">'+photos.map(function(p){return '<img src="'+p.photo+'" onclick="viewVisitPhoto(\''+p.id+'\')" title="'+fmtDateShort(p.date)+'">';}).join('')+'</div>';var ph='';if(!pts.length)ph='<div class="empty-state" style="padding:30px;"><i class="fa-solid fa-map-location-dot"></i><p>Sin puntos</p></div>';else{var byDay={};pts.forEach(function(p){if(!byDay[p.dayOfWeek])byDay[p.dayOfWeek]=[];byDay[p.dayOfWeek].push(p);});ph=Object.keys(byDay).sort().map(function(day){return '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:6px;">'+DOW_NAME[day]+'</div>'+byDay[day].map(function(p){return '<div class="card" style="padding:12px;margin-bottom:6px;"><div style="display:flex;align-items:flex-start;gap:10px;"><div style="width:28px;height:28px;border-radius:6px;background:var(--primary-50);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0;">'+p.order+'</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:700;">'+esc(p.name)+'</div><div style="margin-top:3px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><button class="btn btn-sm" onclick="event.stopPropagation();deletePointConfirm(\''+p.id+'\',\''+uid+'\')" style="width:28px;height:28px;padding:0;background:var(--danger-light);color:var(--danger);flex-shrink:0;"><i class="fa-solid fa-trash" style="font-size:10px;"></i></button></div></div>';}).join('')+'</div>';}).join('');}document.getElementById('superDetailContent').innerHTML=userInfo+'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div class="section-title" style="margin:0;">Puntos</div><button class="btn btn-primary btn-sm" onclick="openNewPointForVisitor(\''+uid+'\');_superBackTo=\''+uid+'\'"><i class="fa-solid fa-plus"></i> Agregar</button></div>'+ph+photoSection;}
 function superEditUser(id){var u=userById(id);if(!u)return;document.getElementById('superEditId').value=id;document.getElementById('seName').value=u.name;document.getElementById('seUsername').value=u.username;document.getElementById('sePassword').value='';document.getElementById('seRole').value=u.role;openModal('modalSuperEdit');}
 function superSaveUser(){var id=document.getElementById('superEditId').value,name=document.getElementById('seName').value.trim(),username=document.getElementById('seUsername').value.trim(),password=document.getElementById('sePassword').value,role=document.getElementById('seRole').value;if(!name||!username){toast('Nombre y usuario obligatorios','err');return;}if(D.users.find(function(u){return u.username===username&&u.id!==id;})){toast('Usuario duplicado','err');return;}var u=userById(id);if(u){u.name=name;u.username=username;if(password)u.password=password;u.role=role;}save(D);closeModal('modalSuperEdit');renderSuperAdmin();toast('Actualizado');}
 
-// =============================================
+// ══════════════════════════════════════════════════════════
 // VISITADOR
-// =============================================
+// ══════════════════════════════════════════════════════════
 function switchVisitorTab(tab,btn){currentVisitorTab=tab;document.querySelectorAll('#visitorScreen .tab-content').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('#visitorScreen .tab-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('vTab-'+tab).classList.add('active');btn.classList.add('active');if(tab==='hoy')renderVisitorToday();if(tab==='semana')renderVisitorWeek();if(tab==='perfil')renderVisitorProfile();}
 function renderVisitor(){var h=new Date().getHours();var sal=h<12?'Buenos dias':h<18?'Buenas tardes':'Buenas noches';document.getElementById('visitorGreeting').textContent=sal+', '+currentUser.name.split(' ')[0]+'!';var d=new Date();var days=['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];var months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];document.getElementById('visitorDate').textContent=days[d.getDay()]+', '+d.getDate()+' de '+months[d.getMonth()]+' '+d.getFullYear();renderVisitorToday();}
 function buildMapsRouteUrl(pts){if(!pts||!pts.length)return null;if(pts.length===1)return mapsLink(pts[0].lat,pts[0].lng,pts[0].address);var origin=encodeURIComponent(pts[0].lat+','+pts[0].lng);var dest=encodeURIComponent(pts[pts.length-1].lat+','+pts[pts.length-1].lng);var waypoints=pts.slice(1,-1).map(function(p){return encodeURIComponent(p.lat+','+p.lng);}).join('|');return 'https://www.google.com/maps/dir/?api=1&origin='+origin+'&destination='+dest+(waypoints?'&waypoints='+waypoints:'')+'&travelmode=driving';}
 function todayForDow(t){var d=new Date(),c=d.getDay()===0?7:d.getDay(),diff=c-t,r=new Date(d);r.setDate(d.getDate()-diff);return r.getFullYear()+'-'+String(r.getMonth()+1).padStart(2,'0')+'-'+String(r.getDate()).padStart(2,'0');}
 
-// =============================================
-// PREVIEW DE RUTA CON SELECTOR DE DIAS
-// =============================================
 function openRoutePreview(selectedDow){
   if(selectedDow===undefined)selectedDow=todayDow();
   var allMyPts=D.points.filter(function(p){return p.assignedTo===currentUser.id;});
@@ -505,85 +863,694 @@ function openRoutePreview(selectedDow){
   if(!daysWithPts.length){toast('Sin puntos asignados','info');return;}
   if(daysWithPts.indexOf(selectedDow)===-1)selectedDow=daysWithPts[0];
   var myPts=allMyPts.filter(function(p){return p.dayOfWeek===selectedDow;}).sort(function(a,b){return a.order-b.order;});
-  var startH=8,startM=0;
-  var totalMin=myPts.length*MIN_PER_PUNTO;
-  var endTotalMin=startH*60+startM+totalMin;
-  var endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
+  var startH=8,startM=0;var totalMin=myPts.length*MIN_PER_PUNTO;var endTotalMin=startH*60+startM+totalMin;var endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
   var doneCt=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(selectedDow)&&v.status==='completed';}).length;
-  var mapsUrl=buildMapsRouteUrl(myPts);
-  var totalHours=Math.floor(totalMin/60),totalMinsRemainder=totalMin%60;
-  var durationText=totalHours+'h '+totalMinsRemainder+'min';
-  var isToday=selectedDow===todayDow();
-
+  var mapsUrl=buildMapsRouteUrl(myPts);var totalHours=Math.floor(totalMin/60),totalMinsRemainder=totalMin%60;var durationText=totalHours+'h '+totalMinsRemainder+'min';var isToday=selectedDow===todayDow();
   var dayTabsHtml='<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;">';
-  daysWithPts.forEach(function(d){
-    var isSelected=d===selectedDow,isT=d===todayDow();
-    var ptsCount=allMyPts.filter(function(p){return p.dayOfWeek===d;}).length;
-    var doneCount=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(d)&&v.status==='completed';}).length;
-    var pct=ptsCount>0?Math.round(doneCount/ptsCount*100):0;
-    dayTabsHtml+='<button onclick="openRoutePreview('+d+')" style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:'+(isSelected?'2px solid var(--primary)':'1.5px solid var(--border)')+';background:'+(isSelected?'var(--primary)':'var(--card)')+';color:'+(isSelected?'#fff':'var(--fg)')+';font-size:12px;font-weight:700;cursor:pointer;">'+DOW_NAME[d]+(isT?' <span style="font-size:9px;opacity:0.8;">Hoy</span>':'')+'<br><span style="font-size:10px;opacity:0.75;">'+doneCount+'/'+ptsCount+' · '+pct+'%</span></button>';
-  });
+  daysWithPts.forEach(function(d){var isSelected=d===selectedDow,isT=d===todayDow();var ptsCount=allMyPts.filter(function(p){return p.dayOfWeek===d;}).length;var doneCount=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(d)&&v.status==='completed';}).length;var pct=ptsCount>0?Math.round(doneCount/ptsCount*100):0;dayTabsHtml+='<button onclick="openRoutePreview('+d+')" style="flex-shrink:0;padding:8px 14px;border-radius:10px;border:'+(isSelected?'2px solid var(--primary)':'1.5px solid var(--border)')+';background:'+(isSelected?'var(--primary)':'var(--card)')+';color:'+(isSelected?'#fff':'var(--fg)')+';font-size:12px;font-weight:700;cursor:pointer;">'+DOW_NAME[d]+(isT?' <span style="font-size:9px;opacity:0.8;">Hoy</span>':'')+'<br><span style="font-size:10px;opacity:0.75;">'+doneCount+'/'+ptsCount+' · '+pct+'%</span></button>';});
   dayTabsHtml+='</div>';
-
-  var stopsHtml='';
-  myPts.forEach(function(p,i){
-    var estMin=startH*60+startM+(i*MIN_PER_PUNTO);
-    var estH=Math.floor(estMin/60)%24,estMM=estMin%60;
-    var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===todayForDow(selectedDow);});
-    var done=visit&&visit.status==='completed',inProg=visit&&visit.status==='in-progress';
-    var numBg=done?'var(--success)':inProg?'var(--info)':'var(--primary)';
-    var numIcon=done?'<i class="fa-solid fa-check" style="font-size:14px;"></i>':(inProg?'<i class="fa-solid fa-play" style="font-size:12px;"></i>':String(i+1));
-    var statusLabel=done?'<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>':inProg?'<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>':'<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';
-    stopsHtml+='<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:'+numBg+';">'+numIcon+'</div><div class="preview-stop-body"><div class="preview-stop-name">'+esc(p.name)+'</div><div class="preview-stop-addr">'+esc(p.address)+'</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~'+fmt(estH,estMM)+'</div>'+statusLabel+'</div><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';
-  });
-
-  document.getElementById('routePreviewContent').innerHTML=
-    dayTabsHtml+
-    '<div class="preview-header"><div class="preview-day">'+DOW_NAME[selectedDow]+(isToday?' <span style="font-size:14px;opacity:0.8;">— Hoy</span>':'')+'</div><div class="preview-sub">'+doneCt+' de '+myPts.length+' puntos completados · '+fmt(startH,startM)+' → '+fmt(endH,endMM)+'</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> '+durationText+'</span><span><i class="fa-solid fa-map-pin"></i> '+myPts.length+' puntos</span><span><i class="fa-solid fa-car"></i> ~'+MIN_PER_PUNTO+'min c/u</span></div></div>'+
-    stopsHtml+
-    (mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="preview-nav-btn"><i class="fa-solid fa-diamond-turn-right"></i> Iniciar navegacion completa</a>':'')+
-    '<button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal(\'modalRoutePreview\')"><i class="fa-solid fa-xmark"></i> Cerrar</button>';
+  var stopsHtml='';myPts.forEach(function(p,i){var estMin=startH*60+startM+(i*MIN_PER_PUNTO);var estH=Math.floor(estMin/60)%24,estMM=estMin%60;var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===todayForDow(selectedDow);});var done=visit&&visit.status==='completed',inProg=visit&&visit.status==='in-progress';var numBg=done?'var(--success)':inProg?'var(--info)':'var(--primary)';var numIcon=done?'<i class="fa-solid fa-check" style="font-size:14px;"></i>':(inProg?'<i class="fa-solid fa-play" style="font-size:12px;"></i>':String(i+1));var statusLabel=done?'<span style="font-size:10px;font-weight:700;color:var(--success);">Completada</span>':inProg?'<span style="font-size:10px;font-weight:700;color:var(--info);">En curso</span>':'<span style="font-size:10px;font-weight:700;color:var(--muted);">Pendiente</span>';stopsHtml+='<div class="preview-stop"><div class="preview-stop-line"></div><div class="preview-stop-num" style="background:'+numBg+';">'+numIcon+'</div><div class="preview-stop-body"><div class="preview-stop-name">'+esc(p.name)+'</div><div class="preview-stop-addr">'+esc(p.address)+'</div><div class="preview-stop-bottom"><div style="display:flex;align-items:center;gap:6px;"><div class="preview-stop-time"><i class="fa-regular fa-clock" style="font-size:10px;"></i> ~'+fmt(estH,estMM)+'</div>'+statusLabel+'</div><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="preview-stop-map-btn"><i class="fa-solid fa-location-dot"></i> Ver en mapa</a></div></div></div>';});
+  document.getElementById('routePreviewContent').innerHTML=dayTabsHtml+'<div class="preview-header"><div class="preview-day">'+DOW_NAME[selectedDow]+(isToday?' <span style="font-size:14px;opacity:0.8;">— Hoy</span>':'')+'</div><div class="preview-sub">'+doneCt+' de '+myPts.length+' puntos completados · '+fmt(startH,startM)+' → '+fmt(endH,endMM)+'</div><div class="preview-stats"><span><i class="fa-solid fa-clock"></i> '+durationText+'</span><span><i class="fa-solid fa-map-pin"></i> '+myPts.length+' puntos</span><span><i class="fa-solid fa-car"></i> ~'+MIN_PER_PUNTO+'min c/u</span></div></div>'+stopsHtml+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="preview-nav-btn"><i class="fa-solid fa-diamond-turn-right"></i> Iniciar navegacion completa</a>':'')+
+  '<button class="btn btn-outline" style="margin-top:10px;" onclick="closeModal(\'modalRoutePreview\')"><i class="fa-solid fa-xmark"></i> Cerrar</button>';
   openModal('modalRoutePreview');
 }
 
+var _visitDow=null;
 function renderVisitorToday(){
-  var dow=todayDow();
-  var myPts=D.points.filter(function(p){return p.assignedTo===currentUser.id&&p.dayOfWeek===dow;}).sort(function(a,b){return a.order-b.order;});
+  var dow=_visitDow||todayDow();
   var el=document.getElementById('visitorTodayPoints');
-  if(!myPts.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-couch"></i><p>Sin puntos para hoy</p></div>';return;}
+  // Day selector
+  var allMyPts=D.points.filter(function(p){return p.assignedTo===currentUser.id;});
+  var daysWithPts=[1,2,3,4,5,6,7].filter(function(d){return allMyPts.some(function(p){return p.dayOfWeek===d;});});
+  var daySelectorHtml='';
+  if(daysWithPts.length>1){
+    daySelectorHtml='<div style="display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;">';
+    daysWithPts.forEach(function(d){
+      var isSel=d===dow,isT=d===todayDow();
+      var pct2=0;var ptsCt=allMyPts.filter(function(p){return p.dayOfWeek===d;}).length;var doneCt2=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(d)&&v.status==='completed';}).length;
+      if(ptsCt>0)pct2=Math.round(doneCt2/ptsCt*100);
+      daySelectorHtml+='<button onclick="_visitDow='+d+';renderVisitorToday()" style="flex-shrink:0;padding:7px 12px;border-radius:10px;border:'+(isSel?'2px solid var(--primary)':'1.5px solid var(--border)')+';background:'+(isSel?'var(--primary)':'var(--card)')+';color:'+(isSel?'#fff':'var(--fg)')+';font-size:11px;font-weight:700;cursor:pointer;">'+DOW_NAME[d]+(isT?'<br><span style="font-size:9px;opacity:0.8;">Hoy</span>':'<br><span style="font-size:9px;opacity:0.7;">'+pct2+'%</span>')+'</button>';
+    });
+    daySelectorHtml+='</div>';
+  }
+  var myPts=allMyPts.filter(function(p){return p.dayOfWeek===dow;}).sort(function(a,b){return a.order-b.order;});
+  if(!myPts.length){el.innerHTML=daySelectorHtml+'<div class="empty-state"><i class="fa-solid fa-couch"></i><p>Sin puntos para '+DOW_NAME[dow]+'</p></div>';return;}
+  var isToday=(dow===todayDow());
   var startH=8,startM=0;var totalMin=myPts.length*MIN_PER_PUNTO;var endTotalMin=startH*60+startM+totalMin;var endH=Math.floor(endTotalMin/60)%24,endMM=endTotalMin%60;
-  var doneCt=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===today()&&v.status==='completed';}).length;
-  var allDone=doneCt===myPts.length;
-  var mapsUrl=buildMapsRouteUrl(myPts);
-  var gpsOk=gpsPermission==='granted';
-  var summaryHtml='<div class="route-card" style="padding:16px;border-left-color:'+(allDone?'var(--success)':'var(--primary)')+';"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:'+(allDone?'var(--success-light)':'var(--primary-50)')+';color:'+(allDone?'var(--success)':'var(--primary)')+';display:flex;align-items:center;justify-content:center;font-size:18px;"><i class="fa-solid '+(allDone?'fa-circle-check':'fa-route')+'"></i></div><div><div style="font-size:15px;font-weight:800;">'+DOW_NAME[dow]+'</div><div style="font-size:12px;color:var(--muted);">'+doneCt+'/'+myPts.length+' puntos &middot; '+fmt(startH,startM)+' &rarr; '+fmt(endH,endMM)+'</div></div></div>'+(!gpsOk?'<span style="font-size:9px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:8px;"></i> Sin GPS</span>':'<span style="font-size:9px;font-weight:700;background:var(--success-light);color:#166634;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:8px;"></i> GPS</span>')+'</div><div style="display:flex;gap:8px;"><button class="btn btn-primary btn-sm" style="flex:1;" onclick="openRoutePreview()"><i class="fa-solid fa-eye"></i> Previsualizar ruta</button>'+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:1;background:var(--info);color:#fff;text-decoration:none;"><i class="fa-solid fa-diamond-turn-right"></i> Navegar</a>':'')+'</div></div>';
+  var doneCt=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(dow)&&v.status==='completed';}).length;var allDone=doneCt===myPts.length;
+  var mapsUrl=buildMapsRouteUrl(myPts);var gpsOk=gpsPermission==='granted';
+  var summaryHtml='<div class="route-card" style="padding:16px;border-left-color:'+(allDone?'var(--success)':'var(--primary)')+';"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;"><div style="display:flex;align-items:center;gap:10px;"><div style="width:42px;height:42px;border-radius:12px;background:'+(allDone?'var(--success-light)':'var(--primary-50)')+';color:'+(allDone?'var(--success)':'var(--primary)')+';display:flex;align-items:center;justify-content:center;font-size:18px;"><i class="fa-solid '+(allDone?'fa-circle-check':'fa-route')+'"></i></div><div><div style="font-size:15px;font-weight:800;">'+DOW_NAME[dow]+(isToday?' <span style="font-size:11px;font-weight:500;color:var(--muted);">— Hoy</span>':' <span style="font-size:11px;font-weight:500;color:var(--muted);">(consulta)</span>')+'</div><div style="font-size:12px;color:var(--muted);">'+doneCt+'/'+myPts.length+' puntos &middot; '+fmt(startH,startM)+' &rarr; '+fmt(endH,endMM)+'</div></div></div>'+(!gpsOk?'<span style="font-size:9px;font-weight:700;background:var(--accent-light);color:#92400E;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-slash" style="font-size:8px;"></i> Sin GPS</span>':'<span style="font-size:9px;font-weight:700;background:var(--success-light);color:#166634;padding:3px 8px;border-radius:6px;"><i class="fa-solid fa-location-dot" style="font-size:8px;"></i> GPS</span>')+'</div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" style="flex:1;" onclick="openRoutePreview('+dow+')"><i class="fa-solid fa-eye"></i> Previsualizar ruta</button>'+(mapsUrl?'<a href="'+mapsUrl+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:1;background:var(--info);color:#fff;text-decoration:none;"><i class="fa-solid fa-diamond-turn-right"></i> Navegar</a>':'')+(!isToday?'':''+(isToday?'<button class="btn btn-sm" onclick="abrirNuevaVisita()" style="flex:1;background:#7C3AED;color:#fff;"><i class="fa-solid fa-user-doctor"></i> Visita prof.</button>':''))+'</div></div>';
   var pointsCards=myPts.map(function(p){
-    var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===today();});
-    var st=visit?visit.status:'pending';
-    var b=st==='completed'?'badge-done':st==='in-progress'?'badge-progress':st==='cancelled'?'badge-cancel':'badge-pending';
-    var lb=st==='completed'?'Completada':st==='in-progress'?'En Curso':st==='cancelled'?'Cancelada':'Pendiente';
+    var visit=D.visits.find(function(v){return v.pointId===p.id&&v.visitorId===currentUser.id&&v.date===todayForDow(dow);});
+    var st=visit?visit.status:'pending';var b=st==='completed'?'badge-done':st==='in-progress'?'badge-progress':st==='cancelled'?'badge-cancel':'badge-pending';var lb=st==='completed'?'Completada':st==='in-progress'?'En Curso':st==='cancelled'?'Cancelada':'Pendiente';
     var act='';
-    if(st==='pending')act='<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="arriveToPoint(\''+p.id+'\')" style="flex:1;"><i class="fa-solid fa-location-crosshairs"></i> Llegada</button><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:0 0 auto;background:var(--info-light);color:var(--info);padding:8px 12px;"><i class="fa-solid fa-map"></i></a></div>';
-    else if(st==='in-progress')act='<button class="btn btn-success btn-sm" onclick="openCloseVisit(\''+visit.id+'\',\''+p.id+'\')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>';
-    else if(st==='completed'&&visit.photo)act='<img src="'+visit.photo+'" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewPhoto(\''+visit.id+'\')">';
+    if(isToday&&st==='pending')act='<div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary btn-sm" onclick="arriveToPoint(\''+p.id+'\')" style="flex:1;"><i class="fa-solid fa-location-crosshairs"></i> Llegada</button><a href="'+mapsLink(p.lat,p.lng,p.address)+'" target="_blank" rel="noopener" class="btn btn-sm" style="flex:0 0 auto;background:var(--info-light);color:var(--info);padding:8px 12px;"><i class="fa-solid fa-map"></i></a></div>';
+    else if(isToday&&st==='in-progress')act='<button class="btn btn-success btn-sm" onclick="openCloseVisit(\''+visit.id+'\',\''+p.id+'\')" style="margin-top:10px;width:100%;"><i class="fa-solid fa-camera"></i> Cerrar Visita</button>';
+    else if(st==='completed'&&visit.photo)act='<img src="'+visit.photo+'" class="visit-photo-thumb" style="margin-top:10px;" onclick="viewVisitPhoto(\''+visit.id+'\')">';
+    else if(!isToday&&st==='pending')act='<div style="margin-top:8px;font-size:11px;color:var(--muted);"><i class="fa-solid fa-info-circle"></i> Registro disponible solo el día asignado</div>';
     return '<div class="card"><div class="point-card-inner" style="border:none;padding:0;"><div class="point-num">'+p.order+'</div><div class="point-info"><div class="point-name">'+esc(p.name)+'</div><div style="margin-top:4px;">'+addrHTML(p.address,p.lat,p.lng)+'</div></div><span class="badge '+b+'">'+lb+'</span></div>'+act+'</div>';
   }).join('');
-  el.innerHTML=summaryHtml+pointsCards;
+  el.innerHTML=daySelectorHtml+summaryHtml+pointsCards;
 }
 
 function arriveToPoint(pid){
-  if(gpsPermission==='denied'){var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast('Llegada registrada (sin coordenadas GPS)','info');return;}
-  toast('Obteniendo GPS...','info');
-  getGPS().then(function(gps){gpsPermission='granted';var pt=pointById(pid);if(!pt)return;var dist=haversine(gps.lat,gps.lng,pt.lat,pt.lng),ok=dist<=300;if(!ok)toast('A '+Math.round(dist)+'m del punto (300m max.)','info');var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:gps.lat,arrivalLng:gps.lng,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress'});save(D);renderVisitorToday();toast(ok?'Llegada registrada':'Llegada registrada (fuera de rango)');}).catch(function(e){toast('No se pudo obtener GPS: '+e,'err');});
+  var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  if(gpsPermission==='denied'){
+    D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:getUserLabId(currentUser.id)});
+    save(D);renderVisitorToday();toast('Llegada registrada (sin GPS)','info');return;
+  }
+  toast('Obteniendo ubicacion...','info');
+  getGPS().then(function(gps){
+    gpsPermission='granted';
+    var pt=pointById(pid);
+    // Fix GPS: solo mostrar advertencia si la precision es buena pero esta lejos
+    // Si la precision es baja (>100m) no bloquear, solo registrar
+    var dist=pt&&pt.lat?haversine(gps.lat,gps.lng,pt.lat,pt.lng):0;
+    var accuracy=gps.accuracy||999;
+    var msg='Llegada registrada';
+    if(dist>300&&accuracy<80){msg='Llegada registrada (a '+Math.round(dist)+'m del punto)';}
+    else if(accuracy>100){msg='Llegada registrada (GPS aproximado ±'+Math.round(accuracy)+'m)';}
+    D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:gps.lat,arrivalLng:gps.lng,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:getUserLabId(currentUser.id)});
+    save(D);renderVisitorToday();toast(msg);
+  }).catch(function(e){
+    // Si GPS falla, registrar igual sin coordenadas
+    D.visits.push({id:uid(),pointId:pid,visitorId:currentUser.id,date:today(),arrivalTime:time,closeTime:null,arrivalLat:null,arrivalLng:null,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:getUserLabId(currentUser.id)});
+    save(D);renderVisitorToday();toast('Llegada registrada (GPS no disponible)','info');
+  });
 }
-function openCloseVisit(vid,pid){var pt=pointById(pid);document.getElementById('closeVisitId').value=vid;document.getElementById('closeVisitPointName').textContent=pt?pt.name:'';document.getElementById('closeVisitPointAddr').innerHTML=pt?addrHTML(pt.address,pt.lat,pt.lng):'';document.getElementById('closeJefe').value='';document.getElementById('closeNotes').value='';currentPhotoData=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoCaptureArea').style.display='block';document.getElementById('visitPhotoInput').value='';openModal('modalCloseVisit');}
-function completeVisit(){var vid=document.getElementById('closeVisitId').value,jefe=document.getElementById('closeJefe').value.trim(),notes=document.getElementById('closeNotes').value.trim();if(!currentPhotoData){toast('Toma una foto','err');return;}if(!jefe){toast('Nombre del jefe obligatorio','err');return;}var cL=null,cN=null;getGPS().then(function(g){cL=g.lat;cN=g.lng;}).catch(function(){});var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');var v=D.visits.find(function(x){return x.id===vid;});if(v){v.closeTime=time;v.closeLat=cL;v.closeLng=cN;v.photo=currentPhotoData;v.jefeNombre=jefe;v.notes=notes;v.status='completed';}save(D);closeModal('modalCloseVisit');currentPhotoData=null;renderVisitorToday();toast('Visita completada');}
 
-function renderVisitorWeek(){var el=document.getElementById('visitorWeekSummary'),dow=todayDow(),days=[1,2,3,4,5,6].filter(function(d){return d<=dow;});var h='';days.forEach(function(day){var pts=D.points.filter(function(p){return p.assignedTo===currentUser.id&&p.dayOfWeek===day;}).sort(function(a,b){return a.order-b.order;});var visits=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(day);});var dn=visits.filter(function(v){return v.status==='completed';}).length,total=pts.length,pct=total>0?Math.round(dn/total*100):0,isToday=day===dow;var circ=2*Math.PI*22,off=circ-(pct/100)*circ,rc=pct===100?'var(--success)':pct>0?'var(--primary)':'var(--border)';h+='<div class="card" style="'+(isToday?'border-color:var(--primary);background:var(--primary-50);':'')+'"><div style="display:flex;align-items:center;gap:14px;"><div class="progress-ring"><svg width="56" height="56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fg" cx="28" cy="28" r="22" stroke="'+rc+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"/></svg><div class="ring-text" style="color:'+rc+';">'+pct+'%</div></div><div style="flex:1;"><div style="font-size:15px;font-weight:800;">'+DOW_NAME[day]+(isToday?' <span style="font-size:11px;color:var(--primary);font-weight:600;">&mdash; Hoy</span>':'')+'</div><div style="font-size:12px;color:var(--muted);">'+fmtDateShort(todayForDow(day))+' &middot; '+dn+'/'+total+'</div>'+pts.map(function(p){var vs=visits.find(function(v){return v.pointId===p.id;});var s=vs?vs.status:'none';var ic=s==='completed'?'fa-check-circle" style="color:var(--success)':s==='in-progress'?'fa-spinner" style="color:#2563EB':'fa-circle" style="color:var(--border)';return '<div style="font-size:12px;margin-top:3px;"><i class="fa-solid '+ic+';font-size:10px;"></i> '+esc(p.name)+'</div>';}).join('')+'</div></div></div>';});if(!h)h='<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Sin informacion</p></div>';el.innerHTML=h;}
+function openCloseVisit(vid,pid){var pt=pointById(pid);document.getElementById('closeVisitId').value=vid;document.getElementById('closeVisitPointName').textContent=pt?pt.name:'';document.getElementById('closeVisitPointAddr').innerHTML=pt?addrHTML(pt.address,pt.lat,pt.lng):'';document.getElementById('closeJefe').value='';document.getElementById('closeNotes').value='';currentPhotoData=null;document.getElementById('photoPreview').style.display='none';document.getElementById('photoCaptureArea').style.display='block';document.getElementById('visitPhotoInput').value='';openModal('modalCloseVisit');}
+function completeVisit(){var vid=document.getElementById('closeVisitId').value,jefe=document.getElementById('closeJefe').value.trim(),notes=document.getElementById('closeNotes').value.trim();if(!currentPhotoData){toast('Toma una foto','err');return;}if(!jefe){toast('Nombre del jefe obligatorio','err');return;}var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');var v=D.visits.find(function(x){return x.id===vid;});if(v){v.closeTime=time;v.photo=currentPhotoData;v.jefeNombre=jefe;v.notes=notes;v.status='completed';}save(D);closeModal('modalCloseVisit');currentPhotoData=null;renderVisitorToday();toast('Visita completada');}
+
+// ══════════════════════════════════════════════════════════
+// NUEVA VISITA — GENERAL Y PROFESIONAL
+// ══════════════════════════════════════════════════════════
+function abrirNuevaVisita(){
+  visitaGpsCoords=null;visitaFotoDataGeneral=null;visitaFotoDataProf=null;profFirmaActiva=false;
+  selectVisitType(null);
+  // Limpiar campos
+  ['vg-lugar','vg-direccion','vg-contacto','vg-notas','vp-nombre','vp-especialidad','vp-telefono','vp-direccion','vp-obsequio','vp-notas'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('vg-preview').style.display='none';document.getElementById('vp-preview').style.display='none';
+  document.getElementById('vg-foto').value='';document.getElementById('vp-foto').value='';
+  document.getElementById('vp-toggleObsequio').checked=false;document.getElementById('vp-obsequioDetail').classList.remove('show');
+  document.getElementById('vp-firmaBadge').classList.remove('show');
+  if(profFirmaCanvas){profFirmaCtx.clearRect(0,0,profFirmaCanvas.width,profFirmaCanvas.height);profFirmaCanvas.classList.remove('signed');}
+  openModal('modalNuevaVisita');
+}
+
+function selectVisitType(tipo){
+  document.getElementById('visitaTipoSelector').style.display=tipo?'none':'block';
+  document.getElementById('formVisitaGeneral').style.display=tipo==='general'?'block':'none';
+  document.getElementById('formVisitaProfesional').style.display=tipo==='profesional'?'block':'none';
+  document.getElementById('btnTipoGeneral').classList.toggle('active',tipo==='general');
+  document.getElementById('btnTipoProfesional').classList.toggle('active',tipo==='profesional');
+  if(tipo==='general')obtenerGPSVisita('gpsChipGeneral','gpsTextGeneral');
+  if(tipo==='profesional'){obtenerGPSVisita('gpsChipProf','gpsTextProf');if(!profFirmaCanvas)initFirmaProf();}
+}
+
+function previewVisitaFoto(input,previewId){
+  var preview=document.getElementById(previewId);
+  if(!input.files||!input.files[0])return;
+  var r=new FileReader();r.onload=function(ev){
+    var img=new Image();img.onload=function(){
+      var c=document.createElement('canvas'),M=800;var w=img.width,h=img.height;
+      if(w>M||h>M){if(w>h){h=h*M/w;w=M;}else{w=w*M/h;h=M;}}
+      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+      var data=c.toDataURL('image/jpeg',0.7);
+      if(input.id==='vg-foto')visitaFotoDataGeneral=data;
+      if(input.id==='vp-foto'){visitaFotoDataProf=data;validarFormProf();}
+      preview.src=data;preview.style.display='block';
+    };img.src=ev.target.result;
+  };r.readAsDataURL(input.files[0]);
+}
+
+function toggleObsequioField(checked){document.getElementById('vp-obsequioDetail').classList.toggle('show',checked);validarFormProf();}
+
+function initFirmaProf(){
+  profFirmaCanvas=document.getElementById('vp-firmaCanvas');profFirmaCtx=profFirmaCanvas.getContext('2d');
+  profFirmaCtx.strokeStyle='#0F172A';profFirmaCtx.lineWidth=2.5;profFirmaCtx.lineCap='round';profFirmaCtx.lineJoin='round';
+  var drawing=false,lastX=0,lastY=0;
+  function getPos(e){var rect=profFirmaCanvas.getBoundingClientRect(),scaleX=profFirmaCanvas.width/rect.width,scaleY=profFirmaCanvas.height/rect.height;if(e.touches)return{x:(e.touches[0].clientX-rect.left)*scaleX,y:(e.touches[0].clientY-rect.top)*scaleY};return{x:(e.clientX-rect.left)*scaleX,y:(e.clientY-rect.top)*scaleY};}
+  function startDraw(e){e.preventDefault();drawing=true;var pos=getPos(e);lastX=pos.x;lastY=pos.y;profFirmaCtx.beginPath();profFirmaCtx.moveTo(lastX,lastY);}
+  function draw(e){e.preventDefault();if(!drawing)return;var pos=getPos(e);profFirmaCtx.lineTo(pos.x,pos.y);profFirmaCtx.stroke();lastX=pos.x;lastY=pos.y;profFirmaActiva=true;profFirmaCanvas.classList.add('signed');document.getElementById('vp-firmaBadge').classList.add('show');validarFormProf();}
+  function stopDraw(){drawing=false;}
+  profFirmaCanvas.addEventListener('mousedown',startDraw);profFirmaCanvas.addEventListener('mousemove',draw);profFirmaCanvas.addEventListener('mouseup',stopDraw);profFirmaCanvas.addEventListener('touchstart',startDraw,{passive:false});profFirmaCanvas.addEventListener('touchmove',draw,{passive:false});profFirmaCanvas.addEventListener('touchend',stopDraw);
+}
+
+function clearFirmaProf(){if(!profFirmaCanvas)return;profFirmaCtx.clearRect(0,0,profFirmaCanvas.width,profFirmaCanvas.height);profFirmaActiva=false;profFirmaCanvas.classList.remove('signed');document.getElementById('vp-firmaBadge').classList.remove('show');validarFormProf();}
+
+function validarFormProf(){
+  var nombre=document.getElementById('vp-nombre').value.trim()!=='';
+  var tel=document.getElementById('vp-telefono').value.trim()!=='';
+  var dir=document.getElementById('vp-direccion').value.trim()!=='';
+  var foto=!!visitaFotoDataProf;
+  var firma=profFirmaActiva;
+  var obsToggle=document.getElementById('vp-toggleObsequio').checked;
+  var obsOk=!obsToggle||document.getElementById('vp-obsequio').value.trim()!=='';
+  document.getElementById('btnGuardarProf').disabled=!(nombre&&tel&&dir&&foto&&firma&&obsOk);
+}
+
+document.addEventListener('input',function(e){if(e.target&&['vp-nombre','vp-telefono','vp-direccion','vp-obsequio'].indexOf(e.target.id)>=0)validarFormProf();});
+
+function guardarVisitaGeneral(){
+  var lugar=document.getElementById('vg-lugar').value.trim();
+  if(!lugar){toast('Nombre del lugar obligatorio','err');return;}
+  if(!visitaFotoDataGeneral){toast('La foto de evidencia es obligatoria','err');return;}
+  var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  var visita={
+    id:uid(),pointId:null,visitorId:currentUser.id,date:today(),
+    arrivalTime:time,closeTime:time,
+    arrivalLat:visitaGpsCoords?visitaGpsCoords.lat:null,arrivalLng:visitaGpsCoords?visitaGpsCoords.lng:null,
+    gps:visitaGpsCoords,
+    lugar:lugar,
+    direccion:document.getElementById('vg-direccion').value.trim(),
+    jefeNombre:document.getElementById('vg-contacto').value.trim(),
+    notes:document.getElementById('vg-notas').value.trim(),
+    photo:visitaFotoDataGeneral||null,
+    status:'completed',tipoVisita:'general',
+    labId:getUserLabId(currentUser.id)
+  };
+  D.visits.push(visita);save(D);closeModal('modalNuevaVisita');renderVisitorToday();toast('Visita general registrada');
+}
+
+function guardarVisitaProfesional(){
+  var now=new Date(),time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  var obsToggle=document.getElementById('vp-toggleObsequio').checked;
+  var visita={
+    id:uid(),pointId:null,visitorId:currentUser.id,date:today(),
+    arrivalTime:time,closeTime:time,
+    arrivalLat:visitaGpsCoords?visitaGpsCoords.lat:null,arrivalLng:visitaGpsCoords?visitaGpsCoords.lng:null,
+    gps:visitaGpsCoords,
+    nombreProfesional:document.getElementById('vp-nombre').value.trim(),
+    especialidad:document.getElementById('vp-especialidad').value.trim(),
+    telefono:document.getElementById('vp-telefono').value.trim(),
+    direccionConsultorio:document.getElementById('vp-direccion').value.trim(),
+    obsequio:obsToggle?document.getElementById('vp-obsequio').value.trim():null,
+    photo:visitaFotoDataProf||null,
+    firma:profFirmaCanvas?profFirmaCanvas.toDataURL('image/png'):null,
+    notes:document.getElementById('vp-notas').value.trim(),
+    jefeNombre:document.getElementById('vp-nombre').value.trim(),
+    status:'completed',tipoVisita:'profesional',
+    labId:getUserLabId(currentUser.id)
+  };
+  D.visits.push(visita);save(D);closeModal('modalNuevaVisita');renderVisitorToday();toast('Visita a profesional registrada');
+}
+
+function verRutaDia(day){
+  _visitDow=day;
+  // Cambiar a la pestaña "Hoy" (que ahora actúa como vista de ruta)
+  var btn=document.querySelector('#visitorScreen .tab-btn');
+  // Encontrar el primer tab-btn (panel/hoy)
+  var tabs=document.querySelectorAll('#visitorScreen .tab-btn');
+  var hoyBtn=null;
+  tabs.forEach(function(b){if(b.getAttribute('onclick')&&b.getAttribute('onclick').indexOf("'hoy'")>=0)hoyBtn=b;});
+  if(hoyBtn)switchVisitorTab('hoy',hoyBtn);
+}
+
+function renderVisitorWeek(){
+  var el=document.getElementById('visitorWeekSummary');
+  var dow=todayDow();
+  // Mostrar todos los días que tengan puntos asignados
+  var allMyPts=D.points.filter(function(p){return p.assignedTo===currentUser.id;});
+  var daysWithPts=[1,2,3,4,5,6,7].filter(function(d){return allMyPts.some(function(p){return p.dayOfWeek===d;});});
+  if(!daysWithPts.length){el.innerHTML='<div class="empty-state"><i class="fa-solid fa-calendar-xmark"></i><p>Sin rutas asignadas esta semana</p></div>';return;}
+  var h='<div style="font-size:11px;color:var(--muted);margin-bottom:10px;text-align:center;"><i class="fa-solid fa-hand-pointer"></i> Toca cualquier día para ver y planificar la ruta</div>';
+  daysWithPts.forEach(function(day){
+    var pts=allMyPts.filter(function(p){return p.dayOfWeek===day;}).sort(function(a,b){return a.order-b.order;});
+    var visits=D.visits.filter(function(v){return v.visitorId===currentUser.id&&v.date===todayForDow(day);});
+    var dn=visits.filter(function(v){return v.status==='completed';}).length;
+    var total=pts.length;
+    var pct=total>0?Math.round(dn/total*100):0;
+    var isToday=day===dow;
+    var isFuture=day>dow;
+    var isPast=day<dow;
+    var circ=2*Math.PI*22,off=circ-(pct/100)*circ;
+    var rc=pct===100?'var(--success)':pct>0?'var(--primary)':'var(--border)';
+    var dayLabel=DOW_NAME[day];
+    var badge='';
+    if(isToday)badge='<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--primary);color:#fff;margin-left:6px;">HOY</span>';
+    else if(isFuture)badge='<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-light);color:#92400E;margin-left:6px;"><i class="fa-solid fa-eye" style="font-size:9px;"></i> Ver ruta</span>';
+    else badge='<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:var(--bg);color:var(--muted);margin-left:6px;">'+pct+'% completado</span>';
+    var borderColor=isToday?'var(--primary)':isFuture?'var(--accent)':'var(--border)';
+    var bgColor=isToday?'var(--primary-50)':isFuture?'#FFFBEB':'var(--card)';
+    h+='<div class="card" style="margin-bottom:10px;border-color:'+borderColor+';background:'+bgColor+';cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;" onclick="verRutaDia('+day+')" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.1)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">';
+    h+='<div style="display:flex;align-items:center;gap:14px;">';
+    // Anillo de progreso
+    h+='<div class="progress-ring"><svg width="56" height="56"><circle class="ring-bg" cx="28" cy="28" r="22"/><circle class="ring-fg" cx="28" cy="28" r="22" stroke="'+rc+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+off+'"/></svg><div class="ring-text" style="color:'+rc+';">'+pct+'%</div></div>';
+    h+='<div style="flex:1;min-width:0;">';
+    h+='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-bottom:4px;"><span style="font-size:15px;font-weight:800;">'+dayLabel+'</span>'+badge+'</div>';
+    h+='<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">'+fmtDateShort(todayForDow(day))+' &middot; '+dn+'/'+total+' puntos</div>';
+    // Lista de puntos
+    h+='<div style="display:flex;flex-direction:column;gap:3px;">';
+    pts.forEach(function(p){
+      var vs=visits.find(function(v){return v.pointId===p.id;});
+      var s=vs?vs.status:'none';
+      var ic=s==='completed'?'fa-check-circle" style="color:var(--success)':s==='in-progress'?'fa-spinner" style="color:var(--info)':'fa-circle" style="color:var(--border)';
+      h+='<div style="font-size:12px;display:flex;align-items:center;gap:5px;"><i class="fa-solid '+ic+';font-size:10px;flex-shrink:0;"></i><span style="color:var(--fg);">'+esc(p.name)+'</span></div>';
+    });
+    h+='</div>';
+    h+='</div>';
+    // Flecha
+    h+='<i class="fa-solid fa-chevron-right" style="color:var(--border);font-size:16px;flex-shrink:0;"></i>';
+    h+='</div></div>';
+  });
+  el.innerHTML=h;
+}
+
 function renderVisitorProfile(){document.getElementById('vProfileAvatar').style.background=avatarColor(currentUser.id);document.getElementById('vProfileAvatar').textContent=initials(currentUser.name);document.getElementById('vProfileName').textContent=currentUser.name;document.getElementById('vProfileUser').textContent='@'+currentUser.username;var all=D.visits.filter(function(v){return v.visitorId===currentUser.id;}),td=all.filter(function(v){return v.date===today()&&v.status==='completed';}).length;var wk=0;for(var d=1;d<=todayDow();d++)wk+=all.filter(function(v){return v.date===todayForDow(d)&&v.status==='completed';}).length;document.getElementById('vProfileTotal').textContent=all.filter(function(v){return v.status==='completed';}).length;document.getElementById('vProfileToday').textContent=td;document.getElementById('vProfileWeek').textContent=wk;}
+
+function getUserLabId(uid){var u=D.users.find(function(x){return x.id===uid;});return u?u.labId:null;}
+
+function goToLabSelect(){currentLabId=null;currentAdminTab='canvas';showScreen('labSelectScreen');renderLabSelect();}
+
+function renderLabSelect(){
+  var el=document.getElementById('labSelectBody');
+  el.innerHTML='<div style="margin-bottom:24px;"><div style="font-size:22px;font-weight:900;font-family:\'DM Serif Display\',serif;margin-bottom:4px;">Selecciona un laboratorio</div><div style="font-size:13px;color:var(--muted);">Cada laboratorio tiene su propio equipo y visitas</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">' +
+  LABS.map(function(lab){
+    var visitors=D.users.filter(function(u){return u.role==='visitor'&&u.active&&u.labId===lab.id;}).length;
+    var todayDone=D.visits.filter(function(v){return v.labId===lab.id&&v.date===today()&&v.status==='completed';}).length;
+    return '<div class="canvas-card" style="background:linear-gradient(135deg,'+lab.colorLight+' 0%,#fff 100%);" onclick="selectLab(\''+lab.id+'\')">' +
+      '<div class="card-stripe" style="background:'+lab.color+';"></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">' +
+      '<div style="width:44px;height:44px;border-radius:12px;background:'+lab.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.15);"><i class="fa-solid '+lab.icon+'"></i></div>' +
+      '<div style="flex:1;"><div style="font-size:16px;font-weight:800;color:var(--fg);">'+esc(lab.name)+'</div><div style="font-size:12px;color:var(--muted);">'+visitors+' visitadores</div></div>' +
+      '<i class="fa-solid fa-chevron-right" style="color:'+lab.color+';"></i></div>' +
+      '<div style="font-size:12px;color:var(--muted);">Hoy: <strong style="color:'+lab.color+';">'+todayDone+'</strong> completadas</div></div>';
+  }).join('') + '</div>';
+}
+
+function selectLab(id){
+  currentLabId=id;
+  var lab=LABS.find(function(l){return l.id===id;});
+  showScreen('adminScreen');
+  currentAdminTab='canvas';
+  document.querySelectorAll('#adminScreen .tab-content').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('#adminScreen .tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('aTab-canvas').classList.add('active');
+  document.querySelectorAll('#adminScreen .tab-btn')[0].classList.add('active');
+  renderAdmin();
+  toast('Laboratorio: '+(lab?lab.name:''));
+}
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(function(m){closeModal(m.id);});cancelConfirm();}});
 initFirebase();
+
+// ══════════════════════════════════════════════════════════
+// MAPA PICKER — Leaflet + OpenStreetMap
+// ══════════════════════════════════════════════════════════
+var _leafletMap=null,_leafletMarker=null;
+
+function abrirMapaPicker(){
+  var lat=parseFloat(document.getElementById('mpLat').value)||4.7110;
+  var lng=parseFloat(document.getElementById('mpLng').value)||-74.0721;
+  openModal('modalMapPicker');
+  setTimeout(function(){
+    var mapDiv=document.getElementById('leafletMap');
+    if(_leafletMap){
+      _leafletMap.remove();_leafletMap=null;_leafletMarker=null;
+    }
+    _leafletMap=L.map(mapDiv,{zoomControl:true}).setView([lat,lng],17);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OSM','maxZoom':19
+    }).addTo(_leafletMap);
+    // Crosshair fijo en el centro — no hay marcador arrastrable, el centro = coordenada
+    var crosshair=L.divIcon({
+      html:'<div style="width:40px;height:40px;margin-left:-20px;margin-top:-40px;"><i class="fa-solid fa-location-dot" style="color:#0F766E;font-size:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));"></i></div>',
+      className:'',iconSize:[40,40]
+    });
+    _leafletMarker=L.marker([lat,lng],{icon:crosshair}).addTo(_leafletMap);
+    _actualizarPinMapa();
+    _leafletMap.on('move',function(){
+      var c=_leafletMap.getCenter();
+      _leafletMarker.setLatLng(c);
+      _actualizarPinMapa();
+    });
+    _leafletMap.on('moveend',function(){
+      var c=_leafletMap.getCenter();
+      _leafletMarker.setLatLng(c);
+      _actualizarPinMapa();
+    });
+    _leafletMap.invalidateSize();
+  },300);
+}
+
+function _actualizarPinMapa(){
+  var c=_leafletMap.getCenter();
+  document.getElementById('mapPickerCoords').textContent=
+    c.lat.toFixed(6)+', '+c.lng.toFixed(6);
+}
+
+function confirmarMapaPicker(){
+  var c=_leafletMap.getCenter();
+  document.getElementById('mpLat').value=c.lat.toFixed(6);
+  document.getElementById('mpLng').value=c.lng.toFixed(6);
+  document.getElementById('gpsCoordsRow').style.display='block';
+  document.getElementById('geoStatus').style.display='flex';
+  document.getElementById('geoStatus').className='geo-status found';
+  document.getElementById('geoStatus').innerHTML='<i class="fa-solid fa-check-circle"></i> Ubicacion confirmada en el mapa ('+c.lat.toFixed(4)+', '+c.lng.toFixed(4)+')';
+  closeModal('modalMapPicker');
+  toast('Ubicacion guardada del mapa');
+}
+</script>
+<script>
+// ══════════════════════════════════════════════════════════
+// MÓDULO DE INFORMES — MedVisit
+// ══════════════════════════════════════════════════════════
+var rptDesde=today(),rptHasta=today(),rptPreset='semana';
+var rptCharts={};
+
+function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDaysStr(str,n){var d=new Date(str+'T12:00:00');d.setDate(d.getDate()+n);return fmtD(d);}
+function subMonths(n){var d=new Date();d.setMonth(d.getMonth()-n);return fmtD(d);}
+
+function setRptPreset(p){
+  rptPreset=p;
+  var d=new Date();
+  rptHasta=today();
+  if(p==='hoy'){rptDesde=today();}
+  else if(p==='semana'){var dow=d.getDay()===0?7:d.getDay();d.setDate(d.getDate()-(dow-1));rptDesde=fmtD(d);}
+  else if(p==='mes'){d.setDate(1);rptDesde=fmtD(d);}
+  else if(p==='3meses'){rptDesde=subMonths(3);}
+  else if(p==='custom'){document.getElementById('rptCustomDiv').style.display='grid';document.getElementById('rptDesdeInput').value=rptDesde;document.getElementById('rptHastaInput').value=rptHasta;_updateRptLabel();return;}
+  document.getElementById('rptCustomDiv').style.display='none';
+  _updateRptLabel();
+  document.querySelectorAll('#rptPresetBtns .btn').forEach(function(b){b.classList.remove('btn-primary');b.classList.add('btn-ghost');});
+  var idx={hoy:0,semana:1,mes:2,'3meses':3,custom:4}[p];
+  var btns=document.querySelectorAll('#rptPresetBtns .btn');
+  if(btns[idx]){btns[idx].classList.remove('btn-ghost');btns[idx].classList.add('btn-primary');}
+  renderRptLabCards();
+}
+
+function aplicarFechasCustom(){
+  rptDesde=document.getElementById('rptDesdeInput').value||rptDesde;
+  rptHasta=document.getElementById('rptHastaInput').value||rptHasta;
+  _updateRptLabel();renderRptLabCards();
+}
+
+function _updateRptLabel(){
+  var el=document.getElementById('rptRangeLabel');
+  if(el)el.textContent=rptDesde===rptHasta?fmtDate(rptDesde):fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta);
+}
+
+// ── Datos del reporte ─────────────────────────────────────
+function getRptData(labId){
+  var visitors=D.users.filter(function(u){return u.role==='visitor'&&(!labId||u.labId===labId);});
+  var vids=visitors.map(function(u){return u.id;});
+  var visits=D.visits.filter(function(v){return vids.indexOf(v.visitorId)>=0&&v.date>=rptDesde&&v.date<=rptHasta;});
+  var completed=visits.filter(function(v){return v.status==='completed';});
+  var byV={};
+  visitors.forEach(function(u){
+    var uv=completed.filter(function(v){return v.visitorId===u.id;});
+    var pts=D.points.filter(function(p){return p.assignedTo===u.id&&(!labId||p.labId===labId);});
+    byV[u.id]={user:u,completed:uv.length,general:uv.filter(function(v){return!v.tipoVisita||v.tipoVisita==='general';}).length,prof:uv.filter(function(v){return v.tipoVisita==='profesional';}).length,visits:uv,points:pts};
+  });
+  return {visitors:visitors,visits:visits,completed:completed,byV:byV};
+}
+
+// ── Render tab ────────────────────────────────────────────
+function renderInformes(){
+  _updateRptLabel();
+  setRptPreset(rptPreset);
+}
+
+function renderRptLabCards(){
+  var el=document.getElementById('rptLabCards');
+  if(!el)return;
+  el.innerHTML=LABS.map(function(lab){
+    var d=getRptData(lab.id);
+    var pct=d.visitors.length>0?Math.round(d.completed.length/(d.visitors.length||1)):0;
+    return '<div class="card" style="margin-bottom:12px;border-left:4px solid '+lab.color+';padding:14px;">'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'+
+      '<div style="width:42px;height:42px;border-radius:12px;background:'+lab.color+';display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;"><i class="fa-solid '+lab.icon+'"></i></div>'+
+      '<div style="flex:1;"><div style="font-size:15px;font-weight:800;">'+esc(lab.name)+'</div>'+
+      '<div style="font-size:11px;color:var(--muted);">'+d.visitors.length+' visit. &middot; '+d.completed.length+' completadas &middot; '+d.byV&&Object.values(d.byV).reduce(function(s,v){return s+v.prof;},0)+' prof.</div></div>'+
+      '<div style="font-size:22px;font-weight:900;color:'+lab.color+';">'+pct+'%</div></div>'+
+      '<div style="display:flex;gap:7px;flex-wrap:wrap;">'+
+      '<button class="btn btn-sm btn-primary" onclick="generarPDF(\''+lab.id+'\')"><i class="fa-solid fa-file-pdf"></i> PDF</button>'+
+      '<button class="btn btn-sm btn-success" onclick="generarExcel(\''+lab.id+'\')"><i class="fa-solid fa-file-excel"></i> Excel</button>'+
+      '<button class="btn btn-sm" style="background:#7C3AED;color:#fff;" onclick="generarPPTX(\''+lab.id+'\')"><i class="fa-solid fa-file-powerpoint"></i> PPTX</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+// ── Helpers de color hex ──────────────────────────────────
+function hexToRgb(h){var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return[r,g,b];}
+
+// ══════════════════════════════════════════════════════════
+// PDF
+// ══════════════════════════════════════════════════════════
+function generarPDF(labId){
+  if(typeof jspdf==='undefined'){toast('Cargando libreria PDF...','info');setTimeout(function(){generarPDF(labId);},1500);return;}
+  var jsPDF=jspdf.jsPDF;
+  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
+  var data=getRptData(labId);
+  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var color=lab?lab.color:'#0F766E';
+  var rgb=hexToRgb(color);
+  var labName=lab?lab.name:'Todos los Laboratorios';
+  var W=210,margin=16;
+
+  // Portada
+  doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+  doc.rect(0,0,W,70,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(24);doc.setFont('helvetica','bold');
+  doc.text('MedVisit',margin,22);
+  doc.setFontSize(16);doc.setFont('helvetica','normal');
+  doc.text('Informe de Cumplimiento',margin,32);
+  doc.setFontSize(20);doc.setFont('helvetica','bold');
+  doc.text(labName,margin,48);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),margin,58);
+  doc.text('Generado: '+new Date().toLocaleString('es-MX'),margin,64);
+
+  // Resumen
+  doc.setTextColor(0,0,0);
+  doc.setFontSize(13);doc.setFont('helvetica','bold');
+  doc.text('Resumen Ejecutivo',margin,82);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
+  var rows=[
+    ['Total visitadores',data.visitors.length],
+    ['Visitas completadas',data.completed.length],
+    ['Visitas a profesionales',totalProf],
+    ['Visitas generales',data.completed.length-totalProf]
+  ];
+  doc.autoTable({startY:86,head:[['Indicador','Valor']],body:rows,theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:10}});
+
+  // Tabla por visitador
+  var y=doc.lastAutoTable.finalY+10;
+  doc.setFontSize(13);doc.setFont('helvetica','bold');
+  doc.text('Cumplimiento por Visitador',margin,y);
+  var visRows=data.visitors.map(function(u){
+    var bv=data.byV[u.id];
+    return[u.name,'@'+u.username,bv.completed,bv.general,bv.prof];
+  });
+  doc.autoTable({startY:y+4,head:[['Nombre','Usuario','Completadas','Generales','Profesionales']],body:visRows.length?visRows:[['Sin visitadores','','','','']],theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:9}});
+
+  // Puntos por visitador
+  data.visitors.forEach(function(u){
+    var bv=data.byV[u.id];
+    if(!bv.visits.length)return;
+    doc.addPage();
+    doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+    doc.rect(0,0,W,18,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(13);doc.setFont('helvetica','bold');
+    doc.text(u.name,margin,12);
+    doc.setTextColor(0,0,0);
+    var ptRows=bv.visits.map(function(v){
+      var pt=pointById(v.pointId);
+      var tipo=v.tipoVisita==='profesional'?'Profesional':'General';
+      var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||'Profesional'):(pt?pt.name:(v.lugar||'—'));
+      return[fmtDateShort(v.date),nombre,tipo,v.arrivalTime||'—',v.closeTime||'—',v.status==='completed'?'\u2713 Completada':'En curso'];
+    });
+    doc.autoTable({startY:22,head:[['Fecha','Punto/Profesional','Tipo','Llegada','Cierre','Estado']],body:ptRows,theme:'striped',headStyles:{fillColor:rgb},margin:{left:margin,right:margin},styles:{fontSize:8}});
+  });
+
+  doc.save('MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.pdf');
+  toast('PDF generado');
+}
+
+// ══════════════════════════════════════════════════════════
+// EXCEL
+// ══════════════════════════════════════════════════════════
+function generarExcel(labId){
+  if(typeof XLSX==='undefined'){toast('Cargando libreria Excel...','info');setTimeout(function(){generarExcel(labId);},1500);return;}
+  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
+  var labName=lab?lab.name:'General';
+  var data=getRptData(labId);
+  var wb=XLSX.utils.book_new();
+
+  // Hoja resumen
+  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
+  var resumen=[
+    ['MedVisit — Informe de Cumplimiento'],
+    ['Laboratorio',labName],
+    ['Periodo',fmtDateShort(rptDesde)+' — '+fmtDate(rptHasta)],
+    ['Generado',new Date().toLocaleString('es-MX')],
+    [],
+    ['RESUMEN'],
+    ['Total visitadores',data.visitors.length],
+    ['Visitas completadas',data.completed.length],
+    ['Visitas generales',data.completed.length-totalProf],
+    ['Visitas a profesionales',totalProf],
+    [],
+    ['CUMPLIMIENTO POR VISITADOR'],
+    ['Nombre','Usuario','Laboratorio','Completadas','Generales','Profesionales']
+  ];
+  data.visitors.forEach(function(u){
+    var bv=data.byV[u.id];
+    resumen.push([u.name,'@'+u.username,u.labId||'—',bv.completed,bv.general,bv.prof]);
+  });
+  var ws1=XLSX.utils.aoa_to_sheet(resumen);
+  ws1['!cols']=[{wch:30},{wch:18},{wch:14},{wch:14},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws1,'Resumen');
+
+  // Hoja detalle de visitas
+  var detalle=[['Fecha','Visitador','Laboratorio','Punto/Lugar','Tipo','Profesional','Especialidad','Llegada','Cierre','Estado']];
+  data.visits.filter(function(v){return v.status==='completed';}).forEach(function(v){
+    var u=userById(v.visitorId);
+    var pt=pointById(v.pointId);
+    detalle.push([v.date,u?u.name:'?',u?u.labId:'?',pt?pt.name:(v.lugar||'—'),v.tipoVisita||'general',v.nombreProfesional||'—',v.especialidad||'—',v.arrivalTime||'—',v.closeTime||'—',v.status]);
+  });
+  var ws2=XLSX.utils.aoa_to_sheet(detalle);
+  ws2['!cols']=[{wch:12},{wch:24},{wch:12},{wch:28},{wch:12},{wch:24},{wch:18},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Visitas');
+
+  // Hoja comparativa por laboratorio (solo en informe general)
+  if(!labId){
+    var comp=[['Laboratorio','Visitadores','Completadas','Generales','Profesionales','% Cumplimiento']];
+    LABS.forEach(function(l){
+      var ld=getRptData(l.id);
+      var pct=ld.visitors.length>0?Math.round(ld.completed.length/ld.visitors.length):0;
+      var prof=Object.values(ld.byV).reduce(function(s,v){return s+v.prof;},0);
+      comp.push([l.name,ld.visitors.length,ld.completed.length,ld.completed.length-prof,prof,pct+'%']);
+    });
+    var ws3=XLSX.utils.aoa_to_sheet(comp);
+    ws3['!cols']=[{wch:16},{wch:14},{wch:14},{wch:14},{wch:16},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Comparativo Labs');
+  }
+
+  XLSX.writeFile(wb,'MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.xlsx');
+  toast('Excel generado');
+}
+
+// ══════════════════════════════════════════════════════════
+// PPTX
+// ══════════════════════════════════════════════════════════
+function generarPPTX(labId){
+  if(typeof PptxGenJS==='undefined'){toast('Cargando libreria PPTX...','info');setTimeout(function(){generarPPTX(labId);},2000);return;}
+  var lab=labId?LABS.find(function(l){return l.id===labId;}):null;
+  var labName=lab?lab.name:'Todos los Laboratorios';
+  var color=lab?lab.color.replace('#',''):'0F766E';
+  var data=getRptData(labId);
+  var totalProf=Object.values(data.byV).reduce(function(s,v){return s+v.prof;},0);
+
+  var pptx=new PptxGenJS();
+  pptx.layout='LAYOUT_16x9';
+  pptx.title='MedVisit — '+labName;
+
+  // Slide 1: Portada
+  var s1=pptx.addSlide();
+  s1.background={color:color};
+  s1.addText('MedVisit',{x:0.5,y:0.8,w:9,h:0.8,fontSize:36,bold:true,color:'FFFFFF',fontFace:'Calibri'});
+  s1.addText('Informe de Cumplimiento',{x:0.5,y:1.5,w:9,h:0.5,fontSize:18,color:'FFFFFF',fontFace:'Calibri'});
+  s1.addText(labName,{x:0.5,y:2.2,w:9,h:0.7,fontSize:28,bold:true,color:'FFFFFF',fontFace:'Calibri'});
+  s1.addText('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),{x:0.5,y:3.1,w:9,h:0.4,fontSize:14,color:'FFFFFF',fontFace:'Calibri'});
+  s1.addText('Generado: '+new Date().toLocaleDateString('es-MX'),{x:0.5,y:3.6,w:9,h:0.35,fontSize:12,color:'FFFFFF',fontFace:'Calibri'});
+
+  // Slide 2: Resumen ejecutivo
+  var s2=pptx.addSlide();
+  s2.addText('Resumen Ejecutivo',{x:0.5,y:0.3,w:9,h:0.6,fontSize:24,bold:true,color:color,fontFace:'Calibri'});
+  var kpis=[
+    {label:'Visitadores',val:data.visitors.length},
+    {label:'Visitas Completadas',val:data.completed.length},
+    {label:'A Profesionales',val:totalProf},
+    {label:'Generales',val:data.completed.length-totalProf}
+  ];
+  kpis.forEach(function(k,i){
+    var x=0.5+(i%2)*4.7,y=1.1+Math.floor(i/2)*1.5;
+    s2.addShape(pptx.ShapeType.roundRect,{x:x,y:y,w:4.2,h:1.2,fill:{color:color+'22'},line:{color:color,width:1.5}});
+    s2.addText(String(k.val),{x:x,y:y+0.05,w:4.2,h:0.7,fontSize:36,bold:true,color:color,align:'center',fontFace:'Calibri'});
+    s2.addText(k.label,{x:x,y:y+0.75,w:4.2,h:0.35,fontSize:13,color:'444444',align:'center',fontFace:'Calibri'});
+  });
+
+  // Slide 3: Tabla de cumplimiento por visitador
+  var s3=pptx.addSlide();
+  s3.addText('Cumplimiento por Visitador',{x:0.5,y:0.3,w:9,h:0.6,fontSize:22,bold:true,color:color,fontFace:'Calibri'});
+  var tableRows=[[
+    {text:'Visitador',options:{bold:true,fill:color,color:'FFFFFF'}},
+    {text:'Completadas',options:{bold:true,fill:color,color:'FFFFFF'}},
+    {text:'Generales',options:{bold:true,fill:color,color:'FFFFFF'}},
+    {text:'Profesionales',options:{bold:true,fill:color,color:'FFFFFF'}}
+  ]];
+  data.visitors.forEach(function(u,i){
+    var bv=data.byV[u.id];
+    var bg=i%2===0?'F8F9FA':'FFFFFF';
+    tableRows.push([
+      {text:u.name,options:{fill:bg}},
+      {text:String(bv.completed),options:{fill:bg,align:'center'}},
+      {text:String(bv.general),options:{fill:bg,align:'center'}},
+      {text:String(bv.prof),options:{fill:bg,align:'center'}}
+    ]);
+  });
+  if(tableRows.length===1)tableRows.push([{text:'Sin visitadores',options:{colspan:4}}]);
+  s3.addTable(tableRows,{x:0.5,y:1.0,w:9,colW:[4,1.8,1.6,1.6],fontSize:11,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
+
+  // Slides por visitador
+  data.visitors.forEach(function(u){
+    var bv=data.byV[u.id];
+    if(!bv.visits.length)return;
+    var sv=pptx.addSlide();
+    sv.addShape(pptx.ShapeType.rect,{x:0,y:0,w:10,h:0.9,fill:{color:color}});
+    sv.addText(u.name,{x:0.3,y:0.1,w:9,h:0.7,fontSize:20,bold:true,color:'FFFFFF',fontFace:'Calibri'});
+    sv.addText('Periodo: '+fmtDateShort(rptDesde)+' \u2013 '+fmtDate(rptHasta),{x:0.3,y:0.55,w:9,h:0.28,fontSize:10,color:'FFFFFF',fontFace:'Calibri'});
+    var vrows=[[
+      {text:'Fecha',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Punto / Profesional',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Tipo',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Llegada',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Cierre',options:{bold:true,fill:color,color:'FFFFFF'}}
+    ]];
+    bv.visits.slice(0,12).forEach(function(v,i){
+      var pt=pointById(v.pointId);
+      var nombre=v.tipoVisita==='profesional'?(v.nombreProfesional||'Profesional'):(pt?pt.name:(v.lugar||'—'));
+      var bg=i%2===0?'F8F9FA':'FFFFFF';
+      vrows.push([
+        {text:fmtDateShort(v.date),options:{fill:bg}},
+        {text:nombre.substring(0,30),options:{fill:bg}},
+        {text:v.tipoVisita==='profesional'?'Prof.':'General',options:{fill:bg,align:'center'}},
+        {text:v.arrivalTime||'—',options:{fill:bg,align:'center'}},
+        {text:v.closeTime||'—',options:{fill:bg,align:'center'}}
+      ]);
+    });
+    sv.addTable(vrows,{x:0.3,y:1.0,w:9.4,colW:[1.4,3.8,1.3,1.4,1.5],fontSize:9,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
+    if(bv.visits.length>12)sv.addText('...y '+(bv.visits.length-12)+' visitas más en Excel',{x:0.3,y:6.8,w:9,h:0.3,fontSize:9,color:'888888',fontFace:'Calibri'});
+  });
+
+  // Slide comparativo de labs (solo general)
+  if(!labId){
+    var sc=pptx.addSlide();
+    sc.addText('Comparativo por Laboratorio',{x:0.5,y:0.3,w:9,h:0.6,fontSize:22,bold:true,color:color,fontFace:'Calibri'});
+    var crows=[[
+      {text:'Laboratorio',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Visitadores',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Completadas',options:{bold:true,fill:color,color:'FFFFFF'}},
+      {text:'Profesionales',options:{bold:true,fill:color,color:'FFFFFF'}}
+    ]];
+    LABS.forEach(function(l,i){
+      var ld=getRptData(l.id);
+      var lprof=Object.values(ld.byV).reduce(function(s,v){return s+v.prof;},0);
+      crows.push([{text:l.name},{text:String(ld.visitors.length),options:{align:'center'}},{text:String(ld.completed.length),options:{align:'center'}},{text:String(lprof),options:{align:'center'}}]);
+    });
+    sc.addTable(crows,{x:0.5,y:1.0,w:9,colW:[3,2,2,2],fontSize:12,fontFace:'Calibri',border:{color:'CCCCCC',pt:0.5}});
+  }
+
+  pptx.writeFile({fileName:'MedVisit_'+labName.replace(/\s/g,'_')+'_'+rptDesde+'_'+rptHasta+'.pptx'});
+  toast('PPTX generado');
+}
+
 </script>
 </body>
 </html>
