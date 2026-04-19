@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -428,7 +428,7 @@
     </div>
     <!-- TAB: Laboratorios -->
     <div class="tab-content" id="sTab-sLabs">
-      <div class="section-title" style="margin-bottom:12px;">Estado por Laboratorio</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="section-title" style="margin:0;">Estado por Laboratorio</div><button class="btn btn-primary btn-sm" onclick="superAbrirNuevoLab()"><i class="fa-solid fa-plus"></i> Nuevo Lab</button></div>
       <div id="superLabsList"></div>
     </div>
   </div>
@@ -608,12 +608,15 @@
 var LAB_NOMBRE = 'Mi Laboratorio';   // ← cambia por el nombre real
 var LAB_COLOR  = '#0F766E';          // ← color del laboratorio
 var LAB_ID     = 'default';          // ← id corto ej: 'abamia', 'nestle'
-var LABS=[
+var BASE_LABS=[
   {id:'nestle',  name:'Nestlé',    color:'#E2001A',colorLight:'#FEE2E2',icon:'fa-cube'},
   {id:'abamia',  name:'Abamia',    color:'#0066CC',colorLight:'#DBEAFE',icon:'fa-pills'},
   {id:'fresenius',name:'Fresenius',color:'#009036',colorLight:'#DCFCE7',icon:'fa-syringe'},
   {id:'ketolance',name:'Ketolance',color:'#F59E0B',colorLight:'#FEF3C7',icon:'fa-flask'}
 ];
+
+var LABS=BASE_LABS.slice();
+function refreshLabs(){LABS=BASE_LABS.slice().concat((D.labs||[]).filter(function(l){return !BASE_LABS.some(function(b){return b.id===l.id;});}));}
 
 // ══════════════════════════════════════════════════════════
 // FIREBASE CONFIG — reemplaza con las credenciales reales
@@ -658,7 +661,7 @@ var lastVisitorDetailId=null,lastSuperDetailId=null,dbRef=null,gpsPermission='un
 var profFirmaCanvas=null,profFirmaCtx=null,profFirmaActiva=false;
 var visitaGpsCoords=null,visitaFotoDataGeneral=null,visitaFotoDataProf=null;
 
-function defaultData(){return{_writeId:null,users:[{id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},{id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Perez Garcia',active:true,labId:'nestle'},{id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'Maria Lopez Hernandez',active:true,labId:'nestle'},{id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martinez',active:true,labId:'nestle'}],points:[{id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1,labId:'nestle'},{id:'p2',name:'Clinica del Valle',address:'Calle Amsterdam 56, Hipodromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2,labId:'nestle'},{id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Avila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1,labId:'nestle'},{id:'p4',name:'Distribuidora Medica Sur',address:'Av. Revolucion 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1,labId:'nestle'},{id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacan, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2,labId:'nestle'},{id:'p6',name:'Clinica Santa Maria',address:'Av. Tlahuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1,labId:'nestle'},{id:'p7',name:'Sanatorio del Angel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1,labId:'nestle'},{id:'p8',name:'FarmaExpress Satelite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Mex.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1,labId:'nestle'}],visits:[{id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:'nestle'}]};}
+function defaultData(){return{_writeId:null,labs:[],users:[{id:'u1',username:'admin',password:'admin123',role:'admin',name:'Coordinador General',active:true},{id:'u2',username:'jperez',password:'visit123',role:'visitor',name:'Juan Perez Garcia',active:true,labId:'nestle'},{id:'u3',username:'mlopez',password:'visit123',role:'visitor',name:'Maria Lopez Hernandez',active:true,labId:'nestle'},{id:'u4',username:'cruiz',password:'visit123',role:'visitor',name:'Carlos Ruiz Martinez',active:true,labId:'nestle'}],points:[{id:'p1',name:'Farmacia San Rafael',address:'Av. Insurgentes Sur 1234, CDMX',lat:19.3826,lng:-99.1749,assignedTo:'u2',dayOfWeek:1,order:1,labId:'nestle'},{id:'p2',name:'Clinica del Valle',address:'Calle Amsterdam 56, Hipodromo, CDMX',lat:19.4284,lng:-99.1717,assignedTo:'u2',dayOfWeek:1,order:2,labId:'nestle'},{id:'p3',name:'Hospital Central Norte',address:'Blvd. Manuel Avila Camacho 20, CDMX',lat:19.4363,lng:-99.1964,assignedTo:'u2',dayOfWeek:2,order:1,labId:'nestle'},{id:'p4',name:'Distribuidora Medica Sur',address:'Av. Revolucion 890, CDMX',lat:19.3782,lng:-99.1712,assignedTo:'u3',dayOfWeek:1,order:1,labId:'nestle'},{id:'p5',name:'Farmacia la Luz',address:'Calle Ermita 45, Coyoacan, CDMX',lat:19.367,lng:-99.1449,assignedTo:'u3',dayOfWeek:1,order:2,labId:'nestle'},{id:'p6',name:'Clinica Santa Maria',address:'Av. Tlahuac 230, Iztapalapa, CDMX',lat:19.355,lng:-99.132,assignedTo:'u3',dayOfWeek:3,order:1,labId:'nestle'},{id:'p7',name:'Sanatorio del Angel',address:'Av. Paseo de la Reforma 500, CDMX',lat:19.4291,lng:-99.1843,assignedTo:'u4',dayOfWeek:1,order:1,labId:'nestle'},{id:'p8',name:'FarmaExpress Satelite',address:'Blvd. de la Luz 12, Naucalpan, Edo. Mex.',lat:19.4978,lng:-99.2346,assignedTo:'u4',dayOfWeek:2,order:1,labId:'nestle'}],visits:[{id:'v1',pointId:'p1',visitorId:'u2',date:'2025-07-14',arrivalTime:'09:20',closeTime:'09:55',arrivalLat:19.3827,arrivalLng:-99.175,closeLat:19.3827,closeLng:-99.175,photo:null,jefeNombre:'Lic. Roberto Vargas',notes:'Entrega de muestra.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v2',pointId:'p2',visitorId:'u2',date:'2025-07-14',arrivalTime:'10:30',closeTime:'11:00',arrivalLat:19.4285,arrivalLng:-99.1718,closeLat:19.4285,closeLng:-99.1718,photo:null,jefeNombre:'Dra. Patricia Mendoza',notes:'Seguimiento.',status:'completed',tipoVisita:'general',labId:'nestle'},{id:'v3',pointId:'p4',visitorId:'u3',date:'2025-07-14',arrivalTime:'09:00',closeTime:null,arrivalLat:19.3783,arrivalLng:-99.1713,closeLat:null,closeLng:null,photo:null,jefeNombre:'',notes:'',status:'in-progress',tipoVisita:'general',labId:'nestle'}]};}
 
 function saveLocal(d){try{localStorage.setItem('medvisit_v5',JSON.stringify(d));}catch(e){}}
 function save(d){myLastWriteId=Date.now()+'_'+Math.random().toString(36).substr(2,6);d._writeId=myLastWriteId;saveLocal(d);if(firebaseReady&&dbRef){dbRef.ref('medvisit').set(d).catch(function(err){console.error('Error Firebase:',err);toast('Error de sincronizacion. Datos guardados localmente.','err');});}}
@@ -672,8 +675,8 @@ function initFirebase(){
   try{
     firebase.initializeApp(FIREBASE_CONFIG);dbRef=firebase.database();
     dbRef.ref('.info/connected').on('value',function(snap){firebaseOnline=snap.val()===true;updateConnBadge();updateHeaderConn();});
-    dbRef.ref('medvisit').once('value').then(function(snap){var r=snap.val();if(r&&r.users&&r.users.length>0){D=r;myLastWriteId=r._writeId||null;}else{D=defaultData();myLastWriteId=Date.now()+'_init';D._writeId=myLastWriteId;dbRef.ref('medvisit').set(D);}saveLocal(D);firebaseReady=true;firebaseOnline=true;loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesion';updateConnBadge();updateHeaderConn();}).catch(function(err){console.error('Error Firebase:',err);try{var l=JSON.parse(localStorage.getItem('medvisit_v5'));if(l&&l.users)D=l;}catch(e){}saveLocal(D);firebaseReady=false;firebaseOnline=false;loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesion';connBadge.className='conn-badge offline';connBadge.innerHTML='<span class="conn-dot"></span> Sin conexion — modo local';updateHeaderConn();});
-    dbRef.ref('medvisit').on('value',function(snap){var n=snap.val();if(!n||!n.users)return;if(n._writeId&&n._writeId===myLastWriteId)return;showSyncIndicator();D=n;myLastWriteId=n._writeId||null;saveLocal(D);renderCurrentScreen();});
+    dbRef.ref('medvisit').once('value').then(function(snap){var r=snap.val();if(r&&r.users&&r.users.length>0){D=r;myLastWriteId=r._writeId||null;}else{D=defaultData();myLastWriteId=Date.now()+'_init';D._writeId=myLastWriteId;dbRef.ref('medvisit').set(D);}if(!D.labs)D.labs=[];refreshLabs();saveLocal(D);firebaseReady=true;firebaseOnline=true;loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesion';updateConnBadge();updateHeaderConn();}).catch(function(err){console.error('Error Firebase:',err);try{var l=JSON.parse(localStorage.getItem('medvisit_v5'));if(l&&l.users)D=l;}catch(e){}if(!D.labs)D.labs=[];refreshLabs();saveLocal(D);firebaseReady=false;firebaseOnline=false;loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesion';connBadge.className='conn-badge offline';connBadge.innerHTML='<span class="conn-dot"></span> Sin conexion — modo local';updateHeaderConn();});
+    dbRef.ref('medvisit').on('value',function(snap){var n=snap.val();if(!n||!n.users)return;if(n._writeId&&n._writeId===myLastWriteId)return;showSyncIndicator();D=n;myLastWriteId=n._writeId||null;if(!D.labs)D.labs=[];refreshLabs();saveLocal(D);renderCurrentScreen();});
   }catch(e){console.error('Error init Firebase:',e);try{var l=JSON.parse(localStorage.getItem('medvisit_v5'));if(l&&l.users)D=l;}catch(ex){}saveLocal(D);firebaseReady=false;loginBtn.disabled=false;loginBtn.innerHTML='Iniciar Sesion';connBadge.className='conn-badge offline';connBadge.innerHTML='<span class="conn-dot"></span> Error de conexion';updateHeaderConn();}
 }
 
@@ -1337,6 +1340,32 @@ function confirmarMapaPicker(){
   closeModal('modalMapPicker');
   toast('Ubicacion guardada del mapa');
 }
+
+// ── Crear Laboratorio (Super Admin) ──
+var _nlColor='#7C3AED',_nlIcon='fa-flask';
+function superAbrirNuevoLab(){_nlColor='#7C3AED';_nlIcon='fa-flask';document.getElementById('nlNombre').value='';document.getElementById('nlColor').value=_nlColor;document.getElementById('nlIcon').value=_nlIcon;document.querySelectorAll('#nlColorPicker button').forEach(function(b){b.style.borderColor='transparent';});document.querySelectorAll('#nlIconPicker button').forEach(function(b){b.style.background='var(--bg)';b.style.borderColor='var(--border)';});openModal('modalNuevoLab');}
+function nlSelColor(col,btn){_nlColor=col;document.getElementById('nlColor').value=col;document.querySelectorAll('#nlColorPicker button').forEach(function(b){b.style.borderColor='transparent';});btn.style.borderColor='#000';}
+function nlSelIcon(ic,btn){_nlIcon=ic;document.getElementById('nlIcon').value=ic;document.querySelectorAll('#nlIconPicker button').forEach(function(b){b.style.background='var(--bg)';b.style.borderColor='var(--border)';});btn.style.background=_nlColor;btn.style.borderColor=_nlColor;btn.style.color='#fff';}
+function superGuardarLab(){
+  var nombre=document.getElementById('nlNombre').value.trim();
+  if(!nombre){toast('Escribe el nombre del laboratorio','err');return;}
+  var color=document.getElementById('nlColor').value||_nlColor||'#7C3AED';
+  var icon=document.getElementById('nlIcon').value||_nlIcon||'fa-flask';
+  var id='lab_'+nombre.toLowerCase().replace(/[^a-z0-9]/g,'_')+'_'+Date.now();
+  // lighten color for colorLight
+  var colorLight=color.replace(/^#/,'');
+  var r=parseInt(colorLight.substr(0,2),16),g=parseInt(colorLight.substr(2,2),16),b=parseInt(colorLight.substr(4,2),16);
+  var lr=Math.round(r+(255-r)*0.85),lg=Math.round(g+(255-g)*0.85),lb=Math.round(b+(255-b)*0.85);
+  var light='#'+lr.toString(16).padStart(2,'0')+lg.toString(16).padStart(2,'0')+lb.toString(16).padStart(2,'0');
+  var newLab={id:id,name:nombre,color:color,colorLight:light,icon:icon};
+  if(!D.labs)D.labs=[];
+  D.labs.push(newLab);
+  refreshLabs();
+  save(D);
+  closeModal('modalNuevoLab');
+  toast('Laboratorio "'+nombre+'" creado');
+  renderSuperLabs();
+}
 </script>
 <script>
 // ══════════════════════════════════════════════════════════
@@ -1678,5 +1707,5 @@ function generarPPTX(labId){
 }
 
 </script>
-</body>
+<div class="modal-overlay" id="modalNuevoLab"><div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Nuevo Laboratorio</div><div class="form-group"><label class="form-label">Nombre del laboratorio</label><input class="form-input" id="nlNombre" placeholder="Ej: Bayer, Roche..."></div><div class="form-group"><label class="form-label">Color principal</label><div style="display:flex;gap:8px;flex-wrap:wrap;" id="nlColorPicker"><button onclick="nlSelColor('#E2001A',this)" style="width:32px;height:32px;border-radius:50%;background:#E2001A;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#0066CC',this)" style="width:32px;height:32px;border-radius:50%;background:#0066CC;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#009036',this)" style="width:32px;height:32px;border-radius:50%;background:#009036;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#F59E0B',this)" style="width:32px;height:32px;border-radius:50%;background:#F59E0B;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#7C3AED',this)" style="width:32px;height:32px;border-radius:50%;background:#7C3AED;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#DB2777',this)" style="width:32px;height:32px;border-radius:50%;background:#DB2777;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#0891B2',this)" style="width:32px;height:32px;border-radius:50%;background:#0891B2;border:3px solid transparent;cursor:pointer;"></button><button onclick="nlSelColor('#EA580C',this)" style="width:32px;height:32px;border-radius:50%;background:#EA580C;border:3px solid transparent;cursor:pointer;"></button></div><input type="hidden" id="nlColor" value="#7C3AED"></div><div class="form-group"><label class="form-label">Icono</label><div style="display:flex;gap:8px;flex-wrap:wrap;" id="nlIconPicker"><button onclick="nlSelIcon('fa-flask',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Frasco"><i class="fa-solid fa-flask"></i></button><button onclick="nlSelIcon('fa-pills',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Pastillas"><i class="fa-solid fa-pills"></i></button><button onclick="nlSelIcon('fa-syringe',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Jeringa"><i class="fa-solid fa-syringe"></i></button><button onclick="nlSelIcon('fa-cube',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Cubo"><i class="fa-solid fa-cube"></i></button><button onclick="nlSelIcon('fa-heart-pulse',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Salud"><i class="fa-solid fa-heart-pulse"></i></button><button onclick="nlSelIcon('fa-dna',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="ADN"><i class="fa-solid fa-dna"></i></button><button onclick="nlSelIcon('fa-microscope',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Microscopio"><i class="fa-solid fa-microscope"></i></button><button onclick="nlSelIcon('fa-hospital',this)" style="width:38px;height:38px;border-radius:10px;background:var(--bg);border:2px solid var(--border);cursor:pointer;font-size:16px;" title="Hospital"><i class="fa-solid fa-hospital"></i></button></div><input type="hidden" id="nlIcon" value="fa-flask"></div><div style="display:flex;gap:10px;margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeModal('modalNuevoLab')">Cancelar</button><button class="btn btn-primary" style="flex:2;" onclick="superGuardarLab()"><i class="fa-solid fa-check"></i> Crear Laboratorio</button></div></div></div></body>
 </html>
