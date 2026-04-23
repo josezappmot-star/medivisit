@@ -609,12 +609,13 @@ var LAB_NOMBRE = 'Mi Laboratorio';   // ? cambia por el nombre real
 var LAB_COLOR  = '#0F766E';          // ? color del laboratorio
 var LAB_ID     = 'default';          // ? id corto ej: 'abamia', 'nestle'
 var BASE_LABS=[
-  {id:'nestle',  name:'Nestlé',    color:'#E2001A',colorLight:'#FEE2E2',icon:'fa-cube', logo:'assets/nestle.png'},
-  {id:'abamia',  name:'Abamia',    color:'#0066CC',colorLight:'#DBEAFE',icon:'fa-pills', logo:'assets/abamia.png'},
-  {id:'fresenius',name:'Fresenius',color:'#009036',colorLight:'#DCFCE7',icon:'fa-syringe', logo:'assets/fresenius.png'},
-  {id:'ketolance',name:'Ketolance',color:'#F59E0B',colorLight:'#FEF3C7',icon:'fa-flask', logo:'assets/ketolance.png'},
-  {id:'abbott',  name:'Abbott',    color:'#009CDE',colorLight:'#E0F2FE',icon:'fa-microscope', logo:'assets/abbott.png'}
-];
+  {id:'nestle',  name:'Nestlé',    color:'#E2001A',colorLight:'#FEE2E2',icon:'fa-cube', logo:'nestle.png'},
+  {id:'abamia',  name:'Abamia',    color:'#0066CC',colorLight:'#DBEAFE',icon:'fa-pills', logo:'abamia.png'},
+  {id:'fresenius',name:'Fresenius',color:'#009036',colorLight:'#DCFCE7',icon:'fa-syringe', logo:'fresenius.png'},
+  {id:'ketolance',name:'Ketolance',color:'#F59E0B',colorLight:'#FEF3C7',icon:'fa-flask', logo:'ketolance.png'},
+  {id:'abbott',  name:'Abbott',    color:'#009CDE',colorLight:'#E0F2FE',icon:'fa-microscope', logo:'abbott.png'}
+];
+
 var LABS=BASE_LABS.slice();
 function refreshLabs(){LABS=BASE_LABS.slice().concat((D.labs||[]).filter(function(l){return !BASE_LABS.some(function(b){return b.id===l.id;});}));}
 
@@ -1920,5 +1921,4 @@ setInterval(function() {
 </script>
 </body>
 </html>
-
 
